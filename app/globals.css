@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased font-sans;
+}
+
+@layer base {
+  h1,
+  h2 {
+    @apply font-serif tracking-tight font-bold;
+  }
+
+  h3,
+  h4 {
+    @apply font-serif tracking-tight font-normal;
+  }
+}
+
+@layer utilities {
+  .surface {
+    @apply rounded-xl2 border border-line bg-card shadow-soft;
+  }
+
+  .ui-meta {
+    @apply font-sans text-[10px] font-bold uppercase tracking-widest;
+  }
+
+  .serif-italic {
+    font-family: var(--font-instrument-serif), var(--font-playfair-display), Georgia, serif;
+    @apply italic font-normal tracking-tight;
+    font-weight: 400 !important;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
