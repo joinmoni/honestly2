@@ -2,7 +2,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
 import { getListsByUserId } from "@/lib/services/lists";
 import { getHomepageSearchIndex } from "@/lib/services/search";
-import { getMockSession } from "@/lib/services/session";
+import { getCurrentSession } from "@/lib/services/session";
 import { VendorListingScreen } from "@/components/vendors-listing/VendorListingScreen";
 import { getVendorListingPageData } from "@/lib/services/vendor-listing";
 
@@ -15,7 +15,7 @@ type VendorsPageProps = {
 };
 
 export default async function VendorsPage({ searchParams }: VendorsPageProps) {
-  const session = await getMockSession();
+  const session = await getCurrentSession();
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const [data, footerContent, lists, searchIndex] = await Promise.all([
     getVendorListingPageData({
@@ -37,6 +37,7 @@ export default async function VendorsPage({ searchParams }: VendorsPageProps) {
         currentUserId={session.user?.id ?? null}
         currentUserName={session.user?.name ?? null}
         currentUserEmail={session.user?.email ?? null}
+        currentUserAvatarUrl={session.user?.avatarUrl}
         searchIndex={searchIndex}
       />
       <SiteFooter content={footerContent} variant="dark" />

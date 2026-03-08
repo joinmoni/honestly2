@@ -28,3 +28,36 @@ export type SavedVendorRowView = {
   categoryLabel: string;
   locationLabel: string;
 };
+
+export type ListDetailVendorView = {
+  vendorId: string;
+  vendorSlug: string;
+  vendorName: string;
+  imageUrl?: string;
+  categoryLabel: string;
+  locationLabel: string;
+  note?: string;
+  savedAtLabel: string;
+};
+
+export type ListDetailPageData = {
+  id: string;
+  name: string;
+  description?: string;
+  visibility: "private" | "shared";
+  shareSlug?: string;
+  vendorCount: number;
+  itemCountLabel: string;
+  vendors: ListDetailVendorView[];
+  copy: {
+    brandLabel: string;
+    backHref: string;
+    backLabel: string;
+    visibilityPrivateLabel: string;
+    visibilitySharedLabel: string;
+    shareLabel: string;
+    notesHeading: string;
+    emptyTitle: string;
+    emptyDescription: string;
+  };
+};

@@ -6,18 +6,15 @@ import { SavedVendorsTable } from "@/components/collections/SavedVendorsTable";
 import { getCollectionListCards, getCollectionsPageCopy, getSavedVendorRows } from "@/lib/services/collections";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
-import { getMockSession } from "@/lib/services/session";
+import { requireUserSession } from "@/lib/services/session";
 
 export default async function ListsPage() {
-  const session = await getMockSession();
-  if (!session.user) {
-    return null;
-  }
+  const user = await requireUserSession();
 
   const [copy, lists, savedRows, footerContent] = await Promise.all([
     getCollectionsPageCopy(),
-    getCollectionListCards(session.user.id),
-    getSavedVendorRows(session.user.id),
+    getCollectionListCards(user.id),
+    getSavedVendorRows(user.id),
     getFooterContent()
   ]);
 
@@ -26,11 +23,12 @@ export default async function ListsPage() {
       <div className="bg-[#FDFCFB] text-stone-900">
         <CollectionsTopNav
           brandLabel={copy.brandLabel}
-          avatarName={session.user.name}
-          avatarUrl={`https://i.pravatar.cc/100?u=${session.user.id}`}
+          avatarName={user.name}
+          avatarUrl={user.avatarUrl}
           navLinks={[
             { label: "Saved Vendors", href: "/lists", active: true },
-            { label: "My Reviews", href: "/me/reviews" }
+            { label: "My Reviews", href: "/me/reviews" },
+            { label: "Preferences", href: "/preferences" }
           ]}
         />
 

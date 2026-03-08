@@ -42,10 +42,11 @@ export function MyReviewsScreen({ data, criteria, session }: MyReviewsScreenProp
         brandLabel={data.copy.brandLabel}
         navLinks={[
           { label: data.copy.savedNavLabel, href: "/lists" },
-          { label: data.copy.reviewsNavLabel, href: "/me/reviews", active: true }
+          { label: data.copy.reviewsNavLabel, href: "/me/reviews", active: true },
+          { label: "Preferences", href: "/preferences" }
         ]}
         innerClassName="max-w-5xl"
-        rightSlot={<ProfileMenu name={session.user?.name} email={session.user?.email} />}
+        rightSlot={<ProfileMenu name={session.user?.name} email={session.user?.email} imageUrl={session.user?.avatarUrl} />}
       />
 
       <main className="mx-auto max-w-4xl px-6 py-16">

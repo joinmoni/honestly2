@@ -230,7 +230,7 @@ export function HomeHeroSearch({
     <>
       <form
         className={cn(
-          "relative flex flex-col items-center rounded-3xl border border-stone-200 bg-white p-2 shadow-xl shadow-stone-200/40 md:flex-row md:rounded-full",
+          "relative flex flex-col items-center rounded-[1.5rem] border border-stone-200 bg-white p-1.5 shadow-xl shadow-stone-200/30 md:flex-row md:rounded-full md:p-2",
           className
         )}
         onSubmit={(event) => {
@@ -238,8 +238,8 @@ export function HomeHeroSearch({
           submitSearch();
         }}
       >
-        <div ref={whoFieldRef} className="flex w-full flex-1 flex-col items-start border-b border-stone-100 px-6 py-2 md:border-b-0 md:border-r">
-          <label htmlFor={whoInputId} className="text-[10px] font-sans font-black uppercase tracking-widest text-stone-400">
+        <div ref={whoFieldRef} className="flex w-full flex-1 flex-col items-start border-b border-stone-100 px-5 py-2 md:border-b-0 md:border-r md:px-6">
+          <label htmlFor={whoInputId} className="text-[9px] font-sans font-black uppercase tracking-[0.18em] text-stone-400">
             Who
           </label>
           <input
@@ -247,7 +247,7 @@ export function HomeHeroSearch({
             type="text"
             value={whoQuery}
             placeholder={searchWhoPlaceholder}
-            className="w-full bg-transparent text-sm placeholder:text-stone-300 focus:outline-none"
+            className="w-full bg-transparent text-[13px] placeholder:text-stone-300 focus:outline-none md:text-sm"
             aria-expanded={activeField === "who"}
             aria-controls={activeField === "who" ? listboxId : undefined}
             role="combobox"
@@ -264,8 +264,8 @@ export function HomeHeroSearch({
             onKeyDown={onKeyDown("who")}
           />
         </div>
-        <div ref={whereFieldRef} className="flex w-full flex-1 flex-col items-start px-6 py-2">
-          <label htmlFor={whereInputId} className="text-[10px] font-sans font-black uppercase tracking-widest text-stone-400">
+        <div ref={whereFieldRef} className="flex w-full flex-1 flex-col items-start px-5 py-2 md:px-6">
+          <label htmlFor={whereInputId} className="text-[9px] font-sans font-black uppercase tracking-[0.18em] text-stone-400">
             Where
           </label>
           <input
@@ -273,7 +273,7 @@ export function HomeHeroSearch({
             type="text"
             value={whereQuery}
             placeholder={searchWherePlaceholder}
-            className="w-full bg-transparent text-sm placeholder:text-stone-300 focus:outline-none"
+            className="w-full bg-transparent text-[13px] placeholder:text-stone-300 focus:outline-none md:text-sm"
             aria-expanded={activeField === "where"}
             aria-controls={activeField === "where" ? listboxId : undefined}
             role="combobox"
@@ -290,11 +290,11 @@ export function HomeHeroSearch({
             onKeyDown={onKeyDown("where")}
           />
         </div>
-          <button
-            type="submit"
-            className="flex w-full justify-center rounded-2xl bg-amber-600 p-4 font-sans font-black uppercase tracking-widest text-white transition-colors hover:bg-amber-700 md:w-auto md:rounded-full"
-            aria-label="Search vendors"
-          >
+        <button
+          type="submit"
+          className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-amber-600 px-6 font-sans font-black uppercase tracking-widest text-white transition-colors hover:bg-amber-700 md:mt-0 md:h-auto md:w-auto md:rounded-full md:p-4"
+          aria-label="Search vendors"
+        >
           <Search size={20} strokeWidth={2.5} />
         </button>
       </form>

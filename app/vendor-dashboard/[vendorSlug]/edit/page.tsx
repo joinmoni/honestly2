@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { VendorEditScreen } from "@/components/vendor-dashboard/VendorEditScreen";
-import { getMockSession } from "@/lib/services/session";
+import { requireUserSession } from "@/lib/services/session";
 import { getVendorEditPageDataBySlug } from "@/lib/services/vendor-edit";
 
 type VendorEditPageProps = {
@@ -8,11 +8,7 @@ type VendorEditPageProps = {
 };
 
 export default async function VendorEditPage({ params }: VendorEditPageProps) {
-  const session = await getMockSession();
-
-  if (!session.user) {
-    redirect("/login");
-  }
+  await requireUserSession();
 
   const { vendorSlug } = await params;
   const data = await getVendorEditPageDataBySlug(vendorSlug);

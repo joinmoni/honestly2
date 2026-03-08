@@ -20,7 +20,6 @@ type ProfileMenuItem = {
   label: string;
   href: string;
   icon: typeof Heart;
-  comingSoon?: boolean;
 };
 
 const menuItems: ProfileMenuItem[] = [
@@ -37,8 +36,7 @@ const menuItems: ProfileMenuItem[] = [
   {
     label: "Preferences",
     href: "/preferences",
-    icon: Settings,
-    comingSoon: true
+    icon: Settings
   }
 ];
 
@@ -92,24 +90,6 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
             <div className="p-2">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                if (item.comingSoon) {
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-stone-50"
-                      onClick={() => setOpen(false)}
-                      role="menuitem"
-                    >
-                      <span className="flex items-center gap-3 text-sm font-medium text-stone-700">
-                        <Icon size={15} className="text-stone-400" />
-                        {item.label}
-                      </span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-300">Soon</span>
-                    </button>
-                  );
-                }
-
                 return (
                   <Link
                     key={item.label}

@@ -18,16 +18,16 @@ export function HomeVendorCard({ vendor }: HomeVendorCardProps) {
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="group cursor-pointer">
       <Link href={`/vendor/${vendor.slug}`}>
-        <div className="relative mb-4 aspect-[4/5] overflow-hidden rounded-3xl">
+        <div className="relative mb-3 aspect-[186/237] overflow-hidden rounded-[1.5rem]">
           {cover ? <Image src={cover.url} alt={cover.alt ?? vendor.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /> : null}
-          <span aria-hidden className="absolute right-4 top-4 rounded-full bg-white/90 p-2.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-white">
-            <Heart size={18} color="#444" />
+          <span aria-hidden className="absolute right-2.5 top-2.5 rounded-full bg-white/90 p-1.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-white">
+            <Heart size={16} color="#444" />
           </span>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-display">{vendor.name}</h3>
-            <div className="flex items-center gap-1 text-sm font-bold">
+            <h3 className="text-lg font-display">{vendor.name}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-bold">
               <span>★</span>
               <span>{vendor.ratingAvg.toFixed(1)}</span>
             </div>
@@ -36,7 +36,7 @@ export function HomeVendorCard({ vendor }: HomeVendorCardProps) {
             {primarySubcategory?.name ?? vendor.primaryCategory?.name ?? "Vendor"}
             {location ? ` • ${location.city}${location.region ? `, ${location.region}` : ""}` : ""}
           </p>
-          {vendor.headline ? <p className="line-clamp-1 text-[11px] italic text-stone-600">&quot;{vendor.headline}&quot;</p> : null}
+          {vendor.headline ? <p className="line-clamp-1 text-[10px] italic text-stone-600">&quot;{vendor.headline}&quot;</p> : null}
         </div>
       </Link>
     </motion.div>

@@ -1,14 +1,9 @@
-import { redirect } from "next/navigation";
 import { AdminTaxonomyScreen } from "@/components/admin/AdminTaxonomyScreen";
 import { getAdminTaxonomyData } from "@/lib/services/admin-categories";
-import { getMockAdminSession } from "@/lib/services/session";
+import { requireAdminSession } from "@/lib/services/session";
 
 export default async function AdminCategoriesPage() {
-  const session = await getMockAdminSession();
-
-  if (!session.user || session.user.role !== "admin") {
-    redirect("/login");
-  }
+  await requireAdminSession();
 
   const data = await getAdminTaxonomyData();
 

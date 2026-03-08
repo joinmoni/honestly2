@@ -7,6 +7,31 @@ const categoryIconsBySlug: Record<string, string> = {
   "floral-design": "🌿"
 };
 
+const homeMerchandisingBySlug: Record<
+  string,
+  {
+    featuredOnHome: boolean;
+    homeOrder: number | null;
+    promotedSubcategories: string[];
+  }
+> = {
+  photography: {
+    featuredOnHome: true,
+    homeOrder: 1,
+    promotedSubcategories: ["Editorial", "Fine Art Film"]
+  },
+  "floral-design": {
+    featuredOnHome: true,
+    homeOrder: 2,
+    promotedSubcategories: ["Wedding Florals"]
+  },
+  venues: {
+    featuredOnHome: true,
+    homeOrder: 3,
+    promotedSubcategories: ["Garden Venues"]
+  }
+};
+
 export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
   const categories = await getCategories();
 
@@ -29,6 +54,9 @@ export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
       slug: category.slug,
       icon: categoryIconsBySlug[category.slug] ?? "✨",
       subcategories: category.subcategories.map((subcategory) => subcategory.name),
+      featuredOnHome: homeMerchandisingBySlug[category.slug]?.featuredOnHome ?? false,
+      homeOrder: homeMerchandisingBySlug[category.slug]?.homeOrder ?? null,
+      promotedSubcategories: homeMerchandisingBySlug[category.slug]?.promotedSubcategories ?? [],
       muted: index > 0
     })),
     pagination: {

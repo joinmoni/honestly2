@@ -8,6 +8,7 @@ export type HomeCategoryShortcut = {
   label: string;
   emoji: string;
   href: string;
+  homeOrder?: number | null;
 };
 
 export type HomeFooterColumn = {

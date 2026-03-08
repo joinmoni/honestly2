@@ -13,12 +13,12 @@ type SharedCollectionScreenProps = {
 export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <nav className="fixed left-1/2 top-6 z-50 flex w-[90%] max-w-xl -translate-x-1/2 items-center justify-between rounded-full border border-stone-200/50 bg-white/70 px-6 py-3 shadow-xl shadow-stone-200/40 backdrop-blur-xl">
-        <Link href="/" className="serif-italic text-3xl">
+      <nav className="fixed left-1/2 top-4 z-50 flex w-[92%] max-w-xl -translate-x-1/2 items-center justify-between rounded-full border border-stone-200/50 bg-white/70 px-4 py-3 shadow-xl shadow-stone-200/40 backdrop-blur-xl md:top-6 md:px-6">
+        <Link href="/" className="serif-italic text-2xl md:text-3xl">
           {data.copy.brandLabel}
         </Link>
-        <div className="flex items-center gap-4">
-          <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="text-[10px] font-bold uppercase tracking-widest text-stone-500 transition-colors hover:text-stone-900">
+        <div className="flex items-center gap-3 md:gap-4">
+          <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="hidden text-[10px] font-bold uppercase tracking-widest text-stone-500 transition-colors hover:text-stone-900 sm:block">
             {data.copy.navFollowListLabel}
           </motion.button>
           <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="rounded-full bg-stone-900 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-stone-800">
@@ -27,8 +27,8 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-32">
-        <header className="mx-auto mb-24 max-w-2xl text-center">
+      <main className="mx-auto max-w-5xl px-6 pb-20 pt-28 md:pb-24 md:pt-32">
+        <header className="mx-auto mb-20 max-w-2xl text-center md:mb-24">
           <div className="mb-6 flex justify-center">
             <div className="relative">
               <Image src={data.curatorAvatarUrl} alt={data.curatorName} width={64} height={64} className="rounded-full border-4 border-white shadow-lg" />
@@ -39,11 +39,11 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
           </div>
 
           <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400">{data.copy.heroBylineLabel}</p>
-          <h1 className="serif-italic mb-6 text-5xl md:text-7xl">{data.title}</h1>
-          <p className="serif-italic text-xl leading-relaxed text-stone-500">{data.description}</p>
+          <h1 className="serif-italic mb-6 text-4xl md:text-7xl">{data.title}</h1>
+          <p className="serif-italic text-lg leading-relaxed text-stone-500 md:text-xl">{data.description}</p>
         </header>
 
-        <div className="space-y-32">
+        <div className="space-y-16 md:space-y-20">
           {data.items.map((item, index) => {
             const cover = item.vendor.images.find((image) => image.kind === "cover") ?? item.vendor.images[0];
             const categoryLabel = item.vendor.primaryCategory?.name ?? "Vendor";
@@ -55,10 +55,10 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
                   initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex flex-col items-center gap-12 ${reversed ? "md:flex-row-reverse" : "md:flex-row"}`}
+                  transition={{ duration: 0.38 }}
+                  className={`flex flex-col items-center gap-8 ${reversed ? "md:flex-row-reverse" : "md:flex-row"}`}
                 >
-                  <div className="aspect-[4/5] w-full overflow-hidden rounded-[3rem] shadow-2xl shadow-stone-200/50 md:w-3/5">
+                  <div className="aspect-[186/237] w-full overflow-hidden rounded-[1.75rem] shadow-xl shadow-stone-200/40 md:w-[36%]">
                     {cover ? (
                       <Image
                         src={cover.url}
@@ -69,14 +69,14 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
                       />
                     ) : null}
                   </div>
-                  <div className="w-full space-y-6 md:w-2/5">
+                  <div className="w-full space-y-4 md:w-[64%]">
                     <div className="flex items-center gap-3">
                       <span className="rounded-full bg-stone-100 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-stone-500">
                         {categoryLabel}
                       </span>
                       <div className="h-[1px] flex-1 bg-stone-100" />
                     </div>
-                    <h2 className="text-4xl">{item.vendor.name}</h2>
+                    <h2 className="text-3xl md:text-4xl">{item.vendor.name}</h2>
                     <p className="serif-italic leading-relaxed text-stone-600">{item.blurb}</p>
                     <div className="pt-4">
                       <Link
@@ -94,7 +94,7 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
           })}
         </div>
 
-        <section className="relative mt-40 overflow-hidden rounded-[3rem] bg-stone-900 p-12 text-center text-white md:p-24">
+        <section className="relative mt-24 overflow-hidden rounded-[2.5rem] bg-stone-900 p-8 text-center text-white md:mt-40 md:rounded-[3rem] md:p-24">
           <div className="relative z-10">
             <h2 className="serif-italic mb-6 text-4xl md:text-6xl">{data.copy.ctaTitle}</h2>
             <p className="mx-auto mb-10 max-w-sm text-lg leading-relaxed text-stone-400">{data.copy.ctaDescription}</p>

@@ -74,6 +74,7 @@ type SearchSuggestions = {
 - HON-040 Login screen
 - HON-031 Save-to-list modal interaction
 - HON-033 Public shared collection page
+- HON-032 User lists pages
 - HON-041 My reviews page
 - HON-050 Claim vendor page
 - HON-060 Admin shell
@@ -83,7 +84,37 @@ type SearchSuggestions = {
 - HON-064 Admin vendor directory page
 - HON-065 Admin rating criteria page
 - HON-066 Homepage category merchandising controls
+- HON-071 Loading, empty, error, skeleton states
+- HON-072 Responsive polish and motion pass
 - HON-051 Vendor edit page
+
+## Future Auth/Profile
+- HON-114 will add provider-linked user avatars plus manual profile photo upload for email/password accounts.
+- Google sign-in should hydrate the user avatar from the provider profile.
+- Email/password accounts should support a first-party uploaded profile image that all app nav/profile surfaces can reuse.
+
+## Supabase Wiring
+- HON-100 establishes environment-based provider selection before real data migration begins.
+- `HONESTLY_DATA_PROVIDER=mock` keeps the current in-memory app behavior.
+- `HONESTLY_DATA_PROVIDER=supabase` should only be used once `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set.
+- Server-only admin work will also require `SUPABASE_SERVICE_ROLE_KEY`.
+- Until HON-101 through HON-113 land, the Supabase provider path is a validated scaffold and can still fall back to mock implementations behind the same service contracts.
+
+## Auth Session Contract
+- App routes should depend on provider-neutral session helpers such as `getCurrentSession()`, `requireUserSession()`, and `requireAdminSession()`.
+- Route files should not be coupled to mock-specific method names.
+- The data layer remains responsible for sourcing the session, while route guards stay centralized in `lib/services/session.ts`.
+
+## Initial Database Shape
+- HON-102 starts with a single initial schema migration under `/supabase/migrations`.
+- The first schema should cover:
+  - `user_profiles`
+  - `categories` and `subcategories`
+  - `vendors` and related location/image/social link tables
+  - `rating_criteria`, `reviews`, and `review_ratings`
+  - `saved_lists` and `saved_list_items`
+  - `vendor_claims`
+- The schema should preserve the current mock-domain concepts so service contracts can migrate without UI rewrites.
 
 ## UI Direction
 - Clean, airy, premium visual language.

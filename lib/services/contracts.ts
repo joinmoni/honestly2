@@ -33,9 +33,9 @@ export interface AppDataLayer {
   getPublicListByShareSlug(shareSlug: string): Promise<SavedList | null>;
   getClaims(): Promise<VendorClaim[]>;
   getClaimsByVendorId(vendorId: string): Promise<VendorClaim[]>;
-  getMockSession(): Promise<MockSession>;
+  getCurrentSession(): Promise<MockSession>;
   getAnonymousSession(): Promise<MockSession>;
-  getMockAdminSession(): Promise<MockSession>;
+  getAdminSession(): Promise<MockSession>;
   getVendorProfileByVendorId(vendorId: string): Promise<VendorProfile | null>;
   getHomeContent(): Promise<HomeContent>;
   getHomeCategoryShortcuts(): Promise<HomeCategoryShortcut[]>;

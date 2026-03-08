@@ -3,7 +3,7 @@
 import React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { GripVertical, Pencil, Plus, Star, Trash2, X } from "lucide-react";
 import { AdminCreateCategoryModal } from "@/components/admin/AdminCreateCategoryModal";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
@@ -16,13 +16,51 @@ type AdminTaxonomyScreenProps = {
 export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
   const [categories, setCategories] = useState(data.categories);
   const [createOpen, setCreateOpen] = useState(false);
+  const [draggingCategoryId, setDraggingCategoryId] = useState<string | null>(null);
+  const orderedCategories = [...categories].sort((a, b) => {
+    if (a.featuredOnHome && b.featuredOnHome) {
+      return (a.homeOrder ?? Number.MAX_SAFE_INTEGER) - (b.homeOrder ?? Number.MAX_SAFE_INTEGER);
+    }
+    if (a.featuredOnHome) return -1;
+    if (b.featuredOnHome) return 1;
+    return a.name.localeCompare(b.name);
+  });
+  const featuredCategories = orderedCategories.filter((category) => category.featuredOnHome);
+
+  const reorderHomepageRows = (draggedId: string, targetId: string) => {
+    if (draggedId === targetId) return;
+
+    setCategories((current) => {
+      const featured = current
+        .filter((category) => category.featuredOnHome)
+        .sort((a, b) => (a.homeOrder ?? Number.MAX_SAFE_INTEGER) - (b.homeOrder ?? Number.MAX_SAFE_INTEGER));
+      const draggedIndex = featured.findIndex((category) => category.id === draggedId);
+      const targetIndex = featured.findIndex((category) => category.id === targetId);
+      if (draggedIndex === -1 || targetIndex === -1) return current;
+
+      const nextFeatured = [...featured];
+      const [draggedItem] = nextFeatured.splice(draggedIndex, 1);
+      if (!draggedItem) return current;
+      nextFeatured.splice(targetIndex, 0, draggedItem);
+
+      const nextOrder = new Map(nextFeatured.map((category, index) => [category.id, index + 1]));
+      return current.map((category) =>
+        category.featuredOnHome
+          ? {
+              ...category,
+              homeOrder: nextOrder.get(category.id) ?? category.homeOrder
+            }
+          : category
+      );
+    });
+  };
 
   return (
     <>
       <div className="min-h-screen bg-[#F9F8F6] font-sans text-stone-900 antialiased">
         <AdminTopNav brandLabel={data.brandLabel} navLinks={data.navLinks} />
 
-        <main className="mx-auto max-w-5xl px-6 py-12">
+        <main className="mx-auto max-w-7xl px-6 py-12">
           <header className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
               <h1 className="mb-2 text-4xl">{data.title}</h1>
@@ -40,8 +78,9 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
             </motion.button>
           </header>
 
-          <div className="grid grid-cols-1 gap-6">
-            {categories.map((category) => (
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid grid-cols-1 gap-6">
+              {orderedCategories.map((category) => (
               <motion.article
                 key={category.id}
                 whileHover={{ y: -2 }}
@@ -107,6 +146,55 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                         </button>
                       </div>
                     </div>
+
+                    <div className="rounded-[1.6rem] border border-stone-100 bg-stone-50/70 p-4">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Homepage Merchandising</p>
+                          <p className="text-xs text-stone-500">Control which taxonomy rows appear on the homepage and in what order.</p>
+                        </div>
+                        <button
+                          type="button"
+                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-colors ${
+                            category.featuredOnHome ? "bg-amber-100 text-amber-800" : "bg-white text-stone-500"
+                          }`}
+                          onClick={() => {
+                            setCategories((current) =>
+                              current.map((item) =>
+                                item.id === category.id
+                                  ? {
+                                      ...item,
+                                      featuredOnHome: !item.featuredOnHome,
+                                      homeOrder: item.featuredOnHome
+                                        ? null
+                                        : current.filter((entry) => entry.featuredOnHome).length + 1
+                                    }
+                                  : item
+                              )
+                            );
+                          }}
+                        >
+                          <Star size={12} className={category.featuredOnHome ? "fill-current" : ""} />
+                          {category.featuredOnHome ? "Featured on Home" : "Feature on Home"}
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="rounded-full border border-stone-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">
+                          {category.featuredOnHome && category.homeOrder ? `Home Row ${category.homeOrder}` : "Not on Homepage"}
+                        </span>
+                      </div>
+
+                      {category.featuredOnHome && category.promotedSubcategories.length ? (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {category.promotedSubcategories.map((subcategory) => (
+                            <span key={`${category.id}-${subcategory}`} className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-stone-500">
+                              {subcategory}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div className="flex shrink-0 gap-2">
@@ -124,7 +212,53 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                   </div>
                 </div>
               </motion.article>
-            ))}
+              ))}
+            </div>
+
+            <aside className="xl:sticky xl:top-28 xl:self-start">
+              <div className="rounded-[2.25rem] border border-stone-200 bg-white p-6 shadow-sm">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Homepage Layout</p>
+                <h2 className="text-2xl">Arrange Featured Rows</h2>
+                <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                  Drag featured categories to control the order they appear in the homepage shortcut rail and merchandising stack.
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  {featuredCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      draggable
+                      onDragStart={() => setDraggingCategoryId(category.id)}
+                      onDragEnd={() => setDraggingCategoryId(null)}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={() => {
+                        if (!draggingCategoryId) return;
+                        reorderHomepageRows(draggingCategoryId, category.id);
+                        setDraggingCategoryId(null);
+                      }}
+                      className={`flex items-center gap-3 rounded-[1.4rem] border px-4 py-4 transition-colors ${
+                        draggingCategoryId === category.id ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-stone-50/70"
+                      }`}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">{category.icon}</div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-stone-900">{category.name}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
+                          Home Row {category.homeOrder}
+                        </p>
+                      </div>
+                      <GripVertical size={16} className="text-stone-400" />
+                    </div>
+                  ))}
+                </div>
+
+                {!featuredCategories.length ? (
+                  <div className="mt-6 rounded-[1.4rem] border border-dashed border-stone-200 bg-stone-50/60 px-4 py-6 text-center text-sm text-stone-500">
+                    Feature a category from the left to add it to the homepage ordering panel.
+                  </div>
+                ) : null}
+              </div>
+            </aside>
           </div>
 
           <AdminPagination
@@ -145,7 +279,10 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
               name: payload.name,
               slug: payload.name.toLowerCase().trim().replace(/\s+/g, "-"),
               icon: payload.icon,
-              subcategories: payload.subcategories
+              subcategories: payload.subcategories,
+              featuredOnHome: false,
+              homeOrder: null,
+              promotedSubcategories: []
             },
             ...current
           ]);

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Map as MapIcon, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { HomeHeroSearch } from "@/components/home/HomeHeroSearch";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
@@ -24,10 +25,11 @@ type VendorListingScreenProps = {
   currentUserId: string | null;
   currentUserName?: string | null;
   currentUserEmail?: string | null;
+  currentUserAvatarUrl?: string;
   searchIndex: HomepageSearchIndex;
 };
 
-export function VendorListingScreen({ data, initialLists, currentUserId, currentUserName, currentUserEmail, searchIndex }: VendorListingScreenProps) {
+export function VendorListingScreen({ data, initialLists, currentUserId, currentUserName, currentUserEmail, currentUserAvatarUrl, searchIndex }: VendorListingScreenProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [activeChipId, setActiveChipId] = useState<string>(data.searchState.categorySlug);
@@ -68,7 +70,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
           }))}
           className="border-b-0 bg-white"
           innerClassName="max-w-[1600px]"
-          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} />}
+          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
         />
 
         <div className="border-t border-stone-100/80">
@@ -139,19 +141,33 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {data.vendors.map((vendor) => (
-            <VendorListingCard
-              key={vendor.id}
-              vendor={vendor}
-              saved={savedVendorIds.includes(vendor.id)}
-              onSaveClick={(vendorId) => {
-                setActiveVendorId(vendorId);
-                setSaveModalOpen(true);
-              }}
-            />
-          ))}
-        </div>
+        {data.vendors.length ? (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {data.vendors.map((vendor) => (
+              <VendorListingCard
+                key={vendor.id}
+                vendor={vendor}
+                saved={savedVendorIds.includes(vendor.id)}
+                onSaveClick={(vendorId) => {
+                  setActiveVendorId(vendorId);
+                  setSaveModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            eyebrow="Search Results"
+            title="No vendors match this search"
+            description="Try broadening the category, changing the location, or clearing a filter to explore more profiles."
+            ctaLabel="Clear filters"
+            onCta={() => {
+              setActiveChipId("all");
+              setCurrentSearch({ query: "", where: "" });
+              router.replace(pathname, { scroll: false });
+            }}
+          />
+        )}
 
         <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2">
           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} type="button" className="flex items-center gap-2 rounded-full bg-stone-900 px-6 py-3 text-sm font-bold text-white shadow-2xl">

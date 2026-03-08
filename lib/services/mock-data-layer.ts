@@ -5,7 +5,7 @@ import { mockClaimPageCopy } from "@/lib/mock-data/claim-page";
 import { mockVendorClaims } from "@/lib/mock-data/claims";
 import { mockCollectionsPageCopy } from "@/lib/mock-data/collections";
 import { mockFooterContent } from "@/lib/mock-data/footer";
-import { mockHomeCategoryShortcuts, mockHomeContent } from "@/lib/mock-data/home";
+import { getMockHomeCategoryShortcuts, mockHomeContent } from "@/lib/mock-data/home";
 import { mockSavedLists } from "@/lib/mock-data/lists";
 import { mockMyReviewsPageCopy } from "@/lib/mock-data/my-reviews";
 import { mockRatingCriteria, mockReviews } from "@/lib/mock-data/reviews";
@@ -56,13 +56,13 @@ export const mockDataLayer: AppDataLayer = {
   async getClaimsByVendorId(vendorId) {
     return mockVendorClaims.filter((claim) => claim.vendorId === vendorId);
   },
-  async getMockSession() {
+  async getCurrentSession() {
     return mockUserSession;
   },
   async getAnonymousSession() {
     return mockAnonymousSession;
   },
-  async getMockAdminSession() {
+  async getAdminSession() {
     return mockAdminSession;
   },
   async getVendorProfileByVendorId(vendorId) {
@@ -72,7 +72,7 @@ export const mockDataLayer: AppDataLayer = {
     return mockHomeContent;
   },
   async getHomeCategoryShortcuts() {
-    return mockHomeCategoryShortcuts;
+    return getMockHomeCategoryShortcuts(mockCategories);
   },
   async getAuthPageCopy() {
     return mockAuthPageCopy;

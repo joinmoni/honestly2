@@ -112,6 +112,9 @@ export type AdminTaxonomyCategoryItem = {
   slug: string;
   icon: string;
   subcategories: string[];
+  featuredOnHome: boolean;
+  homeOrder: number | null;
+  promotedSubcategories: string[];
   muted?: boolean;
 };
 

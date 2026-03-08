@@ -1,3 +1,4 @@
+import type { Category } from "@/lib/types/domain";
 import type { HomeCategoryShortcut, HomeContent } from "@/lib/types/home";
 
 export const mockHomeContent: HomeContent = {
@@ -34,10 +35,35 @@ export const mockHomeContent: HomeContent = {
   ]
 };
 
-export const mockHomeCategoryShortcuts: HomeCategoryShortcut[] = [
-  { id: "shortcut-photo", label: "Photo", emoji: "📸", href: "/category/photography" },
-  { id: "shortcut-florals", label: "Florals", emoji: "🌿", href: "/category/floral-design" },
-  { id: "shortcut-venues", label: "Venues", emoji: "🏰", href: "/category/venues" },
-  { id: "shortcut-catering", label: "Catering", emoji: "🍽️", href: "/vendors" },
-  { id: "shortcut-planning", label: "Planning", emoji: "✨", href: "/vendors" }
-];
+const homeShortcutMetaBySlug: Record<
+  string,
+  {
+    emoji: string;
+    label: string;
+    featuredOnHome: boolean;
+    homeOrder: number | null;
+  }
+> = {
+  photography: { emoji: "📸", label: "Photo", featuredOnHome: true, homeOrder: 1 },
+  "floral-design": { emoji: "🌿", label: "Florals", featuredOnHome: true, homeOrder: 2 },
+  venues: { emoji: "🏰", label: "Venues", featuredOnHome: true, homeOrder: 3 }
+};
+
+export function getMockHomeCategoryShortcuts(categories: Category[]): HomeCategoryShortcut[] {
+  return categories
+    .map((category) => {
+      const meta = homeShortcutMetaBySlug[category.slug];
+      if (!meta?.featuredOnHome) return null;
+
+      return {
+        id: `shortcut-${category.slug}`,
+        label: meta.label,
+        emoji: meta.emoji,
+        href: `/category/${category.slug}`,
+        homeOrder: meta.homeOrder
+      };
+    })
+    .filter((item): item is HomeCategoryShortcut & { homeOrder: number | null } => Boolean(item))
+    .sort((a, b) => (a.homeOrder ?? Number.MAX_SAFE_INTEGER) - (b.homeOrder ?? Number.MAX_SAFE_INTEGER))
+    .map(({ homeOrder: _homeOrder, ...item }) => item);
+}

@@ -137,7 +137,7 @@ describe("VendorListingScreen", () => {
   it("renders editorial card proportions and serif vendor names", () => {
     const { container } = render(<VendorListingScreen data={data} initialLists={lists} currentUserId="usr-1" searchIndex={searchIndex} />);
 
-    expect(screen.getByRole("heading", { name: "Wildflower Archive" })).toHaveClass("text-xl", "font-serif");
-    expect(container.querySelector(".aspect-\\[4\\/5\\]")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Wildflower Archive" })).toHaveClass("text-lg", "font-serif");
+    expect(container.querySelector(".aspect-\\[186\\/237\\]")).not.toBeNull();
   });
 });

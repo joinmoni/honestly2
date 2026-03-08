@@ -14,30 +14,30 @@ export function AuthScreen({ copy }: AuthScreenProps) {
   const [email, setEmail] = useState("");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FDFCFB] p-6">
+    <div className="flex min-h-screen items-center justify-center bg-[#FDFCFB] p-4 md:p-6">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex min-h-[600px] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl shadow-stone-200/60 md:flex-row"
+        transition={{ duration: 0.36 }}
+        className="flex min-h-[600px] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-stone-200/60 md:flex-row md:rounded-[2.5rem]"
       >
-        <div className="relative overflow-hidden bg-stone-100 md:w-1/2">
+        <div className="relative min-h-[280px] overflow-hidden bg-stone-100 md:min-h-0 md:w-1/2">
           <Image src={copy.heroImageUrl} alt="Login visual" fill className="object-cover opacity-90" sizes="(max-width: 768px) 100vw, 50vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent" />
 
-          <div className="absolute bottom-10 left-10 right-10 text-white">
-            <div className="mb-2 text-2xl italic">{copy.quoteText}</div>
+          <div className="absolute bottom-6 left-6 right-6 text-white md:bottom-10 md:left-10 md:right-10">
+            <div className="mb-2 text-xl italic md:text-2xl">{copy.quoteText}</div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">{copy.quoteAuthor}</p>
           </div>
 
-          <Link href="/" className="serif-italic absolute left-8 top-8 text-4xl text-white">
+          <Link href="/" className="serif-italic absolute left-6 top-6 text-3xl text-white md:left-8 md:top-8 md:text-4xl">
             honestly<span className="text-amber-400">.</span>
           </Link>
         </div>
 
-        <div className="flex flex-col justify-center p-8 md:w-1/2 md:p-16">
-          <div className="mb-10">
-            <h1 className="mb-3 text-4xl">{copy.heading}</h1>
+        <div className="flex flex-col justify-center p-6 md:w-1/2 md:p-16">
+          <div className="mb-8 md:mb-10">
+            <h1 className="mb-3 text-3xl md:text-4xl">{copy.heading}</h1>
             <p className="text-sm text-stone-500">{copy.subheading}</p>
           </div>
 

@@ -8,7 +8,7 @@ import { VendorDetailSidebar } from "@/components/vendor-detail/VendorDetailSide
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
 import { getListsByUserId } from "@/lib/services/lists";
-import { getMockSession } from "@/lib/services/session";
+import { getCurrentSession } from "@/lib/services/session";
 import { getRatingCriteria, getReviewsByVendorId } from "@/lib/services/reviews";
 import { getVendorBySlug } from "@/lib/services/vendors";
 import { getVendorProfileByVendorId } from "@/lib/services/vendor-profiles";
@@ -29,7 +29,7 @@ export default async function VendorDetailPage({ params }: VendorDetailPageProps
     getVendorProfileByVendorId(vendor.id),
     getReviewsByVendorId(vendor.id),
     getRatingCriteria(),
-    getMockSession(),
+    getCurrentSession(),
     getFooterContent()
   ]);
   const initialLists = session.user ? await getListsByUserId(session.user.id) : [];
@@ -43,14 +43,14 @@ export default async function VendorDetailPage({ params }: VendorDetailPageProps
   return (
     <>
       <div className="bg-[#FDFCFB] text-stone-900">
-        <VendorDetailNav />
+        <VendorDetailNav session={session} />
 
-        <main className="mx-auto max-w-7xl px-6 py-8 md:px-12 md:py-12">
+        <main className="mx-auto max-w-7xl px-6 py-8 md:px-12 md:py-10">
           <VendorDetailHero vendor={vendor} profile={profile} initialLists={initialLists} session={session} />
           <VendorDetailGallery images={vendor.images} />
 
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.5fr)_360px]">
-            <div className="space-y-12">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.45fr)_330px]">
+            <div className="space-y-8">
               <VendorDetailAbout profile={profile} />
               <VendorDetailReviewFlow
                 vendorId={vendor.id}

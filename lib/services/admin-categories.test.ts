@@ -8,7 +8,9 @@ describe("getAdminTaxonomyData", () => {
     expect(data.navLinks.some((link) => link.id === "taxonomy" && link.active)).toBe(true);
     expect(data.categories[0]).toMatchObject({
       name: "Photography",
-      slug: "photography"
+      slug: "photography",
+      featuredOnHome: true,
+      homeOrder: 1
     });
   });
 });

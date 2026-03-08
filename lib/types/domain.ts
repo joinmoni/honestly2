@@ -135,5 +135,7 @@ export type MockSession = {
     name: string;
     email: string;
     role: "user" | "admin";
+    authProvider?: "google" | "password";
+    avatarUrl?: string;
   } | null;
 };

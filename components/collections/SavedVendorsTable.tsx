@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { SavedVendorRowView } from "@/lib/types/collections";
 
 type SavedVendorsTableProps = {
@@ -15,6 +16,14 @@ export function SavedVendorsTable({ title, rows, addToListLabel }: SavedVendorsT
   return (
     <section className="mt-24">
       <h2 className="mb-8 text-2xl italic">{title}</h2>
+      {!rows.length ? (
+        <EmptyState
+          eyebrow="Saved Vendors"
+          title="No saved vendors yet"
+          description="As you save vendors from discovery pages, they will appear here for quick sorting into lists."
+        />
+      ) : null}
+      {rows.length ? (
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
@@ -48,6 +57,7 @@ export function SavedVendorsTable({ title, rows, addToListLabel }: SavedVendorsT
           </tbody>
         </table>
       </div>
+      ) : null}
     </section>
   );
 }

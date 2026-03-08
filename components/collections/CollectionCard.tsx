@@ -21,7 +21,7 @@ export function CollectionCard({ list, privateLabel, sharedLabel }: CollectionCa
   return (
     <motion.article whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="group cursor-pointer">
       <Link href={list.href}>
-        <div className="mb-4 aspect-video overflow-hidden rounded-3xl border border-stone-200 bg-stone-100">
+        <div className="mb-3 aspect-[1.45/1] overflow-hidden rounded-[1.5rem] border border-stone-200 bg-stone-100">
           {showCollage ? (
             <div className="grid h-full grid-cols-2 gap-1">
               <div className="relative h-full">
@@ -49,8 +49,8 @@ export function CollectionCard({ list, privateLabel, sharedLabel }: CollectionCa
 
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-2xl">{list.name}</h3>
-          <p className="text-sm font-medium text-stone-400">
+          <h3 className="text-xl">{list.name}</h3>
+          <p className="text-[13px] font-medium text-stone-400">
             {list.vendorCount} vendors • {visibilityLabel}
           </p>
         </div>

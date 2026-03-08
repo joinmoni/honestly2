@@ -22,12 +22,13 @@
 ## Epic 3 — Saved vendors and lists
 - [x] HON-030 Build save/favorite interaction
 - [x] HON-031 Build save-to-list modal
-- [ ] HON-032 Build user lists pages (needs screen)
+- [x] HON-032 Build user lists pages
 - [x] HON-033 Build public shared list page
 
 ## Epic 4 — Auth and profile-lite
 - [x] HON-040 Build login screen
 - [x] HON-041 Build my reviews page
+- [ ] HON-114 Add user avatars from auth providers and manual profile photo upload
 
 ## Epic 5 — Claim flow and vendor editing
 - [x] HON-050 Build claim vendor page
@@ -40,12 +41,12 @@
 - [x] HON-063 Build admin categories page
 - [x] HON-064 Build admin vendors page
 - [x] HON-065 Build rating criteria management page
-- [ ] HON-066 Build homepage category merchandising controls
+- [x] HON-066 Build homepage category merchandising controls
 
 ## Epic 7 — Integration prep
 - [x] HON-070 Refactor mock services to interface-based data layer
-- [ ] HON-071 Add loading, empty, error, skeleton states
-- [ ] HON-072 Add responsive polish and motion pass
+- [x] HON-071 Add loading, empty, error, skeleton states
+- [x] HON-072 Add responsive polish and motion pass
 
 ## Phase 2 — Real data and search evolution
 - [ ] HON-100 Setup Supabase project wiring
