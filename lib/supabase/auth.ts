@@ -1,4 +1,4 @@
-import type { Session } from "@supabase/supabase-js";
+import type { EmailOtpType, Session } from "@supabase/supabase-js";
 
 import { isSupabaseConfigured } from "@/lib/config/app-env";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -6,6 +6,7 @@ import { clearSupabaseAccessTokenCookie, persistSupabaseAccessTokenCookie } from
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const DEFAULT_AUTH_REDIRECT_PATH = "/vendors";
+const EMAIL_OTP_TYPES: EmailOtpType[] = ["signup", "invite", "magiclink", "recovery", "email_change", "email"];
 
 function normalizeNextPath(nextPath?: string): string {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
@@ -165,6 +166,7 @@ export async function completeBrowserAuthCallback(searchParams: URLSearchParams)
   const authCode = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
+  const emailOtpType = type && EMAIL_OTP_TYPES.includes(type as EmailOtpType) ? (type as EmailOtpType) : undefined;
 
   if (errorDescription) {
     throw new Error(errorDescription);
@@ -190,10 +192,10 @@ export async function completeBrowserAuthCallback(searchParams: URLSearchParams)
     return nextPath;
   }
 
-  if (tokenHash && type) {
+  if (tokenHash && emailOtpType) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
-      type
+      type: emailOtpType
     });
 
     if (error) {

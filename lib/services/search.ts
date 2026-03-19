@@ -191,7 +191,7 @@ async function getSearchVendors(): Promise<Vendor[]> {
     throw new Error(`Failed to load search vendors from Supabase: ${error.message}`);
   }
 
-  return ((data ?? []) as SupabaseSearchVendorRow[]).map(mapSearchVendor);
+  return ((data ?? []) as unknown as SupabaseSearchVendorRow[]).map(mapSearchVendor);
 }
 
 async function getSearchLocations(): Promise<HomepageSearchIndex["locations"]> {
@@ -356,7 +356,7 @@ export async function searchVendorDirectory({
   query,
   where,
   categorySlug
-}: VendorDirectorySearchInput) {
+}: VendorDirectorySearchInput): Promise<Vendor[]> {
   if (getSearchProvider() === "meilisearch") {
     const filters: string[] = [];
     if (categorySlug && categorySlug !== "all") {
@@ -368,7 +368,7 @@ export async function searchVendorDirectory({
 
     const results = await searchMeilisearchVendors(query?.trim() ?? "", 24, filters);
 
-    return results.hits.map((vendor) => ({
+    return results.hits.map((vendor): Vendor => ({
       id: vendor.id,
       slug: vendor.slug,
       name: vendor.name,

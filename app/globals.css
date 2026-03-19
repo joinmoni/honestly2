@@ -4,6 +4,9 @@
 
 :root {
   color-scheme: light;
+  --font-inter: "Inter";
+  --font-instrument-serif: "Instrument Serif";
+  --font-playfair-display: "Playfair Display";
 }
 
 body {

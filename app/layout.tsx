@@ -1,24 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif, Playfair_Display } from "next/font/google";
 import "@/app/globals.css";
 import { buildPageMetadata, SITE_DESCRIPTION } from "@/lib/seo";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter"
-});
-
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  variable: "--font-instrument-serif",
-  weight: "400"
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair-display",
-  weight: ["700"]
-});
 
 export const metadata: Metadata = {
   ...buildPageMetadata({
@@ -30,7 +12,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${instrumentSerif.variable} ${playfairDisplay.variable} font-sans`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Instrument+Serif:ital@0;1&family=Playfair+Display:wght@700&display=swap"
+        />
+      </head>
+      <body className="font-sans">
         {children}
       </body>
     </html>

@@ -430,7 +430,7 @@ async function getSupabaseCategories(): Promise<Category[]> {
     throw new Error(`Failed to load categories from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapCategory(row as SupabaseCategoryRow));
+  return (data ?? []).map((row) => mapCategory(row as unknown as SupabaseCategoryRow));
 }
 
 async function getSupabaseVendors(): Promise<Vendor[]> {
@@ -442,7 +442,7 @@ async function getSupabaseVendors(): Promise<Vendor[]> {
     throw new Error(`Failed to load vendors from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapVendor(row as SupabaseVendorRow));
+  return (data ?? []).map((row) => mapVendor(row as unknown as SupabaseVendorRow));
 }
 
 async function getSupabaseReviews(): Promise<Review[]> {
@@ -454,7 +454,7 @@ async function getSupabaseReviews(): Promise<Review[]> {
     throw new Error(`Failed to load reviews from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapReview(row as SupabaseReviewRow));
+  return (data ?? []).map((row) => mapReview(row as unknown as SupabaseReviewRow));
 }
 
 async function getSupabaseRatingCriteria(): Promise<RatingCriterion[]> {
@@ -466,7 +466,7 @@ async function getSupabaseRatingCriteria(): Promise<RatingCriterion[]> {
     throw new Error(`Failed to load rating criteria from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapRatingCriterion(row as SupabaseCriterionRow));
+  return (data ?? []).map((row) => mapRatingCriterion(row as unknown as SupabaseCriterionRow));
 }
 
 async function resolveSupabaseProfileId(userId: string): Promise<string | null> {
@@ -522,7 +522,7 @@ async function getSupabaseListsByUserId(userId: string) {
     throw new Error(`Failed to load saved lists from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapSavedList(row as SupabaseSavedListRow));
+  return (data ?? []).map((row) => mapSavedList(row as unknown as SupabaseSavedListRow));
 }
 
 async function getSupabaseListById(id: string) {
@@ -552,7 +552,7 @@ async function getSupabaseListById(id: string) {
     throw new Error(`Failed to load saved list "${id}" from Supabase: ${error.message}`);
   }
 
-  return data ? mapSavedList(data as SupabaseSavedListRow) : null;
+  return data ? mapSavedList(data as unknown as SupabaseSavedListRow) : null;
 }
 
 async function getSupabasePublicListByShareSlug(shareSlug: string) {
@@ -583,7 +583,7 @@ async function getSupabasePublicListByShareSlug(shareSlug: string) {
     throw new Error(`Failed to load public list "${shareSlug}" from Supabase: ${error.message}`);
   }
 
-  return data ? mapSavedList(data as SupabaseSavedListRow) : null;
+  return data ? mapSavedList(data as unknown as SupabaseSavedListRow) : null;
 }
 
 async function getSupabaseClaims() {
@@ -611,7 +611,7 @@ async function getSupabaseClaims() {
     throw new Error(`Failed to load vendor claims from Supabase: ${error.message}`);
   }
 
-  return (data ?? []).map((row) => mapClaim(row as SupabaseClaimRow));
+  return (data ?? []).map((row) => mapClaim(row as unknown as SupabaseClaimRow));
 }
 
 export function getSupabaseDataLayer(): AppDataLayer {
@@ -633,7 +633,7 @@ export function getSupabaseDataLayer(): AppDataLayer {
         throw new Error(`Failed to load vendor "${slug}" from Supabase: ${error.message}`);
       }
 
-      return data ? mapVendor(data as SupabaseVendorRow) : null;
+      return data ? mapVendor(data as unknown as SupabaseVendorRow) : null;
     },
     async getCategories() {
       return getSupabaseCategories();
