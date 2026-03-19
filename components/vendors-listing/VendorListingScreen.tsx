@@ -9,12 +9,10 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { HomeHeroSearch } from "@/components/home/HomeHeroSearch";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
+import { UserTopNav } from "@/components/ui/UserTopNav";
 import { VendorListingCard } from "@/components/vendors-listing/VendorListingCard";
-import {
-  createListWithVendor,
-  getSavedVendorIds,
-  toggleVendorInList
-} from "@/lib/services/lists";
+import { createListWithVendor, getSavedVendorIds, toggleVendorInList } from "@/lib/lists.client";
+import { getUserNavLinks } from "@/lib/user-nav";
 import type { SavedList } from "@/lib/types/domain";
 import type { HomepageSearchIndex } from "@/lib/types/search";
 import type { VendorListingPageData } from "@/lib/types/vendor-listing";
@@ -62,16 +60,27 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
       <header className="sticky top-0 z-50 border-b border-stone-100 bg-white">
-        <EditorialTopNav
-          brandLabel={data.copy.brandLabel}
-          navLinks={data.copy.navLinks.map((link) => ({
-            ...link,
-            active: link.href === "/vendors"
-          }))}
-          className="border-b-0 bg-white"
-          innerClassName="max-w-[1600px]"
-          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
-        />
+        {currentUserName ? (
+          <UserTopNav
+            brandLabel={data.copy.brandLabel}
+            avatarName={currentUserName}
+            avatarEmail={currentUserEmail}
+            avatarUrl={currentUserAvatarUrl}
+            navLinks={getUserNavLinks("none")}
+            className="border-b-0 bg-white"
+          />
+        ) : (
+          <EditorialTopNav
+            brandLabel={data.copy.brandLabel}
+            navLinks={data.copy.navLinks.map((link) => ({
+              ...link,
+              active: link.href === "/vendors"
+            }))}
+            className="border-b-0 bg-white"
+            innerClassName="max-w-7xl md:px-12"
+            rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
+          />
+        )}
 
         <div className="border-t border-stone-100/80">
           <div className="mx-auto flex max-w-[1600px] px-6 py-5 md:justify-center">

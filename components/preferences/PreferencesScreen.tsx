@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ImagePlus, Link2, Upload } from "lucide-react";
+import { KeyRound, Trash2, Upload } from "lucide-react";
 
 import { Avatar } from "@/components/ui/Avatar";
+import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { clearProfileAvatarOverride, saveProfileAvatarOverride, usePreferredAvatar } from "@/lib/profile-avatar.client";
+import { updatePassword, updateProfileAvatar } from "@/lib/supabase/auth";
 import type { MockSession } from "@/lib/types/domain";
 
 type PreferencesScreenProps = {
@@ -13,9 +16,23 @@ type PreferencesScreenProps = {
 };
 
 export function PreferencesScreen({ session }: PreferencesScreenProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(session.avatarUrl);
+  const persistedAvatarUrl = usePreferredAvatar(session.avatarUrl);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(persistedAvatarUrl);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-  const providerLabel = session.authProvider === "google" ? "Google" : "Email + Password";
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [passwordFormOpen, setPasswordFormOpen] = useState(false);
+  const [nextPassword, setNextPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordPending, setPasswordPending] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPreviewUrl(persistedAvatarUrl);
+  }, [persistedAvatarUrl]);
 
   useEffect(() => {
     return () => {
@@ -41,108 +58,279 @@ export function PreferencesScreen({ session }: PreferencesScreenProps) {
           </Link>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="space-y-8">
-            <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Profile Photo</p>
-              <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-center">
-                <Avatar name={session.name} imageUrl={previewUrl} size="md" className="h-24 w-24 text-2xl" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-3xl">{session.name}</h2>
-                  <p className="mt-2 text-sm text-stone-500">{session.email}</p>
-                  <p className="mt-4 text-sm leading-relaxed text-stone-500">
-                    {session.authProvider === "google"
-                      ? "Your current avatar is synced from Google. You can upload a custom photo here to override it inside Honestly."
-                      : "You signed up with email and password, so this is where you upload the profile photo used throughout Honestly."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-8 grid gap-4 md:grid-cols-2">
-                <label className="flex cursor-pointer items-center justify-center gap-3 rounded-[1.6rem] border border-stone-200 bg-stone-50 px-5 py-5 text-sm font-semibold text-stone-700 transition-colors hover:border-amber-300 hover:bg-amber-50">
-                  <Upload size={18} />
-                  Upload from device
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
-
-                      setPreviewUrl((current) => {
-                        if (current && current.startsWith("blob:")) {
-                          URL.revokeObjectURL(current);
-                        }
-                        return URL.createObjectURL(file);
-                      });
-                      setSelectedFileName(file.name);
-                    }}
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  className="rounded-[1.6rem] border border-dashed border-stone-200 bg-white px-5 py-5 text-sm font-semibold text-stone-500 transition-colors hover:border-stone-300 hover:text-stone-900"
-                  onClick={() => {
-                    setPreviewUrl(session.avatarUrl);
-                    setSelectedFileName(null);
-                  }}
-                >
-                  Reset to account default
-                </button>
-              </div>
-
-              {selectedFileName ? (
-                <div className="mt-5 rounded-[1.5rem] bg-stone-50 px-4 py-3 text-sm text-stone-600">
-                  Selected file: <span className="font-semibold text-stone-900">{selectedFileName}</span>
-                </div>
-              ) : null}
+        <section className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Profile Photo</p>
+          <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-center">
+            <Avatar name={session.name} imageUrl={previewUrl} size="md" className="h-24 w-24 text-2xl" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-3xl">{session.name}</h2>
+              <p className="mt-2 text-sm text-stone-500">{session.email}</p>
+              <p className="mt-4 text-sm leading-relaxed text-stone-500">Choose the photo you want to use across Honestly.</p>
             </div>
+          </div>
 
-            <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-              <div className="flex items-center gap-3">
-                <ImagePlus size={18} className="text-amber-700" />
-                <h2 className="text-3xl">Avatar Rules</h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <label className="flex cursor-pointer items-center justify-center gap-3 rounded-[1.6rem] border border-stone-200 bg-stone-50 px-5 py-5 text-sm font-semibold text-stone-700 transition-colors hover:border-amber-300 hover:bg-amber-50">
+              <Upload size={18} />
+              Upload from device
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+
+                  if (file.size > 2 * 1024 * 1024) {
+                    setErrorMessage("Choose an image under 2 MB for now.");
+                    setSaveMessage(null);
+                    return;
+                  }
+
+                  const nextPreviewUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+                    reader.onerror = () => reject(new Error("This image could not be loaded."));
+                    reader.readAsDataURL(file);
+                  }).catch(() => "");
+
+                  if (!nextPreviewUrl) {
+                    setErrorMessage("This image could not be loaded.");
+                    setSaveMessage(null);
+                    return;
+                  }
+
+                  try {
+                    const persistedAvatarUrl = isSupabaseConfigured()
+                      ? await updateProfileAvatar({
+                          userId: session.id,
+                          email: session.email,
+                          name: session.name,
+                          role: session.role,
+                          authProvider: session.authProvider,
+                          avatarUrl: nextPreviewUrl
+                        })
+                      : nextPreviewUrl;
+
+                    setPreviewUrl(persistedAvatarUrl ?? nextPreviewUrl);
+                    saveProfileAvatarOverride(persistedAvatarUrl ?? nextPreviewUrl);
+                    setSelectedFileName(file.name);
+                    setSaveMessage("Profile photo updated.");
+                    setErrorMessage(null);
+                    event.target.value = "";
+                  } catch (error) {
+                    setErrorMessage(error instanceof Error ? error.message : "Profile photo could not be saved.");
+                    setSaveMessage(null);
+                  }
+                }}
+              />
+            </label>
+
+            <button
+              type="button"
+              className="rounded-[1.6rem] border border-dashed border-stone-200 bg-white px-5 py-5 text-sm font-semibold text-stone-500 transition-colors hover:border-stone-300 hover:text-stone-900"
+              onClick={async () => {
+                try {
+                  const fallbackAvatarUrl = isSupabaseConfigured()
+                    ? await updateProfileAvatar({
+                        userId: session.id,
+                        email: session.email,
+                        name: session.name,
+                        role: session.role,
+                        authProvider: session.authProvider,
+                        avatarUrl: null
+                      })
+                    : session.avatarUrl;
+
+                  if (fallbackAvatarUrl) {
+                    saveProfileAvatarOverride(fallbackAvatarUrl);
+                  } else {
+                    clearProfileAvatarOverride();
+                  }
+
+                  setPreviewUrl(fallbackAvatarUrl);
+                  setSelectedFileName(null);
+                  setSaveMessage("Profile photo reset.");
+                  setErrorMessage(null);
+                } catch (error) {
+                  setErrorMessage(error instanceof Error ? error.message : "Profile photo could not be reset.");
+                  setSaveMessage(null);
+                }
+              }}
+            >
+              Reset photo
+            </button>
+          </div>
+
+          {saveMessage ? <div className="mt-5 rounded-[1.5rem] border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{saveMessage}</div> : null}
+          {errorMessage ? <div className="mt-5 rounded-[1.5rem] border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</div> : null}
+          {selectedFileName ? (
+            <div className="mt-5 rounded-[1.5rem] bg-stone-50 px-4 py-3 text-sm text-stone-600">
+              Selected file: <span className="font-semibold text-stone-900">{selectedFileName}</span>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="mt-8 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-stone-100 p-3 text-stone-700">
+                <KeyRound size={18} />
               </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.6rem] bg-stone-50 p-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Google Sign-In</p>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
-                    When a user authenticates with Google, Honestly should hydrate their avatar from the provider profile and use it as the default app image.
-                  </p>
-                </div>
-                <div className="rounded-[1.6rem] bg-stone-50 p-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Email Sign-Up</p>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
-                    Users without a provider avatar should be able to upload a first-party photo that the app stores and reuses across account surfaces.
-                  </p>
-                </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Security</p>
+                <h2 className="mt-2 text-3xl">Reset Password</h2>
               </div>
             </div>
-          </section>
-
-          <aside className="rounded-[2.25rem] border border-stone-200 bg-stone-900 p-6 text-white shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Account Source</p>
-            <p className="mt-4 text-3xl">{providerLabel}</p>
-            <p className="mt-3 text-sm leading-relaxed text-stone-400">
-              This mock account is currently treated as a {session.authProvider === "google" ? "provider-linked" : "direct email"} profile.
-              The avatar shown in the top navigation now comes from this account record instead of a placeholder image.
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-stone-500">
+              Create a new password for your account without leaving this page.
             </p>
+            {!passwordFormOpen ? (
+              <button
+                type="button"
+                className="mt-6 inline-flex rounded-full border border-stone-200 bg-stone-50 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-stone-700 transition-colors hover:border-stone-900 hover:bg-white"
+                onClick={() => {
+                  setPasswordFormOpen(true);
+                  setPasswordMessage(null);
+                  setPasswordError(null);
+                }}
+              >
+                Set new password
+              </button>
+            ) : (
+              <form
+                className="mt-6 space-y-4"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setPasswordMessage(null);
+                  setPasswordError(null);
 
-            <div className="mt-8 rounded-[1.5rem] border border-stone-800 bg-stone-950/40 p-4">
-              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-stone-400">Next Integration</p>
-              <p className="mt-3 text-sm leading-relaxed text-stone-300">
-                When Supabase auth is wired, this screen should save uploaded images to storage and persist the resulting URL on the user profile row.
-              </p>
-            </div>
+                  if (nextPassword.length < 8) {
+                    setPasswordError("Use at least 8 characters.");
+                    return;
+                  }
 
-            <div className="mt-6 inline-flex items-center gap-2 border-b border-white pb-1 text-[11px] font-black uppercase tracking-[0.18em] text-white">
-              <Link2 size={14} />
-              Avatar now used in app nav
+                  if (nextPassword !== confirmPassword) {
+                    setPasswordError("Passwords do not match.");
+                    return;
+                  }
+
+                  if (!isSupabaseConfigured()) {
+                    setPasswordError("Password updates are not connected yet.");
+                    return;
+                  }
+
+                  setPasswordPending(true);
+
+                  try {
+                    await updatePassword(nextPassword);
+                    setPasswordMessage("Password updated.");
+                    setNextPassword("");
+                    setConfirmPassword("");
+                    setPasswordFormOpen(false);
+                  } catch (error) {
+                    setPasswordError(error instanceof Error ? error.message : "Password update failed.");
+                  } finally {
+                    setPasswordPending(false);
+                  }
+                }}
+              >
+                <input
+                  type="password"
+                  value={nextPassword}
+                  onChange={(event) => setNextPassword(event.target.value)}
+                  placeholder="New password"
+                  className="w-full rounded-[1.25rem] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none transition-colors focus:border-stone-900"
+                />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Confirm password"
+                  className="w-full rounded-[1.25rem] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none transition-colors focus:border-stone-900"
+                />
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={passwordPending}
+                    className="inline-flex rounded-full bg-stone-900 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {passwordPending ? "Saving..." : "Update password"}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex rounded-full border border-stone-200 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:border-stone-400 hover:text-stone-900"
+                    onClick={() => {
+                      setPasswordFormOpen(false);
+                      setNextPassword("");
+                      setConfirmPassword("");
+                      setPasswordError(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+            {passwordMessage ? <div className="mt-5 rounded-[1.5rem] border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{passwordMessage}</div> : null}
+            {passwordError ? <div className="mt-5 rounded-[1.5rem] border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{passwordError}</div> : null}
+          </div>
+
+          <div className="rounded-[2rem] border border-rose-200 bg-rose-50/50 p-8 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-white p-3 text-rose-700">
+                <Trash2 size={18} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400">Danger Zone</p>
+                <h2 className="mt-2 text-3xl text-stone-900">Delete Account</h2>
+              </div>
             </div>
-          </aside>
-        </div>
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-stone-600">
+              Permanently remove your account, saved vendors, lists, and review history from Honestly.
+            </p>
+            {!deleteConfirmOpen ? (
+              <button
+                type="button"
+                className="mt-6 inline-flex rounded-full bg-stone-900 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800"
+                onClick={() => {
+                  setDeleteConfirmOpen(true);
+                  setDeleteMessage(null);
+                }}
+              >
+                Delete account
+              </button>
+            ) : (
+              <div className="mt-6 rounded-[1.5rem] border border-rose-200 bg-white/80 p-5">
+                <p className="text-sm leading-relaxed text-stone-700">
+                  Confirm your request and we&apos;ll open an email draft to <span className="font-semibold">support@honestly.com</span> with your account details.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href={`mailto:support@honestly.com?subject=${encodeURIComponent("Delete my Honestly account")}&body=${encodeURIComponent(
+                      `Please delete my Honestly account.\n\nName: ${session.name}\nEmail: ${session.email}\n\nI understand this removes my account data.`
+                    )}`}
+                    className="inline-flex rounded-full bg-stone-900 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800"
+                    onClick={() => {
+                      setDeleteMessage("Deletion request draft opened in your email app.");
+                      setDeleteConfirmOpen(false);
+                    }}
+                  >
+                    Open deletion request
+                  </a>
+                  <button
+                    type="button"
+                    className="inline-flex rounded-full border border-stone-200 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:border-stone-400 hover:text-stone-900"
+                    onClick={() => setDeleteConfirmOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+            {deleteMessage ? <div className="mt-5 rounded-[1.5rem] border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{deleteMessage}</div> : null}
+          </div>
+        </section>
       </main>
     </div>
   );

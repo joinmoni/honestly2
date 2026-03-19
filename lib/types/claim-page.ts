@@ -1,6 +1,7 @@
 export type ClaimStatusView = "form" | "pending" | "approved" | "rejected";
 
 export type ClaimPageCopy = {
+  backLabel: string;
   pageTitle: string;
   pageDescription: string;
   targetProfileLabel: string;
@@ -27,6 +28,7 @@ export type ClaimPageData = {
   vendorId: string;
   vendorSlug: string;
   vendorName: string;
+  vendorHref: string;
   vendorImageUrl?: string;
   vendorCategoryLabel: string;
   vendorLocationLabel: string;

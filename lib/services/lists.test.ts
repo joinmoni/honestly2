@@ -2,8 +2,9 @@ import {
   createListWithVendor,
   getSavedVendorIds,
   isVendorSaved,
+  persistCreateEmptyList,
   toggleVendorInList
-} from "@/lib/services/lists";
+} from "@/lib/lists.client";
 import type { SavedList } from "@/lib/types/domain";
 
 const sampleLists: SavedList[] = [
@@ -57,5 +58,20 @@ describe("list service helpers", () => {
       name: "New Collection 3"
     });
     expect(next[2]?.items[0]?.vendorId).toBe("ven-9");
+  });
+
+  it("creates an empty mock list for the /lists create flow", async () => {
+    const next = await persistCreateEmptyList(sampleLists, {
+      userId: "usr-001",
+      name: "New Moodboard"
+    });
+
+    expect(next).toMatchObject({
+      id: "list-new-3",
+      userId: "usr-001",
+      name: "New Moodboard",
+      isPublic: false,
+      items: []
+    });
   });
 });

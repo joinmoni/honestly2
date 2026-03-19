@@ -6,9 +6,10 @@ import type { CollectionsPageCopy } from "@/lib/types/collections";
 
 type CollectionsHeaderProps = {
   copy: CollectionsPageCopy;
+  onCreateList?: () => void;
 };
 
-export function CollectionsHeader({ copy }: CollectionsHeaderProps) {
+export function CollectionsHeader({ copy, onCreateList }: CollectionsHeaderProps) {
   return (
     <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
       <div className="max-w-xl">
@@ -21,6 +22,7 @@ export function CollectionsHeader({ copy }: CollectionsHeaderProps) {
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.98 }}
         className="flex items-center gap-2 rounded-2xl bg-stone-900 px-8 py-4 font-semibold text-white shadow-lg shadow-stone-200 transition-all hover:bg-stone-800"
+        onClick={onCreateList}
       >
         <Plus size={18} />
         {copy.createListLabel}

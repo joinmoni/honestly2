@@ -1,5 +1,4 @@
-import { ProfileMenu } from "@/components/ui/ProfileMenu";
-import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
+import { UserTopNav } from "@/components/ui/UserTopNav";
 
 type CollectionsTopNavProps = {
   brandLabel: string;
@@ -13,12 +12,5 @@ type CollectionsTopNavProps = {
 };
 
 export function CollectionsTopNav({ brandLabel, avatarName, avatarUrl, navLinks }: CollectionsTopNavProps) {
-  return (
-    <EditorialTopNav
-      brandLabel={brandLabel}
-      navLinks={navLinks}
-      innerClassName="max-w-7xl"
-      rightSlot={<ProfileMenu name={avatarName} imageUrl={avatarUrl} size="md" />}
-    />
-  );
+  return <UserTopNav brandLabel={brandLabel} avatarName={avatarName} avatarUrl={avatarUrl} navLinks={navLinks} />;
 }

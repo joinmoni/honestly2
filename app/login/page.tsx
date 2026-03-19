@@ -1,7 +1,17 @@
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { getAuthPageCopy } from "@/lib/services/auth-page";
+import { normalizeRedirectPath } from "@/lib/services/session";
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{
+    next?: string;
+  }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const copy = await getAuthPageCopy();
-  return <AuthScreen copy={copy} />;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const nextPath = normalizeRedirectPath(resolvedSearchParams?.next);
+
+  return <AuthScreen copy={copy} nextPath={nextPath} />;
 }

@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
+
+import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { signOut } from "@/lib/supabase/auth";
 import type { AdminNavLink } from "@/lib/types/admin-dashboard";
 
 type AdminSidebarPanelProps = {
@@ -12,6 +16,24 @@ type AdminSidebarPanelProps = {
 };
 
 export function AdminSidebarPanel({ brandLabel, queueNav, structureNav }: AdminSidebarPanelProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (!isSupabaseConfigured()) {
+      router.push("/login");
+      router.refresh();
+      return;
+    }
+
+    try {
+      await signOut();
+      router.push("/login");
+      router.refresh();
+    } catch {
+      // Keep the current session in place if logout fails.
+    }
+  };
+
   return (
     <aside className="flex w-full flex-col border-b border-stone-200 bg-white p-8 md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r">
       <Link href="/" className="serif-italic mb-12 inline-block text-4xl">
@@ -51,7 +73,7 @@ export function AdminSidebarPanel({ brandLabel, queueNav, structureNav }: AdminS
       </nav>
 
       <div className="mt-10 border-t border-stone-100 pt-6 md:mt-auto">
-        <button type="button" className="flex items-center gap-3 text-sm text-stone-400 transition-colors hover:text-rose-600">
+        <button type="button" onClick={handleLogout} className="flex items-center gap-3 text-sm text-stone-400 transition-colors hover:text-rose-600">
           <LogOut size={18} />
           Logout
         </button>

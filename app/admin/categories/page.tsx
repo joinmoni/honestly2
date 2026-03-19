@@ -3,7 +3,7 @@ import { getAdminTaxonomyData } from "@/lib/services/admin-categories";
 import { requireAdminSession } from "@/lib/services/session";
 
 export default async function AdminCategoriesPage() {
-  await requireAdminSession();
+  await requireAdminSession("/admin/categories");
 
   const data = await getAdminTaxonomyData();
 

@@ -1,4 +1,4 @@
-import { getAdminSession, getAnonymousSession, getCurrentSession } from "@/lib/services/session";
+import { buildLoginRedirect, getAdminSession, getAnonymousSession, getCurrentSession, normalizeRedirectPath } from "@/lib/services/session";
 
 describe("session services", () => {
   it("returns the current signed-in session", async () => {
@@ -18,5 +18,15 @@ describe("session services", () => {
     const session = await getAdminSession();
 
     expect(session.user?.role).toBe("admin");
+  });
+
+  it("normalizes unsafe redirect paths back to vendors", () => {
+    expect(normalizeRedirectPath("//evil.example")).toBe("/vendors");
+    expect(normalizeRedirectPath("https://evil.example")).toBe("/vendors");
+    expect(normalizeRedirectPath("/preferences")).toBe("/preferences");
+  });
+
+  it("builds login redirects with a preserved next path", () => {
+    expect(buildLoginRedirect("/preferences")).toBe("/login?next=%2Fpreferences");
   });
 });

@@ -15,6 +15,8 @@ import { mockVendorEditCopy } from "@/lib/mock-data/vendor-edit";
 import { mockVendorListingCopy, mockVendorListingFilterChips } from "@/lib/mock-data/vendor-listing";
 import { mockVendorProfiles } from "@/lib/mock-data/vendor-profiles";
 import { mockVendors } from "@/lib/mock-data/vendors";
+import { getServerStoredMockLists } from "@/lib/mock-list-persistence.server";
+import { mergeMockLists } from "@/lib/mock-list-persistence.shared";
 import type { AppDataLayer } from "@/lib/services/contracts";
 
 export const mockDataLayer: AppDataLayer = {
@@ -42,13 +44,16 @@ export const mockDataLayer: AppDataLayer = {
     return [...mockRatingCriteria].sort((a, b) => a.position - b.position);
   },
   async getListsByUserId(userId) {
-    return mockSavedLists.filter((list) => list.userId === userId);
+    const lists = mergeMockLists(mockSavedLists, await getServerStoredMockLists());
+    return lists.filter((list) => list.userId === userId);
   },
   async getListById(id) {
-    return mockSavedLists.find((list) => list.id === id) ?? null;
+    const lists = mergeMockLists(mockSavedLists, await getServerStoredMockLists());
+    return lists.find((list) => list.id === id) ?? null;
   },
   async getPublicListByShareSlug(shareSlug) {
-    return mockSavedLists.find((list) => list.shareSlug === shareSlug && list.isPublic) ?? null;
+    const lists = mergeMockLists(mockSavedLists, await getServerStoredMockLists());
+    return lists.find((list) => list.shareSlug === shareSlug && list.isPublic) ?? null;
   },
   async getClaims() {
     return mockVendorClaims;

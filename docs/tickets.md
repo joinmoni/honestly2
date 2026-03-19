@@ -29,6 +29,8 @@
 - [x] HON-040 Build login screen
 - [x] HON-041 Build my reviews page
 - [ ] HON-114 Add user avatars from auth providers and manual profile photo upload
+- [ ] HON-115 Add create-list flow from /lists
+- [ ] HON-116 Wire New Moodboard card to create and open a new collection
 
 ## Epic 5 — Claim flow and vendor editing
 - [x] HON-050 Build claim vendor page

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
-import { ProfileMenu } from "@/components/ui/ProfileMenu";
+import { UserTopNav } from "@/components/ui/UserTopNav";
 import { ReviewFlowModal } from "@/components/vendor-detail/ReviewFlowModal";
+import { getUserNavLinks } from "@/lib/user-nav";
 import type { MockSession, RatingCriterion, Review } from "@/lib/types/domain";
 import type { MyReviewsFilter, MyReviewsPageData } from "@/lib/types/my-reviews";
 
@@ -38,15 +38,12 @@ export function MyReviewsScreen({ data, criteria, session }: MyReviewsScreenProp
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <EditorialTopNav
+      <UserTopNav
         brandLabel={data.copy.brandLabel}
-        navLinks={[
-          { label: data.copy.savedNavLabel, href: "/lists" },
-          { label: data.copy.reviewsNavLabel, href: "/me/reviews", active: true },
-          { label: "Preferences", href: "/preferences" }
-        ]}
-        innerClassName="max-w-5xl"
-        rightSlot={<ProfileMenu name={session.user?.name} email={session.user?.email} imageUrl={session.user?.avatarUrl} />}
+        avatarName={session.user?.name}
+        avatarEmail={session.user?.email}
+        avatarUrl={session.user?.avatarUrl}
+        navLinks={getUserNavLinks("my_reviews")}
       />
 
       <main className="mx-auto max-w-4xl px-6 py-16">

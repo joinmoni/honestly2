@@ -1,4 +1,5 @@
 export type DataProvider = "mock" | "supabase";
+export type SearchProvider = "database" | "meilisearch";
 
 export type SupabasePublicEnv = {
   url: string;
@@ -7,6 +8,11 @@ export type SupabasePublicEnv = {
 
 export type SupabaseServerEnv = SupabasePublicEnv & {
   serviceRoleKey: string;
+};
+
+export type MeilisearchEnv = {
+  host: string;
+  apiKey?: string;
 };
 
 function readEnv(name: string): string | undefined {
@@ -20,6 +26,12 @@ export function getDataProvider(): DataProvider {
   const raw = readEnv("HONESTLY_DATA_PROVIDER");
   if (raw === "supabase") return "supabase";
   return "mock";
+}
+
+export function getSearchProvider(): SearchProvider {
+  const raw = readEnv("HONESTLY_SEARCH_PROVIDER");
+  if (raw === "meilisearch") return "meilisearch";
+  return "database";
 }
 
 export function getSupabasePublicEnv(): SupabasePublicEnv | null {
@@ -43,6 +55,22 @@ export function getSupabaseServerEnv(): SupabaseServerEnv | null {
   };
 }
 
+export function getMeilisearchEnv(): MeilisearchEnv | null {
+  const host = readEnv("MEILISEARCH_HOST");
+  if (!host) return null;
+
+  const apiKey = readEnv("MEILISEARCH_API_KEY");
+
+  return {
+    host,
+    apiKey
+  };
+}
+
 export function isSupabaseConfigured(): boolean {
   return getSupabasePublicEnv() !== null;
+}
+
+export function isMeilisearchConfigured(): boolean {
+  return getMeilisearchEnv() !== null;
 }

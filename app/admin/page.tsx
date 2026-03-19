@@ -3,7 +3,7 @@ import { getAdminDashboardData } from "@/lib/services/admin-dashboard";
 import { requireAdminSession } from "@/lib/services/session";
 
 export default async function AdminPage() {
-  await requireAdminSession();
+  await requireAdminSession("/admin");
 
   const data = await getAdminDashboardData();
 

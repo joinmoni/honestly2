@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { VendorDetailAbout } from "@/components/vendor-detail/VendorDetailAbout";
 import { VendorDetailGallery } from "@/components/vendor-detail/VendorDetailGallery";
@@ -12,10 +13,34 @@ import { getCurrentSession } from "@/lib/services/session";
 import { getRatingCriteria, getReviewsByVendorId } from "@/lib/services/reviews";
 import { getVendorBySlug } from "@/lib/services/vendors";
 import { getVendorProfileByVendorId } from "@/lib/services/vendor-profiles";
+import { buildPageMetadata } from "@/lib/seo";
 
 type VendorDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: VendorDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const vendor = await getVendorBySlug(slug);
+
+  if (!vendor) {
+    return buildPageMetadata({
+      title: "Vendor not found | Honestly",
+      description: "This vendor profile could not be found on Honestly.",
+      path: `/vendor/${slug}`
+    });
+  }
+
+  const primaryLocation = vendor.locations.find((entry) => entry.isPrimary) ?? vendor.locations[0];
+  const locationLabel = primaryLocation ? `${primaryLocation.city}${primaryLocation.region ? `, ${primaryLocation.region}` : ""}` : "Location on request";
+  const categoryLabel = vendor.primaryCategory?.name ?? "Vendor";
+
+  return buildPageMetadata({
+    title: `${vendor.name} | ${categoryLabel} on Honestly`,
+    description: `${vendor.headline ?? vendor.description ?? `${vendor.name} on Honestly`}${locationLabel ? ` Based in ${locationLabel}.` : ""}`,
+    path: `/vendor/${vendor.slug}`
+  });
+}
 
 export default async function VendorDetailPage({ params }: VendorDetailPageProps) {
   const { slug } = await params;

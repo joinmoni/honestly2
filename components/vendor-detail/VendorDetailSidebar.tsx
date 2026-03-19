@@ -59,7 +59,7 @@ export function VendorDetailSidebar({ vendor, profile }: VendorDetailSidebarProp
 
         <div className="rounded-[1.6rem] border border-dashed border-stone-200 bg-stone-50/70 p-5 text-center md:rounded-[2rem] md:p-6">
           <p className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-stone-400 md:text-[10px] md:tracking-[0.22em]">Own this business?</p>
-          <Link href={`/claim/${vendor.slug}`} className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 underline underline-offset-4 md:text-[11px]">
+          <Link href={`/claim/${vendor.slug}`} className="cursor-pointer text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 underline underline-offset-4 md:text-[11px]">
             {profile.ctas.claimLabel}
           </Link>
         </div>

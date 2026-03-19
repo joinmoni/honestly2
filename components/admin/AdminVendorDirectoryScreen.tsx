@@ -6,6 +6,7 @@ import { Ban, Check, Pencil, Search, Shield } from "lucide-react";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { updateAdminVendorStatus } from "@/lib/admin-vendors.client";
 import type { AdminVendorDirectoryData } from "@/lib/types/admin-dashboard";
 
 type AdminVendorDirectoryScreenProps = {
@@ -15,12 +16,28 @@ type AdminVendorDirectoryScreenProps = {
 export function AdminVendorDirectoryScreen({ data }: AdminVendorDirectoryScreenProps) {
   const [query, setQuery] = useState("");
   const [vendors, setVendors] = useState(data.vendors);
+  const [pendingVendorId, setPendingVendorId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const filteredVendors = useMemo(() => {
     const term = query.toLowerCase().trim();
     if (!term) return vendors;
     return vendors.filter((vendor) => vendor.vendorName.toLowerCase().includes(term));
   }, [query, vendors]);
+
+  const handleStatusChange = async (vendorId: string, status: "active" | "suspended") => {
+    setPendingVendorId(vendorId);
+    setErrorMessage(null);
+
+    try {
+      const nextVendors = await updateAdminVendorStatus(vendors, vendorId, status);
+      setVendors(nextVendors);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "This vendor could not be updated right now.");
+    } finally {
+      setPendingVendorId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F9F8F6] font-sans text-stone-900 antialiased">
@@ -47,6 +64,8 @@ export function AdminVendorDirectoryScreen({ data }: AdminVendorDirectoryScreenP
           </div>
         </header>
 
+        {errorMessage ? <p className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
+
         {filteredVendors.length ? (
           <div className="overflow-hidden rounded-[2.5rem] border border-stone-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
@@ -63,6 +82,7 @@ export function AdminVendorDirectoryScreen({ data }: AdminVendorDirectoryScreenP
                 <tbody className="divide-y divide-stone-50">
                   {filteredVendors.map((vendor) => {
                     const suspended = vendor.status === "suspended";
+                    const pending = pendingVendorId === vendor.id;
 
                     return (
                       <tr key={vendor.id} className={suspended ? "group bg-stone-50/30 grayscale-[0.4]" : "group transition-colors hover:bg-stone-50/50"}>
@@ -130,23 +150,28 @@ export function AdminVendorDirectoryScreen({ data }: AdminVendorDirectoryScreenP
                             <button
                               type="button"
                               className="rounded-lg bg-stone-900 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-stone-200 transition-all active:scale-95 hover:bg-stone-800"
-                              onClick={() => {
-                                setVendors((current) => current.map((item) => (item.id === vendor.id ? { ...item, status: "active" } : item)));
-                              }}
+                              disabled={pending}
+                              onClick={() => void handleStatusChange(vendor.id, "active")}
                             >
-                              Unsuspend
+                              {pending ? "Updating..." : "Unsuspend"}
                             </button>
                           ) : (
-                            <div className="flex justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                              <button type="button" className="rounded-lg p-2 text-stone-400 shadow-sm transition-all hover:bg-white hover:text-stone-900">
+                            <div className="flex justify-end gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                              <button
+                                type="button"
+                                title={`Edit ${vendor.vendorName}`}
+                                aria-label={`Edit ${vendor.vendorName}`}
+                                className="rounded-lg p-2 text-stone-400 shadow-sm transition-all hover:bg-white hover:text-stone-900"
+                              >
                                 <Pencil size={16} />
                               </button>
                               <button
                                 type="button"
+                                title={`Suspend ${vendor.vendorName}`}
+                                aria-label={`Suspend ${vendor.vendorName}`}
                                 className="rounded-lg p-2 text-stone-400 shadow-sm transition-all hover:bg-white hover:text-stone-900"
-                                onClick={() => {
-                                  setVendors((current) => current.map((item) => (item.id === vendor.id ? { ...item, status: "suspended" } : item)));
-                                }}
+                                disabled={pending}
+                                onClick={() => void handleStatusChange(vendor.id, "suspended")}
                               >
                                 <Ban size={16} />
                               </button>

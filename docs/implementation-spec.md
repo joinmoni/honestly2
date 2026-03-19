@@ -99,11 +99,13 @@ type SearchSuggestions = {
 - `HONESTLY_DATA_PROVIDER=supabase` should only be used once `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set.
 - Server-only admin work will also require `SUPABASE_SERVICE_ROLE_KEY`.
 - Until HON-101 through HON-113 land, the Supabase provider path is a validated scaffold and can still fall back to mock implementations behind the same service contracts.
+- Shared Supabase helpers should live under `/lib/supabase` so browser, server, and admin clients are wired in one place.
 
 ## Auth Session Contract
 - App routes should depend on provider-neutral session helpers such as `getCurrentSession()`, `requireUserSession()`, and `requireAdminSession()`.
 - Route files should not be coupled to mock-specific method names.
 - The data layer remains responsible for sourcing the session, while route guards stay centralized in `lib/services/session.ts`.
+- HON-101 should use `/lib/supabase/auth.ts` as the integration entrypoint for Google OAuth, email OTP/password flows, logout, and Supabase session reads.
 
 ## Initial Database Shape
 - HON-102 starts with a single initial schema migration under `/supabase/migrations`.
@@ -115,6 +117,16 @@ type SearchSuggestions = {
   - `saved_lists` and `saved_list_items`
   - `vendor_claims`
 - The schema should preserve the current mock-domain concepts so service contracts can migrate without UI rewrites.
+
+## Seed Strategy
+- HON-103 should keep a checked-in `/supabase/seed.sql` that mirrors the Phase 1 mock domain closely enough for local Supabase setup.
+- Seed data should include:
+  - at least one user account plus one admin account
+  - featured categories and subcategories
+  - a representative vendor set with locations, images, and socials
+  - rating criteria
+  - sample reviews with criterion scores
+  - saved lists and claims
 
 ## UI Direction
 - Clean, airy, premium visual language.

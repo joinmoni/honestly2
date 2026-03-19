@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Instagram, Mail, Music2 } from "lucide-react";
+import { updateAdminClaimStatus } from "@/lib/admin-claims.client";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import type { AdminClaimFilter, AdminClaimsModerationData } from "@/lib/types/admin-dashboard";
@@ -15,8 +16,24 @@ type AdminClaimsModerationScreenProps = {
 export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScreenProps) {
   const [activeFilter, setActiveFilter] = useState<AdminClaimFilter>("pending");
   const [claims, setClaims] = useState(data.claims);
+  const [pendingClaimId, setPendingClaimId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const filteredClaims = useMemo(() => claims.filter((claim) => claim.status === activeFilter), [activeFilter, claims]);
+
+  const handleStatusChange = async (claimId: string, status: "approved" | "rejected") => {
+    setPendingClaimId(claimId);
+    setErrorMessage(null);
+
+    try {
+      const nextClaims = await updateAdminClaimStatus(claims, claimId, status);
+      setClaims(nextClaims);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "This claim could not be updated right now.");
+    } finally {
+      setPendingClaimId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F9F8F6] font-sans text-stone-900 antialiased">
@@ -49,6 +66,8 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
             })}
           </div>
         </header>
+
+        {errorMessage ? <p className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
 
         <div className="space-y-8">
           {filteredClaims.map((claim) =>
@@ -117,20 +136,18 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                       <button
                         type="button"
                         className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-stone-400 transition-colors hover:text-stone-900"
-                        onClick={() => {
-                          setClaims((current) => current.map((item) => (item.id === claim.id ? { ...item, status: "rejected" } : item)));
-                        }}
+                        disabled={pendingClaimId === claim.id}
+                        onClick={() => void handleStatusChange(claim.id, "rejected")}
                       >
-                        Reject Claim
+                        {pendingClaimId === claim.id ? "Updating..." : "Reject Claim"}
                       </button>
                       <button
                         type="button"
                         className="rounded-xl bg-stone-900 px-8 py-3 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-stone-100 transition-all hover:bg-stone-800"
-                        onClick={() => {
-                          setClaims((current) => current.map((item) => (item.id === claim.id ? { ...item, status: "approved" } : item)));
-                        }}
+                        disabled={pendingClaimId === claim.id}
+                        onClick={() => void handleStatusChange(claim.id, "approved")}
                       >
-                        Approve Ownership
+                        {pendingClaimId === claim.id ? "Updating..." : "Approve Ownership"}
                       </button>
                     </div>
                   </div>

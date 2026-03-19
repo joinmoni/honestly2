@@ -1,6 +1,7 @@
 import type { ClaimPageCopy } from "@/lib/types/claim-page";
 
 export const mockClaimPageCopy: ClaimPageCopy = {
+  backLabel: "Back to vendor",
   pageTitle: "Claim your profile",
   pageDescription: "Verify your business to manage your presence on Honestly.",
   targetProfileLabel: "Target Profile",

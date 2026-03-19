@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Heart, LogOut, Settings, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Avatar } from "@/components/ui/Avatar";
+import { usePreferredAvatar } from "@/lib/profile-avatar.client";
+import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { signOut } from "@/lib/supabase/auth";
 import { cn } from "@/lib/utils";
 
 type ProfileMenuProps = {
@@ -41,8 +45,12 @@ const menuItems: ProfileMenuItem[] = [
 ];
 
 export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: ProfileMenuProps) {
+  const preferredAvatarUrl = usePreferredAvatar(imageUrl);
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!open) return;
@@ -57,6 +65,30 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [open]);
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setSignOutError(null);
+
+    if (!isSupabaseConfigured()) {
+      setOpen(false);
+      router.push("/login");
+      router.refresh();
+      setSigningOut(false);
+      return;
+    }
+
+    try {
+      await signOut();
+      setOpen(false);
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Logout could not be completed right now.";
+      setSignOutError(message);
+      setSigningOut(false);
+    }
+  };
+
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <button
@@ -67,7 +99,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
         aria-expanded={open}
         aria-label="Open profile menu"
       >
-        <Avatar name={name} imageUrl={imageUrl} size={size} />
+        <Avatar name={name} imageUrl={preferredAvatarUrl} size={size} />
         <span className="hidden text-[11px] font-black uppercase tracking-[0.18em] sm:block">{name ?? "Account"}</span>
         <ChevronDown size={14} className={cn("hidden text-white/70 transition-transform sm:block", open && "rotate-180")} />
       </button>
@@ -105,16 +137,19 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
               })}
             </div>
 
+            {signOutError ? <p className="px-5 pb-2 text-xs text-rose-600">{signOutError}</p> : null}
+
             <div className="border-t border-stone-100 p-2">
-              <Link
-                href="/login"
+              <button
+                type="button"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50"
-                onClick={() => setOpen(false)}
+                onClick={handleSignOut}
                 role="menuitem"
+                disabled={signingOut}
               >
                 <LogOut size={15} className="text-stone-400" />
-                Logout
-              </Link>
+                {signingOut ? "Logging out..." : "Logout"}
+              </button>
             </div>
           </motion.div>
         ) : null}

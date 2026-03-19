@@ -5,37 +5,79 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock3, Instagram, Mail, Music2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock3, Instagram, Mail, Music2 } from "lucide-react";
+import { submitVendorClaim } from "@/lib/claims.client";
 import type { ClaimPageData, ClaimStatusView } from "@/lib/types/claim-page";
 
 type ClaimPageScreenProps = {
   data: ClaimPageData;
+  currentUser: {
+    id: string;
+    name: string;
+  };
 };
 
-export function ClaimPageScreen({ data }: ClaimPageScreenProps) {
+export function ClaimPageScreen({ data, currentUser }: ClaimPageScreenProps) {
   const [email, setEmail] = useState(data.initialContact.email);
   const [instagram, setInstagram] = useState(data.initialContact.instagram);
   const [tiktok, setTiktok] = useState(data.initialContact.tiktok);
   const [note, setNote] = useState(data.initialNote);
   const [state, setState] = useState<ClaimStatusView>(data.state);
   const [showValidation, setShowValidation] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submittedAt, setSubmittedAt] = useState(data.submittedAt);
+  const [submitting, setSubmitting] = useState(false);
 
   const hasContact = Boolean(email.trim() || instagram.trim() || tiktok.trim());
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!hasContact) {
       setShowValidation(true);
       return;
     }
 
     setShowValidation(false);
-    setState("pending");
+    setSubmitError(null);
+    setSubmitting(true);
+
+    try {
+      const result = await submitVendorClaim({
+        vendorId: data.vendorId,
+        userId: currentUser.id,
+        claimantName: currentUser.name,
+        email: email.trim() || undefined,
+        instagram: instagram.trim() || undefined,
+        tiktok: tiktok.trim() || undefined,
+        note: note.trim() || undefined
+      });
+
+      setSubmittedAt(new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(new Date(result.submittedAt)));
+      setState("pending");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Claim request could not be submitted.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const submittedLine = data.submittedAt ? `${data.copy.submittedPrefix} ${data.submittedAt}` : null;
+  const submittedLine = submittedAt ? `${data.copy.submittedPrefix} ${submittedAt}` : null;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 lg:py-24">
+      <div className="mb-8">
+        <Link
+          href={data.vendorHref}
+          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900"
+        >
+          <ArrowLeft size={14} />
+          {data.copy.backLabel}
+        </Link>
+      </div>
+
       <header className="mb-10 text-center">
         <h1 className="serif-italic mb-3 text-4xl text-stone-800 md:text-5xl">{data.copy.pageTitle}</h1>
         <p className="font-medium text-stone-500">{data.copy.pageDescription}</p>
@@ -98,7 +140,12 @@ export function ClaimPageScreen({ data }: ClaimPageScreenProps) {
                 />
               </div>
 
-              {showValidation ? <p className="text-xs font-medium text-stone-500">{data.copy.requiredContactMessage}</p> : null}
+              {showValidation ? (
+                <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">
+                  {data.copy.requiredContactMessage}
+                </p>
+              ) : null}
+              {submitError ? <p className="text-xs font-medium text-rose-600">{submitError}</p> : null}
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{data.copy.relationshipLabel}</label>
@@ -119,8 +166,9 @@ export function ClaimPageScreen({ data }: ClaimPageScreenProps) {
                 whileTap={{ scale: 0.98 }}
                 className="w-full rounded-2xl bg-stone-900 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-xl shadow-stone-200 transition-all hover:bg-stone-800"
                 onClick={handleSubmit}
+                disabled={submitting}
               >
-                {state === "rejected" ? data.copy.resubmitLabel : data.copy.submitLabel}
+                {submitting ? "Submitting..." : state === "rejected" ? data.copy.resubmitLabel : data.copy.submitLabel}
               </motion.button>
             </div>
 

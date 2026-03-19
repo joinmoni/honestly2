@@ -27,6 +27,7 @@ export async function getClaimPageDataByVendorSlug(
     vendorId: vendor.id,
     vendorSlug: vendor.slug,
     vendorName: vendor.name,
+    vendorHref: `/vendor/${vendor.slug}`,
     vendorImageUrl: cover?.url,
     vendorCategoryLabel: vendor.primaryCategory?.name ?? "Vendor",
     vendorLocationLabel: location ? `${location.city}${location.region ? `, ${location.region}` : ""}` : "Location TBD",

@@ -5,12 +5,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
+import { isVendorSaved, persistCreateListWithVendor, persistToggleVendorInList } from "@/lib/lists.client";
 import type { SavedList, Vendor } from "@/lib/types/domain";
-import {
-  createListWithVendor,
-  isVendorSaved,
-  toggleVendorInList
-} from "@/lib/services/lists";
 
 type VendorSaveButtonProps = {
   vendor: Vendor;
@@ -27,6 +23,8 @@ export function VendorSaveButton({
 }: VendorSaveButtonProps) {
   const [lists, setLists] = useState(initialLists);
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const saved = isVendorSaved(lists, vendor.id);
 
   const saveListOptions = lists.map((list) => {
@@ -64,13 +62,35 @@ export function VendorSaveButton({
         contextImageUrl={coverImageUrl}
         lists={saveListOptions}
         onClose={() => setOpen(false)}
-        onToggleList={(listId) => setLists((current) => toggleVendorInList(current, listId, vendor.id))}
-        onCreateCollection={() => {
+        onToggleList={async (listId) => {
+          setPending(true);
+          setErrorMessage(null);
+          try {
+            const nextLists = await persistToggleVendorInList(lists, listId, vendor.id);
+            setLists(nextLists);
+          } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "This vendor could not be saved right now.");
+          } finally {
+            setPending(false);
+          }
+        }}
+        onCreateCollection={async () => {
           if (!currentUserId) return;
-          setLists((current) => createListWithVendor(current, { userId: currentUserId, vendorId: vendor.id }));
+          setPending(true);
+          setErrorMessage(null);
+          try {
+            const nextLists = await persistCreateListWithVendor(lists, { userId: currentUserId, vendorId: vendor.id });
+            setLists(nextLists);
+          } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "A new collection could not be created right now.");
+          } finally {
+            setPending(false);
+          }
         }}
         onDone={() => setOpen(false)}
       />
+      {errorMessage ? <p className="mt-3 text-xs text-rose-600">{errorMessage}</p> : null}
+      {pending ? <p className="mt-3 text-xs text-stone-500">Updating saved vendors…</p> : null}
     </>
   );
 }

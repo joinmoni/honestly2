@@ -4,7 +4,7 @@ import { getRatingCriteria } from "@/lib/services/reviews";
 import { getCurrentSession, requireUserSession } from "@/lib/services/session";
 
 export default async function MyReviewsPage() {
-  const user = await requireUserSession();
+  const user = await requireUserSession("/me/reviews");
   const session = await getCurrentSession();
 
   const [data, criteria] = await Promise.all([

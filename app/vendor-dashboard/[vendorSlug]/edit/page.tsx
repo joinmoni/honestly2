@@ -8,9 +8,8 @@ type VendorEditPageProps = {
 };
 
 export default async function VendorEditPage({ params }: VendorEditPageProps) {
-  await requireUserSession();
-
   const { vendorSlug } = await params;
+  await requireUserSession(`/vendor-dashboard/${vendorSlug}/edit`);
   const data = await getVendorEditPageDataBySlug(vendorSlug);
 
   if (!data) {

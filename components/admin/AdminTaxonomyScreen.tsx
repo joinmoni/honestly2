@@ -4,6 +4,14 @@ import React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { GripVertical, Pencil, Plus, Star, Trash2, X } from "lucide-react";
+import {
+  addAdminSubcategory,
+  createAdminCategory,
+  deleteAdminCategory,
+  removeAdminSubcategory,
+  reorderAdminHomepageCategories,
+  toggleAdminHomepageCategory
+} from "@/lib/admin-categories.client";
 import { AdminCreateCategoryModal } from "@/components/admin/AdminCreateCategoryModal";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
@@ -17,6 +25,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
   const [categories, setCategories] = useState(data.categories);
   const [createOpen, setCreateOpen] = useState(false);
   const [draggingCategoryId, setDraggingCategoryId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const orderedCategories = [...categories].sort((a, b) => {
     if (a.featuredOnHome && b.featuredOnHome) {
       return (a.homeOrder ?? Number.MAX_SAFE_INTEGER) - (b.homeOrder ?? Number.MAX_SAFE_INTEGER);
@@ -27,32 +37,18 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
   });
   const featuredCategories = orderedCategories.filter((category) => category.featuredOnHome);
 
-  const reorderHomepageRows = (draggedId: string, targetId: string) => {
-    if (draggedId === targetId) return;
+  const runMutation = async (actionKey: string, action: () => Promise<typeof categories>) => {
+    setPendingAction(actionKey);
+    setErrorMessage(null);
 
-    setCategories((current) => {
-      const featured = current
-        .filter((category) => category.featuredOnHome)
-        .sort((a, b) => (a.homeOrder ?? Number.MAX_SAFE_INTEGER) - (b.homeOrder ?? Number.MAX_SAFE_INTEGER));
-      const draggedIndex = featured.findIndex((category) => category.id === draggedId);
-      const targetIndex = featured.findIndex((category) => category.id === targetId);
-      if (draggedIndex === -1 || targetIndex === -1) return current;
-
-      const nextFeatured = [...featured];
-      const [draggedItem] = nextFeatured.splice(draggedIndex, 1);
-      if (!draggedItem) return current;
-      nextFeatured.splice(targetIndex, 0, draggedItem);
-
-      const nextOrder = new Map(nextFeatured.map((category, index) => [category.id, index + 1]));
-      return current.map((category) =>
-        category.featuredOnHome
-          ? {
-              ...category,
-              homeOrder: nextOrder.get(category.id) ?? category.homeOrder
-            }
-          : category
-      );
-    });
+    try {
+      const nextCategories = await action();
+      setCategories(nextCategories);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "The taxonomy could not be updated right now.");
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   return (
@@ -77,6 +73,9 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
               {data.createCategoryLabel}
             </motion.button>
           </header>
+
+          {pendingAction ? <p className="mb-6 text-sm text-stone-500">Saving taxonomy changes…</p> : null}
+          {errorMessage ? <p className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
 
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid grid-cols-1 gap-6">
@@ -110,16 +109,9 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                             {!category.muted ? (
                               <button
                                 type="button"
-                                className="opacity-0 transition-opacity hover:text-stone-900 group-hover/tag:opacity-100"
-                                onClick={() => {
-                                  setCategories((current) =>
-                                    current.map((item) =>
-                                      item.id === category.id
-                                        ? { ...item, subcategories: item.subcategories.filter((itemName) => itemName !== subcategory) }
-                                        : item
-                                    )
-                                  );
-                                }}
+                                className="opacity-100 transition-opacity hover:text-stone-900 md:opacity-0 md:group-hover/tag:opacity-100"
+                                disabled={pendingAction !== null}
+                                onClick={() => void runMutation(`remove-sub-${category.id}-${subcategory}`, () => removeAdminSubcategory(categories, category.id, subcategory))}
                                 aria-label={`Remove ${subcategory}`}
                               >
                                 <X size={12} />
@@ -131,15 +123,12 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                         <button
                           type="button"
                           className={`flex items-center gap-1 rounded-xl border px-4 py-2 text-xs font-bold transition-all ${category.muted ? "border-dashed border-stone-200 text-stone-400" : "border-dashed border-stone-200 text-amber-600 hover:border-amber-400 hover:bg-amber-50"}`}
-                          onClick={() => {
-                            setCategories((current) =>
-                              current.map((item) =>
-                                item.id === category.id
-                                  ? { ...item, subcategories: [...item.subcategories, `New Sub ${item.subcategories.length + 1}`] }
-                                  : item
-                              )
-                            );
-                          }}
+                          disabled={pendingAction !== null}
+                          onClick={() =>
+                            void runMutation(`add-sub-${category.id}`, () =>
+                              addAdminSubcategory(categories, category.id, `New Sub ${category.subcategories.length + 1}`)
+                            )
+                          }
                         >
                           <Plus size={12} strokeWidth={3} />
                           Add Sub
@@ -158,21 +147,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                           className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-colors ${
                             category.featuredOnHome ? "bg-amber-100 text-amber-800" : "bg-white text-stone-500"
                           }`}
-                          onClick={() => {
-                            setCategories((current) =>
-                              current.map((item) =>
-                                item.id === category.id
-                                  ? {
-                                      ...item,
-                                      featuredOnHome: !item.featuredOnHome,
-                                      homeOrder: item.featuredOnHome
-                                        ? null
-                                        : current.filter((entry) => entry.featuredOnHome).length + 1
-                                    }
-                                  : item
-                              )
-                            );
-                          }}
+                          disabled={pendingAction !== null}
+                          onClick={() => void runMutation(`feature-${category.id}`, () => toggleAdminHomepageCategory(categories, category.id))}
                         >
                           <Star size={12} className={category.featuredOnHome ? "fill-current" : ""} />
                           {category.featuredOnHome ? "Featured on Home" : "Feature on Home"}
@@ -205,7 +181,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                       type="button"
                       className="rounded-xl p-3 text-stone-400 transition-all hover:bg-stone-50 hover:text-stone-900"
                       aria-label={`Delete ${category.name}`}
-                      onClick={() => setCategories((current) => current.filter((item) => item.id !== category.id))}
+                      disabled={pendingAction !== null}
+                      onClick={() => void runMutation(`delete-${category.id}`, () => deleteAdminCategory(categories, category.id))}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -233,7 +210,9 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                       onDragOver={(event) => event.preventDefault()}
                       onDrop={() => {
                         if (!draggingCategoryId) return;
-                        reorderHomepageRows(draggingCategoryId, category.id);
+                        void runMutation(`reorder-${draggingCategoryId}-${category.id}`, () =>
+                          reorderAdminHomepageCategories(categories, draggingCategoryId, category.id)
+                        );
                         setDraggingCategoryId(null);
                       }}
                       className={`flex items-center gap-3 rounded-[1.4rem] border px-4 py-4 transition-colors ${
@@ -273,19 +252,7 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreateCategory={(payload) => {
-          setCategories((current) => [
-            {
-              id: `cat-local-${current.length + 1}`,
-              name: payload.name,
-              slug: payload.name.toLowerCase().trim().replace(/\s+/g, "-"),
-              icon: payload.icon,
-              subcategories: payload.subcategories,
-              featuredOnHome: false,
-              homeOrder: null,
-              promotedSubcategories: []
-            },
-            ...current
-          ]);
+          void runMutation(`create-${payload.name}`, () => createAdminCategory(categories, payload));
         }}
       />
     </>

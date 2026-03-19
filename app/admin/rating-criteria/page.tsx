@@ -3,7 +3,7 @@ import { getAdminRatingCriteriaData } from "@/lib/services/admin-rating-criteria
 import { requireAdminSession } from "@/lib/services/session";
 
 export default async function AdminRatingCriteriaPage() {
-  await requireAdminSession();
+  await requireAdminSession("/admin/rating-criteria");
 
   const data = await getAdminRatingCriteriaData();
 

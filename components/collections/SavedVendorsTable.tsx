@@ -10,9 +10,10 @@ type SavedVendorsTableProps = {
   title: string;
   rows: SavedVendorRowView[];
   addToListLabel: string;
+  onAddToList: (row: SavedVendorRowView) => void;
 };
 
-export function SavedVendorsTable({ title, rows, addToListLabel }: SavedVendorsTableProps) {
+export function SavedVendorsTable({ title, rows, addToListLabel, onAddToList }: SavedVendorsTableProps) {
   return (
     <section className="mt-24">
       <h2 className="mb-8 text-2xl italic">{title}</h2>
@@ -48,7 +49,13 @@ export function SavedVendorsTable({ title, rows, addToListLabel }: SavedVendorsT
                 <td className="py-6 text-sm text-stone-500">{row.categoryLabel}</td>
                 <td className="py-6 text-sm text-stone-500">{row.locationLabel}</td>
                 <td className="py-6 text-right">
-                  <motion.button type="button" whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-xs font-bold text-stone-900 shadow-sm hover:bg-stone-50">
+                  <motion.button
+                    type="button"
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-xs font-bold text-stone-900 shadow-sm hover:bg-stone-50"
+                    onClick={() => onAddToList(row)}
+                  >
                     {addToListLabel}
                   </motion.button>
                 </td>

@@ -3,7 +3,7 @@ import { getAdminClaimsModerationData } from "@/lib/services/admin-claims";
 import { requireAdminSession } from "@/lib/services/session";
 
 export default async function AdminClaimsPage() {
-  await requireAdminSession();
+  await requireAdminSession("/admin/claims");
 
   const data = await getAdminClaimsModerationData();
 

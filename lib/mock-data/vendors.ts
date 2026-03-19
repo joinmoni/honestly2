@@ -156,7 +156,7 @@ export const mockVendors: Vendor[] = [
     images: [
       {
         id: "img-film-archive-cover",
-        url: "https://images.unsplash.com/photo-1492691523567-61709d1aa3b0?auto=format&fit=crop&q=80&w=800",
+        url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=800",
         alt: "Film photography portrait",
         kind: "cover"
       }

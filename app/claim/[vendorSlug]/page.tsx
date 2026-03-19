@@ -8,14 +8,13 @@ type ClaimPageProps = {
 };
 
 export default async function ClaimPage({ params }: ClaimPageProps) {
-  const user = await requireUserSession();
-
   const { vendorSlug } = await params;
+  const user = await requireUserSession(`/claim/${vendorSlug}`);
   const data = await getClaimPageDataByVendorSlug(vendorSlug, user.id);
 
   if (!data) {
     notFound();
   }
 
-  return <ClaimPageScreen data={data} />;
+  return <ClaimPageScreen data={data} currentUser={{ id: user.id, name: user.name }} />;
 }
