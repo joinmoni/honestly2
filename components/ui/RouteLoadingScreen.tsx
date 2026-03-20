@@ -1,46 +1,29 @@
-import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
-
 type RouteLoadingScreenProps = {
   title?: string;
   subtitle?: string;
 };
 
 export function RouteLoadingScreen({
-  title = "Loading the next view",
-  subtitle = "Fetching content, layout blocks, and navigation context."
+  title = "Honestly is loading",
+  subtitle = "Pulling in the next view."
 }: RouteLoadingScreenProps) {
   return (
-    <div className="min-h-screen bg-[#F8F6F2] text-stone-900">
-      <div className="mx-auto max-w-7xl px-6 py-8 md:px-12">
-        <div className="flex items-center justify-between py-4">
-          <SkeletonBlock className="h-10 w-40 rounded-full" />
-          <div className="hidden items-center gap-4 md:flex">
-            <SkeletonBlock className="h-4 w-28" />
-            <SkeletonBlock className="h-4 w-32" />
-            <SkeletonBlock className="h-12 w-36 rounded-full" />
-          </div>
+    <div className="flex min-h-screen items-center justify-center bg-[#F8F6F2] px-6 text-stone-900">
+      <div className="flex max-w-md flex-col items-center text-center">
+        <div className="flex items-end gap-1">
+          <span className="serif-italic text-[6.5rem] leading-none text-stone-900 md:text-[7.5rem]">h</span>
+          <span className="mb-3 inline-block h-4 w-4 animate-pulse rounded-full bg-[var(--brand-accent)] md:mb-4 md:h-5 md:w-5" />
         </div>
 
-        <div className="mt-16 max-w-2xl">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Loading</p>
-          <h1 className="text-5xl md:text-6xl">{title}</h1>
-          <p className="mt-4 max-w-xl text-lg leading-relaxed text-stone-500">{subtitle}</p>
+        <div className="mt-5 flex items-center gap-2">
+          <span className="h-1.5 w-10 animate-pulse rounded-full bg-stone-300 [animation-delay:0ms]" />
+          <span className="h-1.5 w-16 animate-pulse rounded-full bg-[var(--brand-accent)] [animation-delay:120ms]" />
+          <span className="h-1.5 w-10 animate-pulse rounded-full bg-stone-300 [animation-delay:240ms]" />
         </div>
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-6">
-            <SkeletonBlock className="h-[26rem] w-full rounded-[2.5rem]" />
-            <div className="grid gap-6 md:grid-cols-2">
-              <SkeletonBlock className="h-56 w-full rounded-[2rem]" />
-              <SkeletonBlock className="h-56 w-full rounded-[2rem]" />
-            </div>
-            <SkeletonBlock className="h-64 w-full rounded-[2rem]" />
-          </div>
-          <div className="space-y-6">
-            <SkeletonBlock className="h-72 w-full rounded-[2rem]" />
-            <SkeletonBlock className="h-40 w-full rounded-[2rem]" />
-          </div>
-        </div>
+        <p className="mt-8 text-[10px] font-black uppercase tracking-[0.24em] text-stone-400">Loading</p>
+        <h1 className="mt-3 text-3xl leading-tight md:text-4xl">{title}</h1>
+        <p className="mt-3 text-sm leading-relaxed text-stone-500 md:text-base">{subtitle}</p>
       </div>
     </div>
   );
