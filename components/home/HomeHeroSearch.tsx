@@ -310,7 +310,14 @@ export function HomeHeroSearch({
         </div>
         <button
           type="submit"
-          className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-amber-600 px-6 font-sans font-black uppercase tracking-widest text-white transition-colors hover:bg-amber-700 md:mt-0 md:h-auto md:w-auto md:rounded-full md:p-4"
+          className="mt-2 flex h-12 w-full items-center justify-center rounded-xl px-6 font-sans font-black uppercase tracking-widest text-white transition-colors md:mt-0 md:h-auto md:w-auto md:rounded-full md:p-4"
+          style={{ backgroundColor: "var(--brand-accent)" }}
+          onMouseEnter={(event) => {
+            event.currentTarget.style.backgroundColor = "var(--brand-accent-hover)";
+          }}
+          onMouseLeave={(event) => {
+            event.currentTarget.style.backgroundColor = "var(--brand-accent)";
+          }}
           aria-label="Search vendors"
         >
           <Search size={20} strokeWidth={2.5} />

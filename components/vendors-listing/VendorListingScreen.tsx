@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Map as MapIcon, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,6 +36,19 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
   const [lists, setLists] = useState<SavedList[]>(initialLists);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [activeVendorId, setActiveVendorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+
+    if (typeof document !== "undefined") {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) {
+        active.blur();
+      }
+    }
+  }, []);
 
   const vendorById = useMemo(() => new Map(data.vendors.map((vendor) => [vendor.id, vendor])), [data.vendors]);
 
