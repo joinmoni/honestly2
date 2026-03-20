@@ -57,6 +57,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const isAnonymous = !name && !email && !imageUrl;
 
   useEffect(() => {
     if (!open) return;
@@ -95,6 +96,20 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
       setSigningOut(false);
     }
   };
+
+  if (isAnonymous) {
+    return (
+      <Link
+        href="/login"
+        className={cn(
+          "inline-flex items-center rounded-full bg-stone-900 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-stone-200/40 transition-colors hover:bg-stone-800",
+          className
+        )}
+      >
+        Sign In
+      </Link>
+    );
+  }
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
