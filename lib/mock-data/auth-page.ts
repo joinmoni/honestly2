@@ -15,5 +15,5 @@ export const mockAuthPageCopy: AuthPageCopy = {
   privacyLabel: "Privacy Policy",
   professionalPrompt: "Used a great vendor before?",
   listBusinessLabel: "Tell us about them",
-  heroImageUrl: "https://images.unsplash.com/photo-1517722014278-c256a911678b?auto=format&fit=crop&q=80&w=1000"
+  heroImageUrl: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=1200"
 };
