@@ -15,6 +15,7 @@ import {
 import { AdminCreateCategoryModal } from "@/components/admin/AdminCreateCategoryModal";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
+import { BodyText, CardTitle, Eyebrow, PageTitle, SectionTitle } from "@/components/ui/Typography";
 import type { AdminTaxonomyData } from "@/lib/types/admin-dashboard";
 
 type AdminTaxonomyScreenProps = {
@@ -59,8 +60,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
         <main className="mx-auto max-w-7xl px-6 py-12">
           <header className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <h1 className="mb-2 text-4xl">{data.title}</h1>
-              <p className="font-medium italic text-stone-500">{data.description}</p>
+              <PageTitle className="mb-2 text-4xl md:text-4xl">{data.title}</PageTitle>
+              <BodyText className="font-medium italic text-stone-500">{data.description}</BodyText>
             </div>
             <motion.button
               whileHover={{ y: -1 }}
@@ -92,13 +93,13 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                         {category.icon}
                       </div>
                       <div>
-                        <h3 className={`text-2xl font-display ${category.muted ? "text-stone-500" : ""}`}>{category.name}</h3>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Slug: {category.slug}</p>
+                        <CardTitle className={`text-2xl md:text-2xl ${category.muted ? "text-stone-500" : ""}`}>{category.name}</CardTitle>
+                        <Eyebrow>Slug: {category.slug}</Eyebrow>
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      {!category.muted ? <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Approved Subcategories</p> : null}
+                      {!category.muted ? <Eyebrow className="text-[9px]">Approved Subcategories</Eyebrow> : null}
                       <div className="flex flex-wrap gap-2">
                         {category.subcategories.map((subcategory) => (
                           <span
@@ -139,8 +140,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                     <div className="rounded-[1.6rem] border border-stone-100 bg-stone-50/70 p-4">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Homepage Merchandising</p>
-                          <p className="text-xs text-stone-500">Control which taxonomy rows appear on the homepage and in what order.</p>
+                          <Eyebrow className="text-[9px]">Homepage Merchandising</Eyebrow>
+                          <BodyText className="text-xs">Control which taxonomy rows appear on the homepage and in what order.</BodyText>
                         </div>
                         <button
                           type="button"
@@ -194,11 +195,11 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
 
             <aside className="xl:sticky xl:top-28 xl:self-start">
               <div className="rounded-[2.25rem] border border-stone-200 bg-white p-6 shadow-sm">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Homepage Layout</p>
-                <h2 className="text-2xl">Arrange Featured Rows</h2>
-                <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                <Eyebrow className="mb-2">Homepage Layout</Eyebrow>
+                <SectionTitle className="text-2xl md:text-2xl">Arrange Featured Rows</SectionTitle>
+                <BodyText className="mt-2 text-sm">
                   Drag featured categories to control the order they appear in the homepage shortcut rail and merchandising stack.
-                </p>
+                </BodyText>
 
                 <div className="mt-6 space-y-3">
                   {featuredCategories.map((category) => (

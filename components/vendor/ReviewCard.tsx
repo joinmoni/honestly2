@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { RatingStars } from "@/components/ui/RatingStars";
+import { MetaText } from "@/components/ui/Typography";
 import type { Review } from "@/lib/types/domain";
 
 type ReviewCardProps = {
@@ -13,7 +14,7 @@ export function ReviewCard({ review, currentUserId, onEditOwnReview }: ReviewCar
   const isEditable = Boolean(currentUserId && review.userId === currentUserId);
 
   return (
-    <article className="rounded-[1.8rem] border border-stone-100 bg-stone-50/50 p-6 shadow-sm">
+    <article className="rounded-[1.8rem] border border-stone-100 bg-stone-50/50 p-5 shadow-sm md:p-6">
       <div className="mb-4 flex items-center gap-3">
         <div className="relative h-10 w-10 overflow-hidden rounded-full bg-stone-200">
           {review.userAvatar ? <Image src={review.userAvatar} alt={review.userName} fill sizes="40px" className="object-cover" /> : null}
@@ -21,9 +22,9 @@ export function ReviewCard({ review, currentUserId, onEditOwnReview }: ReviewCar
         <div>
           <p className="text-sm font-bold">{review.userName}</p>
           <div className="flex items-center gap-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
+            <MetaText>
               {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-            </p>
+            </MetaText>
             {new Date(review.updatedAt).getTime() > new Date(review.createdAt).getTime() ? (
               <>
                 <span className="text-stone-200">•</span>
@@ -38,7 +39,7 @@ export function ReviewCard({ review, currentUserId, onEditOwnReview }: ReviewCar
         </div>
       </div>
 
-      {review.title ? <h4 className="mb-2 text-lg text-stone-900">{review.title}</h4> : null}
+      {review.title ? <h4 className="mb-2 text-[15px] text-stone-900 md:text-base">{review.title}</h4> : null}
       {review.body ? <p className="text-sm italic leading-relaxed text-stone-600">&quot;{review.body}&quot;</p> : null}
 
       {review.ratings.length ? (
@@ -46,8 +47,8 @@ export function ReviewCard({ review, currentUserId, onEditOwnReview }: ReviewCar
           {review.ratings.map((rating) => (
             <div key={`${review.id}-${rating.criterionId}`} className="rounded-[1rem] bg-white px-4 py-3">
               <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-stone-500">{rating.criterionName}</p>
-                <p className="text-sm font-bold text-stone-900">{rating.score.toFixed(1)}</p>
+                <MetaText className="tracking-[0.16em] text-stone-500">{rating.criterionName}</MetaText>
+                <p className="text-xs font-bold text-stone-900">{rating.score.toFixed(1)}</p>
               </div>
               <div className="h-2 rounded-full bg-stone-100">
                 <div className="h-2 rounded-full bg-stone-900" style={{ width: `${(rating.score / 5) * 100}%` }} />

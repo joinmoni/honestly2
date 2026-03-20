@@ -1,14 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { CollectionCard } from "@/components/collections/CollectionCard";
 import { CollectionsHeader } from "@/components/collections/CollectionsHeader";
 import { NewMoodboardCard } from "@/components/collections/NewMoodboardCard";
 import { SavedVendorsTable } from "@/components/collections/SavedVendorsTable";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
-import { isVendorSaved, persistCreateEmptyList, persistCreateListWithVendor, persistToggleVendorInList } from "@/lib/lists.client";
+import {
+  isGenericListName,
+  isVendorSaved,
+  persistCreateEmptyList,
+  persistCreateListWithVendor,
+  persistDeleteList,
+  persistToggleVendorInList,
+  persistUpdateListDetails
+} from "@/lib/lists.client";
 import type { SavedList } from "@/lib/types/domain";
 import type { CollectionsListCardView, CollectionsPageCopy, SavedVendorRowView } from "@/lib/types/collections";
 
@@ -22,12 +31,15 @@ type CollectionsOverviewScreenProps = {
 
 export function CollectionsOverviewScreen({ userId, copy, initialLists, initialSavedLists, savedRows }: CollectionsOverviewScreenProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [lists, setLists] = useState(initialLists);
   const [savedLists, setSavedLists] = useState(initialSavedLists);
   const [tableRows, setTableRows] = useState(savedRows);
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<SavedVendorRowView | null>(null);
+  const [activeList, setActiveList] = useState<CollectionsListCardView | null>(null);
+  const [renamingListName, setRenamingListName] = useState("");
 
   const syncCardAfterToggle = (listId: string, didAdd: boolean, imageUrl?: string) => {
     setLists((current) =>
@@ -85,6 +97,105 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
     }
   };
 
+  useEffect(() => {
+    if (searchParams.get("create") !== "1" || pending) return;
+    void handleCreateList(copy.createListLabel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const syncCardsFromSavedLists = (nextLists: SavedList[]) => {
+    setLists((current) =>
+      current
+        .map((card) => {
+          const source = nextLists.find((list) => list.id === card.id);
+          if (!source) return null;
+          return {
+            ...card,
+            name: source.name,
+            href: `/lists/${source.id}`,
+            visibility: source.isPublic ? "shared" : "private"
+          };
+        })
+        .filter((card): card is CollectionsListCardView => Boolean(card))
+    );
+  };
+
+  const handleOpenActions = (list: CollectionsListCardView) => {
+    setActiveList(list);
+    setRenamingListName(list.name);
+  };
+
+  const handleShareList = async () => {
+    if (!activeList) return;
+
+    setPending(true);
+    setErrorMessage(null);
+
+    try {
+      const sourceList = savedLists.find((list) => list.id === activeList.id);
+      const nextName = renamingListName.trim() || activeList.name;
+      const requiresName = isGenericListName(sourceList?.name ?? activeList.name);
+
+      if (requiresName && !renamingListName.trim()) {
+        setErrorMessage("Name this list before sharing it publicly.");
+        setPending(false);
+        return;
+      }
+
+      const nextLists = await persistUpdateListDetails(savedLists, activeList.id, {
+        name: nextName,
+        isPublic: true
+      });
+
+      setSavedLists(nextLists);
+      syncCardsFromSavedLists(nextLists);
+      setActiveList(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "This list could not be shared right now.");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const handleRenameList = async () => {
+    if (!activeList) return;
+    const nextName = renamingListName.trim();
+    if (!nextName) {
+      setErrorMessage("Enter a list name first.");
+      return;
+    }
+
+    setPending(true);
+    setErrorMessage(null);
+    try {
+      const nextLists = await persistUpdateListDetails(savedLists, activeList.id, { name: nextName });
+      setSavedLists(nextLists);
+      syncCardsFromSavedLists(nextLists);
+      setActiveList(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "This list could not be renamed right now.");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const handleDeleteList = async () => {
+    if (!activeList) return;
+
+    setPending(true);
+    setErrorMessage(null);
+    try {
+      const nextLists = await persistDeleteList(savedLists, activeList.id);
+      setSavedLists(nextLists);
+      syncCardsFromSavedLists(nextLists);
+      setActiveList(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "This list could not be deleted right now.");
+    } finally {
+      setPending(false);
+    }
+  };
+
   const selectedVendorSavedOptions = selectedVendor
     ? savedLists.map((list) => ({
         id: list.id,
@@ -97,13 +208,13 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
 
   return (
     <>
-      <CollectionsHeader copy={copy} onCreateList={() => handleCreateList(copy.createListLabel)} />
+      <CollectionsHeader copy={copy} />
 
       <section className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {lists.map((list) => (
-          <CollectionCard key={list.id} list={list} privateLabel={copy.visibilityPrivateLabel} sharedLabel={copy.visibilitySharedLabel} />
+          <CollectionCard key={list.id} list={list} privateLabel={copy.visibilityPrivateLabel} sharedLabel={copy.visibilitySharedLabel} onOpenActions={handleOpenActions} />
         ))}
-        <NewMoodboardCard label={copy.newMoodboardLabel} onClick={() => handleCreateList(copy.newMoodboardLabel)} />
+        <NewMoodboardCard label={copy.newListCardLabel} onClick={() => handleCreateList(copy.newListCardLabel)} />
       </section>
 
       {pending ? <p className="mt-6 text-sm text-stone-500">Creating your new list…</p> : null}
@@ -179,6 +290,49 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
         }}
         onDone={() => setSelectedVendor(null)}
       />
+
+      <AnimatePresence>
+        {activeList ? (
+          <motion.div
+            className="fixed inset-0 z-[95] flex items-end justify-center bg-stone-900/35 p-4 md:items-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveList(null)}
+          >
+            <motion.div
+              className="w-full max-w-sm rounded-[2rem] border border-stone-200 bg-white p-6 shadow-2xl"
+              initial={{ y: 24, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 24, opacity: 0 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">List actions</p>
+              <h3 className="mt-3 text-2xl leading-tight">{activeList.name}</h3>
+              <div className="mt-5 space-y-3">
+                <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{copy.renameListLabel}</span>
+                  <input
+                    value={renamingListName}
+                    onChange={(event) => setRenamingListName(event.target.value)}
+                    className="w-full rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-900 outline-none transition-colors focus:border-stone-900"
+                    placeholder="Summer Wedding 2026"
+                  />
+                </label>
+                <button type="button" className="w-full rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-900" onClick={handleRenameList}>
+                  {copy.renameListLabel}
+                </button>
+                <button type="button" className="w-full rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white" onClick={handleShareList}>
+                  {copy.sharePubliclyLabel}
+                </button>
+                <button type="button" className="w-full rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700" onClick={handleDeleteList}>
+                  {copy.deleteListLabel}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

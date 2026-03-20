@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { VendorDetailAbout } from "@/components/vendor-detail/VendorDetailAbout";
-import { VendorDetailGallery } from "@/components/vendor-detail/VendorDetailGallery";
-import { VendorDetailHero } from "@/components/vendor-detail/VendorDetailHero";
 import { VendorDetailNav } from "@/components/vendor-detail/VendorDetailNav";
-import { VendorDetailReviewFlow } from "@/components/vendor-detail/VendorDetailReviewFlow";
-import { VendorDetailSidebar } from "@/components/vendor-detail/VendorDetailSidebar";
+import { VendorDetailPageContent } from "@/components/vendor-detail/VendorDetailPageContent";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
 import { getListsByUserId } from "@/lib/services/lists";
@@ -71,25 +67,7 @@ export default async function VendorDetailPage({ params }: VendorDetailPageProps
         <VendorDetailNav session={session} />
 
         <main className="mx-auto max-w-7xl px-6 py-8 md:px-12 md:py-10">
-          <VendorDetailHero vendor={vendor} profile={profile} initialLists={initialLists} session={session} />
-          <VendorDetailGallery images={vendor.images} />
-
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.45fr)_330px]">
-            <div className="space-y-8">
-              <VendorDetailAbout profile={profile} />
-              <VendorDetailReviewFlow
-                vendorId={vendor.id}
-                vendorName={vendor.name}
-                profile={profile}
-                criteria={criteria}
-                initialReviews={approvedReviews}
-                initialReviewCount={vendor.reviewCount}
-                session={session}
-              />
-            </div>
-
-            <VendorDetailSidebar vendor={vendor} profile={profile} />
-          </div>
+          <VendorDetailPageContent vendor={vendor} profile={profile} initialLists={initialLists} session={session} criteria={criteria} approvedReviews={approvedReviews} />
         </main>
       </div>
       <SiteFooter content={footerContent} variant="dark" />

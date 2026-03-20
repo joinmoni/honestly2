@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { KeyRound, Trash2, Upload } from "lucide-react";
 
 import { Avatar } from "@/components/ui/Avatar";
+import { BodyText, CardTitle, Eyebrow, PageTitle } from "@/components/ui/Typography";
 import { isSupabaseConfigured } from "@/lib/config/app-env";
 import { clearProfileAvatarOverride, saveProfileAvatarOverride, usePreferredAvatar } from "@/lib/profile-avatar.client";
 import { updatePassword, updateProfileAvatar } from "@/lib/supabase/auth";
@@ -44,14 +45,14 @@ export function PreferencesScreen({ session }: PreferencesScreenProps) {
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <main className="mx-auto max-w-6xl px-6 py-8 md:py-10">
+        <div className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Account Preferences</p>
-            <h1 className="mt-3 text-5xl">Profile & Photo</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-500">
+            <Eyebrow>Account Preferences</Eyebrow>
+            <PageTitle className="mt-3">Profile & Photo</PageTitle>
+            <BodyText className="mt-4 max-w-2xl">
               Manage the avatar that appears in menus, saved lists, reviews, and future account surfaces across the app.
-            </p>
+            </BodyText>
           </div>
           <Link href="/lists" className="text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900">
             Back to lists
@@ -59,13 +60,13 @@ export function PreferencesScreen({ session }: PreferencesScreenProps) {
         </div>
 
         <section className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Profile Photo</p>
+          <Eyebrow>Profile Photo</Eyebrow>
           <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-center">
             <Avatar name={session.name} imageUrl={previewUrl} size="md" className="h-24 w-24 text-2xl" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-3xl">{session.name}</h2>
+              <CardTitle>{session.name}</CardTitle>
               <p className="mt-2 text-sm text-stone-500">{session.email}</p>
-              <p className="mt-4 text-sm leading-relaxed text-stone-500">Choose the photo you want to use across Honestly.</p>
+              <BodyText className="mt-4">Choose the photo you want to use across Honestly.</BodyText>
             </div>
           </div>
 
@@ -178,13 +179,13 @@ export function PreferencesScreen({ session }: PreferencesScreenProps) {
                 <KeyRound size={18} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Security</p>
-                <h2 className="mt-2 text-3xl">Reset Password</h2>
+                <Eyebrow>Security</Eyebrow>
+                <CardTitle className="mt-2">Reset Password</CardTitle>
               </div>
             </div>
-            <p className="mt-5 max-w-md text-sm leading-relaxed text-stone-500">
+            <BodyText className="mt-5 max-w-md">
               Create a new password for your account without leaving this page.
-            </p>
+            </BodyText>
             {!passwordFormOpen ? (
               <button
                 type="button"
@@ -282,13 +283,13 @@ export function PreferencesScreen({ session }: PreferencesScreenProps) {
                 <Trash2 size={18} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400">Danger Zone</p>
-                <h2 className="mt-2 text-3xl text-stone-900">Delete Account</h2>
+                <Eyebrow className="text-rose-400">Danger Zone</Eyebrow>
+                <CardTitle className="mt-2 text-stone-900">Delete Account</CardTitle>
               </div>
             </div>
-            <p className="mt-5 max-w-md text-sm leading-relaxed text-stone-600">
+            <BodyText className="mt-5 max-w-md">
               Permanently remove your account, saved vendors, lists, and review history from Honestly.
-            </p>
+            </BodyText>
             {!deleteConfirmOpen ? (
               <button
                 type="button"

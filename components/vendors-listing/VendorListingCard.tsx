@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
+import { CardTitle, MetaText } from "@/components/ui/Typography";
 import type { Vendor } from "@/lib/types/domain";
 
 type VendorListingCardProps = {
@@ -38,17 +39,17 @@ export function VendorListingCard({ vendor, saved, onSaveClick }: VendorListingC
 
       <div className="space-y-1.5">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-lg font-serif text-stone-900">{vendor.name}</h3>
+          <CardTitle className="text-[1.8rem] leading-tight text-stone-900 md:text-[2rem]">{vendor.name}</CardTitle>
           <div className="flex items-center gap-1 pt-0.5 text-[11px] font-bold">
             <span>★</span>
             <span>{vendor.ratingAvg.toFixed(2)}</span>
           </div>
         </div>
         <div className="space-y-1">
-          <p className="ui-meta text-stone-500">
+          <MetaText className="text-stone-500">
             {vendor.primaryCategory?.name ?? "Vendor"}
             {location ? ` • ${location.city}${location.region ? `, ${location.region}` : ""}` : ""}
-          </p>
+          </MetaText>
           {vendor.headline ? <p className="line-clamp-2 text-[10px] italic leading-relaxed text-stone-400">&quot;{vendor.headline}&quot;</p> : null}
         </div>
         <div className="flex items-center gap-1 text-xs font-bold">

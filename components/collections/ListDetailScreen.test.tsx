@@ -12,6 +12,13 @@ const listDetailData: ListDetailPageData = {
   vendorCount: 1,
   itemCountLabel: "1 vendor saved",
   shareSlug: undefined,
+  sourceList: {
+    id: "list-1",
+    userId: "usr-001",
+    name: "Summer Wedding 2026",
+    isPublic: false,
+    items: [{ vendorId: "ven-1", createdAt: "2026-02-20T00:00:00.000Z" }]
+  },
   vendors: [
     {
       vendorId: "ven-1",
@@ -42,6 +49,6 @@ describe("ListDetailScreen", () => {
 
     expect(screen.getByRole("link", { name: "Open Wildflower Archive" })).toHaveAttribute("href", "/vendor/wildflower-archive");
     expect(screen.queryByRole("link", { name: "View vendor" })).not.toBeInTheDocument();
-    expect(screen.getByText("In shortlist")).toHaveClass("bg-amber-100");
+    expect(screen.getByText("In shortlist").closest("div")).toHaveClass("bg-amber-100");
   });
 });

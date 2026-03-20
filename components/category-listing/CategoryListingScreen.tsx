@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { CategoryVendorCard } from "@/components/category-listing/CategoryVendorCard";
+import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
 import type { CategoryListingPageData } from "@/lib/types/category-listing";
 
 type CategoryListingScreenProps = {
@@ -91,6 +92,8 @@ export function CategoryListingScreen({ data }: CategoryListingScreenProps) {
             <CategoryVendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
+
+        <ProfessionalCtaBanner className="mt-16 md:mt-20" />
 
         <div className="mt-24 text-center">
           <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="rounded-full border border-stone-200 bg-white px-10 py-4 text-sm font-sans font-black uppercase tracking-widest text-stone-900 shadow-sm transition-colors hover:bg-stone-50">

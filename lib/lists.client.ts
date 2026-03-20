@@ -3,6 +3,22 @@ import { getStoredMockLists, persistMockLists } from "@/lib/mock-list-persistenc
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { SavedList } from "@/lib/types/domain";
 
+const DEFAULT_LIST_NAME_PATTERNS = [/^new collection \d+$/i, /^create new list$/i, /^new moodboard$/i, /^new list$/i];
+
+function slugifyListName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
+export function isGenericListName(name: string | undefined): boolean {
+  if (!name) return true;
+  return DEFAULT_LIST_NAME_PATTERNS.some((pattern) => pattern.test(name.trim()));
+}
+
 export function getSavedVendorIds(lists: SavedList[]): string[] {
   return Array.from(new Set(lists.flatMap((list) => list.items.map((item) => item.vendorId))));
 }
@@ -46,11 +62,36 @@ export function createListWithVendor(
     {
       id: `list-new-${nextListNumber}`,
       userId: input.userId,
-      name: input.name ?? `New Collection ${nextListNumber}`,
+      name: input.name ?? `New List ${nextListNumber}`,
       isPublic: false,
       items: [{ vendorId: input.vendorId, createdAt: new Date().toISOString() }]
     }
   ];
+}
+
+export function updateListDetails(
+  lists: SavedList[],
+  listId: string,
+  input: {
+    name?: string;
+    isPublic?: boolean;
+    shareSlug?: string;
+  }
+): SavedList[] {
+  return lists.map((list) =>
+    list.id === listId
+      ? {
+          ...list,
+          name: input.name ?? list.name,
+          isPublic: input.isPublic ?? list.isPublic,
+          shareSlug: input.shareSlug ?? list.shareSlug
+        }
+      : list
+  );
+}
+
+export function deleteList(lists: SavedList[], listId: string): SavedList[] {
+  return lists.filter((list) => list.id !== listId);
 }
 
 async function resolveProfileId(userId: string): Promise<string | null> {
@@ -135,7 +176,7 @@ export async function persistCreateListWithVendor(
   }
 
   const nextListNumber = lists.length + 1;
-  const nextName = input.name ?? `New Collection ${nextListNumber}`;
+  const nextName = input.name ?? `New List ${nextListNumber}`;
 
   const { data: createdList, error: listError } = await supabase
     .from("saved_lists")
@@ -189,7 +230,7 @@ export async function persistCreateEmptyList(
     const nextList = {
       id: `list-new-${nextListNumber}`,
       userId: input.userId,
-      name: input.name ?? `New Collection ${nextListNumber}`,
+      name: input.name ?? `New List ${nextListNumber}`,
       isPublic: false,
       items: []
     };
@@ -206,7 +247,7 @@ export async function persistCreateEmptyList(
   }
 
   const nextListNumber = lists.length + 1;
-  const nextName = input.name ?? `New Collection ${nextListNumber}`;
+  const nextName = input.name ?? `New List ${nextListNumber}`;
 
   const { data: createdList, error } = await supabase
     .from("saved_lists")
@@ -231,4 +272,70 @@ export async function persistCreateEmptyList(
     shareSlug: (createdList.share_slug as string | null) ?? undefined,
     items: []
   };
+}
+
+export async function persistUpdateListDetails(
+  lists: SavedList[],
+  listId: string,
+  input: {
+    name?: string;
+    isPublic?: boolean;
+  }
+): Promise<SavedList[]> {
+  const targetList = lists.find((list) => list.id === listId);
+  if (!targetList) {
+    return lists;
+  }
+
+  const nextName = input.name?.trim() || targetList.name;
+  const nextShareSlug = (input.isPublic ?? targetList.isPublic) ? slugifyListName(nextName) || targetList.id : undefined;
+
+  if (!isSupabaseConfigured()) {
+    const sourceLists = getStoredMockLists().length ? getStoredMockLists() : lists;
+    const nextLists = updateListDetails(sourceLists, listId, {
+      name: nextName,
+      isPublic: input.isPublic,
+      shareSlug: nextShareSlug
+    });
+    persistMockLists(nextLists);
+    return nextLists;
+  }
+
+  const supabase = getSupabaseBrowserClient();
+  const { error } = await supabase
+    .from("saved_lists")
+    .update({
+      name: nextName,
+      is_public: input.isPublic ?? targetList.isPublic,
+      share_slug: nextShareSlug ?? null
+    })
+    .eq("id", listId);
+
+  if (error) {
+    throw error;
+  }
+
+  return updateListDetails(lists, listId, {
+    name: nextName,
+    isPublic: input.isPublic,
+    shareSlug: nextShareSlug
+  });
+}
+
+export async function persistDeleteList(lists: SavedList[], listId: string): Promise<SavedList[]> {
+  if (!isSupabaseConfigured()) {
+    const sourceLists = getStoredMockLists().length ? getStoredMockLists() : lists;
+    const nextLists = deleteList(sourceLists, listId);
+    persistMockLists(nextLists);
+    return nextLists;
+  }
+
+  const supabase = getSupabaseBrowserClient();
+  const { error } = await supabase.from("saved_lists").delete().eq("id", listId);
+
+  if (error) {
+    throw error;
+  }
+
+  return deleteList(lists, listId);
 }

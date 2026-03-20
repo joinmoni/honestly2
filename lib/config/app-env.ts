@@ -15,6 +15,12 @@ export type MeilisearchEnv = {
   apiKey?: string;
 };
 
+export type MeilisearchAdminEnv = {
+  host: string;
+  adminApiKey: string;
+  syncToken?: string;
+};
+
 function readEnv(name: string): string | undefined {
   const value = process.env[name];
   if (!value) return undefined;
@@ -64,6 +70,19 @@ export function getMeilisearchEnv(): MeilisearchEnv | null {
   return {
     host,
     apiKey
+  };
+}
+
+export function getMeilisearchAdminEnv(): MeilisearchAdminEnv | null {
+  const host = readEnv("MEILISEARCH_HOST");
+  const adminApiKey = readEnv("MEILISEARCH_ADMIN_API_KEY");
+
+  if (!host || !adminApiKey) return null;
+
+  return {
+    host,
+    adminApiKey,
+    syncToken: readEnv("HONESTLY_SEARCH_SYNC_TOKEN")
   };
 }
 

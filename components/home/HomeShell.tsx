@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HomeCategoryRail } from "@/components/home/HomeCategoryRail";
 import { HomeFeaturedSection } from "@/components/home/HomeFeaturedSection";
 import { HomeHeroSearch } from "@/components/home/HomeHeroSearch";
+import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
 import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import { UserTopNav } from "@/components/ui/UserTopNav";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
@@ -57,6 +58,7 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, cu
 
         <HomeCategoryRail shortcuts={shortcuts} />
         <HomeFeaturedSection title={content.featuredTitle} description={content.featuredDescription} vendors={featuredVendors} />
+        {!currentUserName ? <ProfessionalCtaBanner className="mb-16 mt-12 md:mb-24 md:mt-16" compact /> : null}
       </main>
 
     </div>

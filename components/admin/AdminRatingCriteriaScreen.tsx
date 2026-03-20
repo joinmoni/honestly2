@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { GripVertical, Plus } from "lucide-react";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
+import { BodyText, CardTitle, MetaText, PageTitle, PillText } from "@/components/ui/Typography";
 import {
   createAdminRatingCriterion,
   reorderAdminRatingCriteria,
@@ -44,8 +45,8 @@ export function AdminRatingCriteriaScreen({ data }: AdminRatingCriteriaScreenPro
       <main className="mx-auto max-w-4xl px-6 py-12">
         <header className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <h1 className="mb-2 text-4xl font-bold tracking-tight">{data.title}</h1>
-            <p className="font-medium italic text-stone-500">{data.description}</p>
+            <PageTitle className="mb-2 text-[2.8rem] leading-[0.98] md:text-[3.35rem]">{data.title}</PageTitle>
+            <BodyText className="italic">{data.description}</BodyText>
           </div>
           <button
             type="button"
@@ -108,19 +109,17 @@ export function AdminRatingCriteriaScreen({ data }: AdminRatingCriteriaScreenPro
                       className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-1 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-100"
                     />
                   ) : (
-                    <h3 className={`font-bold ${criterion.active ? "text-stone-900" : "line-through text-stone-400"}`}>{criterion.name}</h3>
+                    <CardTitle className={`text-[1.5rem] leading-tight md:text-[1.7rem] ${criterion.active ? "text-stone-900" : "line-through text-stone-400"}`}>{criterion.name}</CardTitle>
                   )}
                   <span
                     className={
-                      criterion.active
-                        ? "rounded-full bg-stone-100 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-stone-700"
-                        : "rounded-full bg-stone-100 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-stone-400"
+                      criterion.active ? "rounded-full bg-stone-100 px-2 py-0.5 text-stone-700" : "rounded-full bg-stone-100 px-2 py-0.5 text-stone-400"
                     }
                   >
-                    {criterion.active ? "Active" : "Inactive"}
+                    <PillText className={criterion.active ? "text-stone-700" : "text-stone-400"}>{criterion.active ? "Active" : "Inactive"}</PillText>
                   </span>
                 </div>
-                <p className={`text-xs font-medium ${criterion.active ? "text-stone-500" : "italic text-stone-400"}`}>{criterion.description}</p>
+                <BodyText className={`text-sm ${criterion.active ? "" : "italic text-stone-400"}`}>{criterion.description}</BodyText>
               </div>
 
               <div className="flex items-center gap-4">
@@ -147,9 +146,9 @@ export function AdminRatingCriteriaScreen({ data }: AdminRatingCriteriaScreenPro
         </div>
 
         <footer className="mt-12 border-t border-stone-100 pt-8 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+          <MetaText>
             Changes here affect the public <span className="text-amber-600">Review Modal</span> in real-time.
-          </p>
+          </MetaText>
         </footer>
       </main>
     </div>

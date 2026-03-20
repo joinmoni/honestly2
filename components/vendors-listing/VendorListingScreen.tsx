@@ -8,6 +8,7 @@ import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HomeHeroSearch } from "@/components/home/HomeHeroSearch";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
+import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
 import { UserTopNav } from "@/components/ui/UserTopNav";
 import { VendorListingCard } from "@/components/vendors-listing/VendorListingCard";
@@ -151,19 +152,22 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
         </div>
 
         {data.vendors.length ? (
-          <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data.vendors.map((vendor) => (
-              <VendorListingCard
-                key={vendor.id}
-                vendor={vendor}
-                saved={savedVendorIds.includes(vendor.id)}
-                onSaveClick={(vendorId) => {
-                  setActiveVendorId(vendorId);
-                  setSaveModalOpen(true);
-                }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {data.vendors.map((vendor) => (
+                <VendorListingCard
+                  key={vendor.id}
+                  vendor={vendor}
+                  saved={savedVendorIds.includes(vendor.id)}
+                  onSaveClick={(vendorId) => {
+                    setActiveVendorId(vendorId);
+                    setSaveModalOpen(true);
+                  }}
+                />
+              ))}
+            </div>
+            {!currentUserName ? <ProfessionalCtaBanner className="mt-16 md:mt-20" /> : null}
+          </>
         ) : (
           <EmptyState
             eyebrow="Search Results"

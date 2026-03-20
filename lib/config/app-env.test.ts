@@ -1,5 +1,6 @@
 import {
   getDataProvider,
+  getMeilisearchAdminEnv,
   getMeilisearchEnv,
   getSearchProvider,
   getSupabasePublicEnv,
@@ -20,6 +21,8 @@ describe("app env", () => {
     delete process.env.HONESTLY_SEARCH_PROVIDER;
     delete process.env.MEILISEARCH_HOST;
     delete process.env.MEILISEARCH_API_KEY;
+    delete process.env.MEILISEARCH_ADMIN_API_KEY;
+    delete process.env.HONESTLY_SEARCH_SYNC_TOKEN;
   });
 
   afterAll(() => {
@@ -72,5 +75,17 @@ describe("app env", () => {
       apiKey: "masterKey"
     });
     expect(isMeilisearchConfigured()).toBe(true);
+  });
+
+  it("reads Meilisearch admin env for indexing operations", () => {
+    process.env.MEILISEARCH_HOST = "http://localhost:7700";
+    process.env.MEILISEARCH_ADMIN_API_KEY = "adminKey";
+    process.env.HONESTLY_SEARCH_SYNC_TOKEN = "syncToken";
+
+    expect(getMeilisearchAdminEnv()).toEqual({
+      host: "http://localhost:7700",
+      adminApiKey: "adminKey",
+      syncToken: "syncToken"
+    });
   });
 });

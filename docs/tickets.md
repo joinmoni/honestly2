@@ -24,6 +24,10 @@
 - [x] HON-031 Build save-to-list modal
 - [x] HON-032 Build user lists pages
 - [x] HON-033 Build public shared list page
+- [x] HON-117 Harmonize collections terminology around lists and remove duplicate create entrypoints
+- [x] HON-118 Add list actions menu from collections cards (share, rename, delete)
+- [x] HON-119 Fix mobile collections layouts and replace saved vendors table with cards
+- [x] HON-120 Require meaningful list naming before public sharing and make share state explicit
 
 ## Epic 4 — Auth and profile-lite
 - [x] HON-040 Build login screen
@@ -31,6 +35,7 @@
 - [ ] HON-114 Add user avatars from auth providers and manual profile photo upload
 - [ ] HON-115 Add create-list flow from /lists
 - [ ] HON-116 Wire New Moodboard card to create and open a new collection
+- [x] HON-121 Add new list action to the profile menu
 
 ## Epic 5 — Claim flow and vendor editing
 - [x] HON-050 Build claim vendor page
@@ -49,6 +54,14 @@
 - [x] HON-070 Refactor mock services to interface-based data layer
 - [x] HON-071 Add loading, empty, error, skeleton states
 - [x] HON-072 Add responsive polish and motion pass
+- [x] HON-122 Normalize signed-in page spacing and typography rhythm
+
+## Epic 8 — UX consistency pass
+- [x] HON-123 Fix review edit status flow and empty states on My Reviews
+- [x] HON-124 Make vendor share/contact actions functional and consistent
+- [x] HON-125 Tighten vendor detail mobile typography and metadata sizing
+- [x] HON-126 Add vendor onboarding CTA for professionals on public entry points
+- [x] HON-127 Create reusable typography scale and apply it across app and admin
 
 ## Phase 2 — Real data and search evolution
 - [ ] HON-100 Setup Supabase project wiring
@@ -59,9 +72,9 @@
 - [ ] HON-105 Replace mock review service with Supabase queries
 - [ ] HON-106 Replace mock lists service with Supabase queries
 - [ ] HON-107 Connect vendor image uploads to Supabase storage
-- [ ] HON-108 Add admin mutations
+- [x] HON-108 Add admin mutations
 - [ ] HON-109 Add claim submission persistence
 - [ ] HON-110 Add basic DB-backed search
 - [ ] HON-111 Add route protection and role enforcement
 - [ ] HON-112 Replace mock search service with Supabase-backed search
-- [ ] HON-113 Upgrade search backend to Meilisearch
+- [ ] HON-113 Upgrade search backend to Meilisearch (provider path + secure sync route in place; live env/index population pending)

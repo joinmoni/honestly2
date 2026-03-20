@@ -87,6 +87,18 @@ type SearchSuggestions = {
 - HON-071 Loading, empty, error, skeleton states
 - HON-072 Responsive polish and motion pass
 - HON-051 Vendor edit page
+- HON-108 Admin mutations
+- HON-117 Collections terminology and list creation cleanup
+- HON-118 Collection actions menu
+- HON-119 Mobile collections cards and saved-vendor card layouts
+- HON-120 Meaningful naming before public list sharing
+- HON-121 New list shortcut in the profile menu
+- HON-122 Signed-in spacing rhythm normalization
+- HON-123 My Reviews edited-review state and empty state fixes
+- HON-124 Working vendor share/contact actions
+- HON-125 Vendor detail mobile typography tightening
+- HON-126 Professional onboarding CTA on public entry points
+- HON-127 Reusable typography scale applied across app and admin
 
 ## Future Auth/Profile
 - HON-114 will add provider-linked user avatars plus manual profile photo upload for email/password accounts.
@@ -144,3 +156,21 @@ type SearchSuggestions = {
 - HON-016 Vendors page live service-backed search
 - HON-112 Supabase-backed search implementation
 - HON-113 Meilisearch upgrade path
+
+## Meilisearch Sync Path
+- HON-113 now includes a secure server-side sync endpoint at `/api/search/sync`.
+- The sync route requires:
+  - `MEILISEARCH_HOST`
+  - `MEILISEARCH_ADMIN_API_KEY`
+  - `HONESTLY_SEARCH_SYNC_TOKEN`
+- Search queries should still use `MEILISEARCH_API_KEY`, while indexing/sync should use the admin key.
+- The sync route updates:
+  - `vendors`
+  - `categories`
+  - `locations`
+- `vendors` sync also configures filterable/searchable attributes for:
+  - `searchCategories`
+  - `searchLocations`
+- Intended invocation pattern:
+  - `POST /api/search/sync`
+  - `Authorization: Bearer <HONESTLY_SEARCH_SYNC_TOKEN>`

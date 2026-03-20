@@ -16,6 +16,7 @@ export function NewMoodboardCard({ label, onClick }: NewMoodboardCardProps) {
       whileTap={{ scale: 0.98 }}
       className="group flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-stone-200 transition-colors hover:border-amber-400"
       onClick={onClick}
+      aria-label={label}
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-stone-50 transition-colors group-hover:bg-amber-50">
         <Plus className="text-stone-400 group-hover:text-amber-600" size={24} />

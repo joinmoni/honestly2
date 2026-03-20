@@ -7,6 +7,7 @@ import { Check, Instagram, Mail, Music2 } from "lucide-react";
 import { updateAdminClaimStatus } from "@/lib/admin-claims.client";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
+import { BodyText, CardTitle, Eyebrow, MetaText, PageTitle, PillText } from "@/components/ui/Typography";
 import type { AdminClaimFilter, AdminClaimsModerationData } from "@/lib/types/admin-dashboard";
 
 type AdminClaimsModerationScreenProps = {
@@ -42,8 +43,8 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
       <main className="mx-auto max-w-5xl px-6 py-12">
         <header className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <h1 className="mb-2 text-4xl">{data.title}</h1>
-            <p className="font-medium italic text-stone-500">{data.description}</p>
+            <PageTitle className="mb-2 text-[2.8rem] leading-[0.98] md:text-[3.35rem]">{data.title}</PageTitle>
+            <BodyText className="italic">{data.description}</BodyText>
           </div>
           <div className="flex rounded-2xl border border-stone-200 bg-white p-1 shadow-sm">
             {data.filters.map((filter) => {
@@ -80,54 +81,56 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                 <div className="flex flex-col lg:flex-row">
                   <div className="flex flex-col justify-between border-r border-stone-100 bg-stone-50 p-8 lg:w-72">
                     <div className="space-y-4">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Target Profile</p>
+                      <Eyebrow>Target Profile</Eyebrow>
                       <div className="aspect-square w-full overflow-hidden rounded-2xl bg-stone-100 shadow-inner">
                         {claim.vendorImageUrl ? <Image src={claim.vendorImageUrl} alt={claim.vendorName} width={400} height={400} className="h-full w-full object-cover" /> : null}
                       </div>
                       <div>
-                        <h3 className="text-xl font-display">{claim.vendorName}</h3>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{claim.vendorCategoryLabel}</p>
+                        <CardTitle className="text-[2rem] leading-tight md:text-[2.2rem]">{claim.vendorName}</CardTitle>
+                        <MetaText>{claim.vendorCategoryLabel}</MetaText>
                       </div>
                     </div>
                     <div className="mt-6 border-t border-stone-200 pt-6">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400">Submitted</p>
-                      <p className="text-xs font-semibold">{claim.submittedDate}</p>
+                      <Eyebrow>Submitted</Eyebrow>
+                      <BodyText className="mt-1 text-sm font-semibold text-stone-900">{claim.submittedDate}</BodyText>
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-8 p-8">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                       <div className="space-y-4">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-amber-600">Claimant Identity</p>
+                        <Eyebrow className="text-amber-700">Claimant Identity</Eyebrow>
                         <div className="space-y-2">
-                          <h4 className="text-lg font-bold">{claim.claimantName}</h4>
+                          <CardTitle className="text-[1.7rem] leading-tight md:text-[1.9rem]">{claim.claimantName}</CardTitle>
                           {claim.claimantEmail ? (
-                            <p className="flex items-center gap-2 text-sm text-stone-500">
+                            <BodyText className="flex items-center gap-2 text-sm">
                               <Mail size={14} />
                               {claim.claimantEmail}
-                            </p>
+                            </BodyText>
                           ) : null}
                           <div className="flex gap-4 pt-1">
                             {claim.claimantInstagram ? (
-                              <span className="flex items-center gap-1 text-xs font-bold text-stone-400">
+                              <MetaText className="flex items-center gap-1">
                                 <Instagram size={14} />
                                 {claim.claimantInstagram}
-                              </span>
+                              </MetaText>
                             ) : null}
                             {claim.claimantTiktok ? (
-                              <span className="flex items-center gap-1 text-xs font-bold text-stone-400">
+                              <MetaText className="flex items-center gap-1">
                                 <Music2 size={14} />
                                 {claim.claimantTiktok}
-                              </span>
+                              </MetaText>
                             ) : null}
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-4">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-stone-400">Relationship Note</p>
-                        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-4 text-sm italic leading-relaxed text-stone-600">
-                          &quot;{claim.note}&quot;
+                        <Eyebrow>Relationship Note</Eyebrow>
+                        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-4">
+                          <BodyText className="italic leading-relaxed">
+                            &quot;{claim.note}&quot;
+                          </BodyText>
                         </div>
                       </div>
                     </div>
@@ -165,10 +168,10 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                       <Check size={20} strokeWidth={3} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-display">{claim.vendorName}</h3>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
+                      <CardTitle className="text-[1.6rem] leading-tight md:text-[1.8rem]">{claim.vendorName}</CardTitle>
+                      <MetaText className="mt-1">
                         {claim.status === "approved" ? "Claim Approved" : "Claim Rejected"} • {claim.submittedDate}
-                      </p>
+                      </MetaText>
                     </div>
                   </div>
                   <button type="button" className="rounded-xl border border-stone-200 px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 transition-colors hover:text-stone-900">

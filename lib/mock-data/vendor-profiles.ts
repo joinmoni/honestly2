@@ -15,7 +15,7 @@ export const mockVendorProfiles: VendorProfile[] = [
     },
     ctas: {
       saveLabel: "Save",
-      shareLabel: "Share List",
+      shareLabel: "Share",
       contactLabel: "Contact Vendor",
       leaveReviewLabel: "Leave a review",
       claimLabel: "Claim this page"
@@ -32,7 +32,7 @@ export const mockVendorProfiles: VendorProfile[] = [
     },
     ctas: {
       saveLabel: "Save",
-      shareLabel: "Share List",
+      shareLabel: "Share",
       contactLabel: "Contact Vendor",
       leaveReviewLabel: "Leave a review",
       claimLabel: "Claim this page"
@@ -49,7 +49,7 @@ export const mockVendorProfiles: VendorProfile[] = [
     },
     ctas: {
       saveLabel: "Save",
-      shareLabel: "Share List",
+      shareLabel: "Share",
       contactLabel: "Contact Vendor",
       leaveReviewLabel: "Leave a review",
       claimLabel: "Claim this page"

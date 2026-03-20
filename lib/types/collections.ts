@@ -1,13 +1,18 @@
+import type { SavedList } from "@/lib/types/domain";
+
 export type CollectionsPageCopy = {
   brandLabel: string;
   pageTitle: string;
   pageDescription: string;
   createListLabel: string;
-  newMoodboardLabel: string;
+  newListCardLabel: string;
   allSavedVendorsTitle: string;
   addToListLabel: string;
   visibilityPrivateLabel: string;
   visibilitySharedLabel: string;
+  sharePubliclyLabel: string;
+  renameListLabel: string;
+  deleteListLabel: string;
 };
 
 export type CollectionsListCardView = {
@@ -49,6 +54,7 @@ export type ListDetailPageData = {
   vendorCount: number;
   itemCountLabel: string;
   vendors: ListDetailVendorView[];
+  sourceList: SavedList;
   copy: {
     brandLabel: string;
     backHref: string;

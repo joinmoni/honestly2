@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
+import { CardTitle, MetaText } from "@/components/ui/Typography";
 import type { Vendor } from "@/lib/types/domain";
 
 type HomeVendorCardProps = {
@@ -26,16 +27,16 @@ export function HomeVendorCard({ vendor }: HomeVendorCardProps) {
         </div>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-display">{vendor.name}</h3>
+            <CardTitle className="text-[1.8rem] leading-tight md:text-[2rem]">{vendor.name}</CardTitle>
             <div className="flex items-center gap-1 text-[11px] font-bold">
               <span>★</span>
               <span>{vendor.ratingAvg.toFixed(1)}</span>
             </div>
           </div>
-          <p className="ui-meta text-stone-400">
+          <MetaText className="text-stone-400">
             {primarySubcategory?.name ?? vendor.primaryCategory?.name ?? "Vendor"}
             {location ? ` • ${location.city}${location.region ? `, ${location.region}` : ""}` : ""}
-          </p>
+          </MetaText>
           {vendor.headline ? <p className="line-clamp-1 text-[10px] italic text-stone-600">&quot;{vendor.headline}&quot;</p> : null}
         </div>
       </Link>

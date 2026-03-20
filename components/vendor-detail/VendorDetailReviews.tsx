@@ -1,6 +1,7 @@
 import type { Review } from "@/lib/types/domain";
 import type { VendorProfile } from "@/lib/types/vendor-profile";
 import { ReviewList } from "@/components/vendor/ReviewList";
+import { Eyebrow, SectionTitle } from "@/components/ui/Typography";
 
 type VendorDetailReviewsProps = {
   reviewCount: number;
@@ -25,8 +26,8 @@ export function VendorDetailReviews({
     <section className="rounded-[2rem] border border-stone-200/80 bg-white px-5 py-6 shadow-sm shadow-stone-200/20 md:rounded-[2.25rem] md:px-10 md:py-10">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:mb-8">
         <div>
-          <p className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-stone-400 md:mb-3 md:text-[10px] md:tracking-[0.22em]">Client Notes</p>
-          <h2 className="text-3xl md:text-4xl">Kind Words <span className="ml-2 text-stone-300">({reviewCount})</span></h2>
+          <Eyebrow className="mb-2 md:mb-3">Client Notes</Eyebrow>
+          <SectionTitle className="text-[2rem] md:text-4xl">Kind Words <span className="ml-2 text-stone-300">({reviewCount})</span></SectionTitle>
         </div>
         <button
           type="button"

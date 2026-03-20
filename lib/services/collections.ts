@@ -101,6 +101,7 @@ export async function getListDetailPageData(userId: string, listId: string): Pro
     vendorCount: items.length,
     itemCountLabel: `${items.length} ${items.length === 1 ? "vendor" : "vendors"} saved`,
     vendors: items,
+    sourceList: list,
     copy: {
       brandLabel: "honestly.",
       backHref: "/lists",

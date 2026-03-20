@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Lock, Share2 } from "lucide-react";
 import { useState } from "react";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BodyText, CardTitle, Eyebrow, MetaText, PillText } from "@/components/ui/Typography";
+import { isGenericListName, persistUpdateListDetails } from "@/lib/lists.client";
 import type { ListDetailPageData } from "@/lib/types/collections";
 
 type ListDetailScreenProps = {
@@ -13,19 +15,50 @@ type ListDetailScreenProps = {
 };
 
 export function ListDetailScreen({ data }: ListDetailScreenProps) {
-  const visibilityLabel = data.visibility === "shared" ? data.copy.visibilitySharedLabel : data.copy.visibilityPrivateLabel;
+  const [sourceList, setSourceList] = useState(data.sourceList);
+  const [listName, setListName] = useState(data.name);
+  const [visibility, setVisibility] = useState(data.visibility);
+  const [shareSlug, setShareSlug] = useState(data.shareSlug);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
+  const [showNamingPrompt, setShowNamingPrompt] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const visibilityLabel = visibility === "shared" ? data.copy.visibilitySharedLabel : data.copy.visibilityPrivateLabel;
+  const shareButtonLabel = visibility === "shared" ? data.copy.shareLabel : "Share publicly";
 
   const handleShare = async () => {
     if (typeof window === "undefined") return;
 
-    const shareUrl = `${window.location.origin}/lists/${data.shareSlug ?? data.id}`;
+    if (visibility === "private" && (isGenericListName(listName) || !listName.trim())) {
+      setShowNamingPrompt(true);
+      setErrorMessage(null);
+      return;
+    }
+
+    let nextList = sourceList;
+
+    if (visibility === "private") {
+      try {
+        const nextLists = await persistUpdateListDetails([sourceList], sourceList.id, {
+          name: listName.trim(),
+          isPublic: true
+        });
+        nextList = nextLists[0] ?? sourceList;
+        setSourceList(nextList);
+        setVisibility(nextList.isPublic ? "shared" : "private");
+        setShareSlug(nextList.shareSlug);
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "This list could not be shared right now.");
+        return;
+      }
+    }
+
+    const shareUrl = `${window.location.origin}/lists/${nextList.shareSlug ?? shareSlug ?? data.id}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: data.name,
-          text: data.description ?? `View ${data.name} on Honestly.`,
+          title: listName,
+          text: data.description ?? `View ${listName} on Honestly.`,
           url: shareUrl
         });
         return;
@@ -45,8 +78,8 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <div className="mb-8">
+      <main className="mx-auto max-w-7xl px-6 py-8 md:py-12">
+        <div className="mb-6 md:mb-8">
           <Link href={data.copy.backHref} className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900">
             <ArrowLeft size={14} />
             {data.copy.backLabel}
@@ -54,20 +87,20 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
         </div>
 
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">Saved List</p>
+          <div className="rounded-[2.5rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+            <Eyebrow className="mb-4">Saved List</Eyebrow>
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="max-w-2xl">
-                <h1 className="text-5xl">{data.name}</h1>
-                {data.description ? <p className="mt-4 max-w-xl text-base leading-relaxed text-stone-500">{data.description}</p> : null}
+                <CardTitle className="max-w-[11ch] text-[2.55rem] leading-[0.94] md:max-w-[15ch] md:text-[3.6rem]">{listName}</CardTitle>
+                {data.description ? <BodyText className="mt-4 max-w-xl">{data.description}</BodyText> : null}
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">
-                  {data.visibility === "shared" ? <Share2 size={12} /> : <Lock size={12} />}
-                  {visibilityLabel}
+                  {visibility === "shared" ? <Share2 size={12} /> : <Lock size={12} />}
+                  <PillText className="text-stone-500">{visibilityLabel}</PillText>
                 </span>
                 <span className="rounded-full border border-stone-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">
-                  {data.itemCountLabel}
+                  <PillText className="text-stone-500">{data.itemCountLabel}</PillText>
                 </span>
                 <button
                   type="button"
@@ -75,19 +108,43 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
                   className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800"
                 >
                   <Share2 size={12} />
-                  {shareState === "copied" ? "Link copied" : "Share publicly"}
+                  {shareState === "copied" ? "Link copied" : shareButtonLabel}
                 </button>
               </div>
             </div>
-            {data.visibility === "private" ? <p className="mt-4 text-[12px] text-stone-500">This list is currently private, but you can still use the share action to publish a public version.</p> : null}
+            {errorMessage ? <p className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
+            {showNamingPrompt ? (
+              <div className="mt-4 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Name this list first</p>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    value={listName}
+                    onChange={(event) => setListName(event.target.value)}
+                    className="flex-1 rounded-full border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none focus:border-stone-900"
+                    placeholder="Summer Wedding 2026"
+                  />
+                  <button
+                    type="button"
+                    className="rounded-full bg-stone-900 px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-white"
+                    onClick={async () => {
+                      setShowNamingPrompt(false);
+                      await handleShare();
+                    }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            ) : null}
+            {visibility === "private" ? <BodyText className="mt-4 text-[12px] md:text-sm">This list stays private until you share it publicly.</BodyText> : null}
           </div>
 
           <aside className="rounded-[2.25rem] border border-stone-200 bg-stone-900 p-6 text-white shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">List Workspace</p>
+            <Eyebrow>List Workspace</Eyebrow>
             <p className="mt-4 text-3xl">{data.vendorCount}</p>
-            <p className="mt-2 text-sm leading-relaxed text-stone-400">Vendors currently tracked in this collection. Use this page to review the shortlist before sharing or outreach.</p>
-            {data.visibility === "shared" && data.shareSlug ? (
-              <Link href={`/lists/${data.shareSlug}`} className="mt-6 inline-flex items-center gap-2 border-b border-white pb-1 text-[11px] font-black uppercase tracking-[0.18em] text-white">
+            <BodyText className="mt-2 text-stone-400">Vendors currently tracked in this collection. Use this page to review the shortlist before sharing or outreach.</BodyText>
+            {visibility === "shared" && shareSlug ? (
+              <Link href={`/lists/${shareSlug}`} className="mt-6 inline-flex items-center gap-2 border-b border-white pb-1 text-[11px] font-black uppercase tracking-[0.18em] text-white">
                 View public version
                 <ArrowUpRight size={14} />
               </Link>
@@ -118,11 +175,13 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
                     </div>
 
                     <div className="min-w-0">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{vendor.categoryLabel}</p>
-                        <h2 className="mt-2 text-[2rem] leading-none">{vendor.vendorName}</h2>
+                      <div className="flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between">
+                        <div>
+                          <MetaText>{vendor.categoryLabel}</MetaText>
+                          <h2 className="mt-2 text-[1.65rem] leading-none md:text-[1.9rem]">{vendor.vendorName}</h2>
+                        </div>
                       </div>
-                      <p className="mt-3 text-sm font-medium uppercase tracking-[0.14em] text-stone-400">{vendor.locationLabel}</p>
+                      <MetaText className="mt-2">{vendor.locationLabel}</MetaText>
                       {vendor.note ? (
                         <div className="mt-5 rounded-[1.5rem] bg-stone-50 p-4">
                           <p className="text-[9px] font-black uppercase tracking-[0.18em] text-stone-400">{data.copy.notesHeading}</p>
@@ -132,12 +191,14 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
                     </div>
 
                     <div className="flex flex-col justify-between gap-3 rounded-[1.5rem] border border-stone-100 bg-stone-50/70 p-4">
-                      <div className="space-y-3">
-                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-stone-400">Saved</p>
-                        <p className="text-xl text-stone-900">{vendor.savedAtLabel}</p>
-                      </div>
-                      <div className="inline-flex w-fit items-center rounded-full bg-amber-100 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
-                        In shortlist
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 md:flex-nowrap">
+                        <MetaText>{vendor.categoryLabel}</MetaText>
+                        <MetaText>{vendor.locationLabel}</MetaText>
+                        <MetaText>Saved</MetaText>
+                        <MetaText>{vendor.savedAtLabel}</MetaText>
+                        <div className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
+                          <PillText className="text-amber-800">In shortlist</PillText>
+                        </div>
                       </div>
                     </div>
                   </Link>

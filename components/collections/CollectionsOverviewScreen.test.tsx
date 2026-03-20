@@ -10,7 +10,8 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push
-  })
+  }),
+  useSearchParams: () => new URLSearchParams()
 }));
 
 vi.mock("@/lib/lists.client", async () => {
@@ -27,11 +28,14 @@ const baseCopy = {
   pageTitle: "Your Collections",
   pageDescription: "Organize your favorite vendors into shared lists for your projects and events.",
   createListLabel: "Create new list",
-  newMoodboardLabel: "New Moodboard",
+  newListCardLabel: "New list",
   allSavedVendorsTitle: "All Saved Vendors",
   addToListLabel: "Add to list",
   visibilityPrivateLabel: "Private",
-  visibilitySharedLabel: "Shared"
+  visibilitySharedLabel: "Shared",
+  sharePubliclyLabel: "Share publicly",
+  renameListLabel: "Rename list",
+  deleteListLabel: "Delete list"
 };
 
 describe("CollectionsOverviewScreen", () => {
@@ -39,12 +43,12 @@ describe("CollectionsOverviewScreen", () => {
     vi.clearAllMocks();
   });
 
-  it("creates a new list from the header CTA and routes into it", async () => {
+  it("creates a new list from the New list card and routes into it", async () => {
     const user = userEvent.setup();
     vi.mocked(persistCreateEmptyList).mockResolvedValue({
       id: "list-new-3",
       userId: "usr-001",
-      name: "Create new list",
+      name: "New list",
       isPublic: false,
       items: []
     });
@@ -59,39 +63,11 @@ describe("CollectionsOverviewScreen", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /create new list/i }));
+    await user.click(screen.getByRole("button", { name: "New list" }));
 
     await waitFor(() => {
       expect(persistCreateEmptyList).toHaveBeenCalled();
       expect(push).toHaveBeenCalledWith("/lists/list-new-3");
-    });
-  });
-
-  it("creates a new list from the New Moodboard card and routes into it", async () => {
-    const user = userEvent.setup();
-    vi.mocked(persistCreateEmptyList).mockResolvedValue({
-      id: "list-new-4",
-      userId: "usr-001",
-      name: "New Moodboard",
-      isPublic: false,
-      items: []
-    });
-
-    render(
-      <CollectionsOverviewScreen
-        userId="usr-001"
-        copy={baseCopy}
-        initialLists={[]}
-        initialSavedLists={[]}
-        savedRows={[]}
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "New Moodboard" }));
-
-    await waitFor(() => {
-      expect(persistCreateEmptyList).toHaveBeenCalled();
-      expect(push).toHaveBeenCalledWith("/lists/list-new-4");
     });
   });
 
@@ -144,11 +120,11 @@ describe("CollectionsOverviewScreen", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /add to list/i }));
+    await user.click(screen.getAllByRole("button", { name: /add to list/i })[0]);
 
     expect(screen.getByRole("heading", { name: /add to list/i })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /summer wedding 2026/i }));
+    await user.click(screen.getAllByRole("button", { name: /summer wedding 2026/i })[1]);
 
     await waitFor(() => {
       expect(persistToggleVendorInList).toHaveBeenCalledWith(

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import type { Review } from "@/lib/types/domain";
 import { ReviewCard } from "@/components/vendor/ReviewCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { MetaText } from "@/components/ui/Typography";
 
 type ReviewListProps = {
   reviews: Review[];
@@ -49,7 +50,7 @@ export function ReviewList({
   }, [reviews]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {!reviews.length ? (
         <EmptyState eyebrow="Reviews" title={emptyTitle} description={emptyDescription} />
       ) : null}
@@ -58,10 +59,10 @@ export function ReviewList({
         <div className="grid gap-3 rounded-[1.8rem] border border-stone-100 bg-stone-50/80 p-5 md:grid-cols-3">
           {rubricSummary.map((item) => (
             <div key={item.label} className="rounded-[1.2rem] bg-white px-4 py-4">
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{item.label}</p>
+              <MetaText className="mb-2">{item.label}</MetaText>
               <div className="flex items-end justify-between gap-4">
-                <p className="text-2xl text-stone-900">{item.average.toFixed(1)}</p>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-300">Average Score</p>
+                <p className="text-lg text-stone-900 md:text-xl">{item.average.toFixed(1)}</p>
+                <MetaText className="text-stone-300">Average Score</MetaText>
               </div>
               <div className="mt-3 h-2 rounded-full bg-stone-100">
                 <div className="h-2 rounded-full bg-amber-500" style={{ width: `${(item.average / 5) * 100}%` }} />

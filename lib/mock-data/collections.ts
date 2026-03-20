@@ -5,9 +5,12 @@ export const mockCollectionsPageCopy: CollectionsPageCopy = {
   pageTitle: "Your Collections",
   pageDescription: "Organize your favorite vendors into shared lists for your projects and events.",
   createListLabel: "Create new list",
-  newMoodboardLabel: "New Moodboard",
+  newListCardLabel: "New list",
   allSavedVendorsTitle: "All Saved Vendors",
   addToListLabel: "Add to list",
   visibilityPrivateLabel: "Private",
-  visibilitySharedLabel: "Shared"
+  visibilitySharedLabel: "Shared",
+  sharePubliclyLabel: "Share publicly",
+  renameListLabel: "Rename list",
+  deleteListLabel: "Delete list"
 };

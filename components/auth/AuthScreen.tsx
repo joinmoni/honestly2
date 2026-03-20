@@ -192,9 +192,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
           <div className="mt-auto border-t border-stone-50 pt-8 text-center">
             <p className="text-xs font-bold text-stone-600">
               {copy.professionalPrompt}
-              <a href="#" className="ml-1 text-amber-700 underline decoration-amber-200">
+              <Link href="/for-professionals" className="ml-1 text-amber-700 underline decoration-amber-200">
                 {copy.listBusinessLabel}
-              </a>
+              </Link>
             </p>
           </div>
         </div>

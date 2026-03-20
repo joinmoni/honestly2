@@ -6,6 +6,7 @@ import { Ban, Check, Pencil, Search, Shield } from "lucide-react";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BodyText, PageTitle } from "@/components/ui/Typography";
 import { updateAdminVendorStatus } from "@/lib/admin-vendors.client";
 import type { AdminVendorDirectoryData } from "@/lib/types/admin-dashboard";
 
@@ -46,8 +47,8 @@ export function AdminVendorDirectoryScreen({ data }: AdminVendorDirectoryScreenP
       <main className="mx-auto max-w-6xl px-6 py-12">
         <header className="mb-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div className="space-y-2">
-            <h1 className="text-4xl">{data.title}</h1>
-            <p className="font-medium italic text-stone-500">{data.description}</p>
+            <PageTitle className="text-4xl md:text-4xl">{data.title}</PageTitle>
+            <BodyText className="font-medium italic text-stone-500">{data.description}</BodyText>
           </div>
 
           <div className="group relative w-full md:w-80">

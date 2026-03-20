@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { BodyText, MetaText, PageTitle } from "@/components/ui/Typography";
 
 type AdminManagementHeaderProps = {
   title: string;
@@ -13,13 +14,13 @@ export function AdminManagementHeader({ title, statusLabel, statusState, onCreat
   return (
     <header className="mb-12 flex flex-col justify-between gap-6 xl:flex-row xl:items-start">
       <div>
-        <h1 className="mb-2 text-4xl">{title}</h1>
-        <p className="text-stone-500">
+        <PageTitle className="mb-2 text-[2.8rem] leading-[0.98] md:text-[3.35rem]">{title}</PageTitle>
+        <BodyText>
           System status:{" "}
-          <span className={statusState === "operational" ? "text-[10px] font-bold uppercase tracking-widest text-emerald-600" : "text-[10px] font-bold uppercase tracking-widest text-amber-600"}>
+          <MetaText className={statusState === "operational" ? "text-emerald-600" : "text-amber-600"}>
             {statusLabel}
-          </span>
-        </p>
+          </MetaText>
+        </BodyText>
       </div>
 
       <div className="flex gap-4">

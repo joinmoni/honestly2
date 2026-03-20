@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { Eyebrow, SectionTitle } from "@/components/ui/Typography";
 import type { Vendor } from "@/lib/types/domain";
 import type { VendorProfile } from "@/lib/types/vendor-profile";
 
 type VendorDetailSidebarProps = {
   vendor: Vendor;
   profile: VendorProfile;
+  onContactVendor?: () => void;
 };
 
-export function VendorDetailSidebar({ vendor, profile }: VendorDetailSidebarProps) {
+export function VendorDetailSidebar({ vendor, profile, onContactVendor }: VendorDetailSidebarProps) {
   const primaryLocation = vendor.locations.find((entry) => entry.isPrimary) ?? vendor.locations[0];
   const locationLabel = primaryLocation
     ? `${primaryLocation.city}${primaryLocation.region ? `, ${primaryLocation.region}` : ""}${primaryLocation.country ? `, ${primaryLocation.country}` : ""}`
@@ -23,8 +25,8 @@ export function VendorDetailSidebar({ vendor, profile }: VendorDetailSidebarProp
     <div className="lg:col-span-1">
       <div className="sticky top-24 space-y-6">
         <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-xl shadow-stone-200/20 md:rounded-[2.25rem] md:p-8">
-          <p className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-stone-400 md:mb-3 md:text-[10px] md:tracking-[0.22em]">At a Glance</p>
-          <h3 className="mb-5 text-3xl md:mb-6">Service Details</h3>
+          <Eyebrow className="mb-2 md:mb-3">At a Glance</Eyebrow>
+          <SectionTitle className="mb-5 text-[2rem] md:mb-6 md:text-3xl">Service Details</SectionTitle>
           <div className="space-y-2 text-[13px] md:space-y-4 md:text-sm">
             <div className="flex justify-between border-b border-stone-50 py-3">
               <span className="text-stone-400">Category</span>
@@ -52,13 +54,14 @@ export function VendorDetailSidebar({ vendor, profile }: VendorDetailSidebarProp
             type="button"
             className="mt-6 w-full rounded-full bg-stone-900 py-3.5 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-transform hover:scale-[1.02] md:mt-8 md:py-4 md:text-[12px]"
             aria-label={profile.ctas.contactLabel}
+            onClick={onContactVendor}
           >
             {profile.ctas.contactLabel}
           </button>
         </div>
 
         <div className="rounded-[1.6rem] border border-dashed border-stone-200 bg-stone-50/70 p-5 text-center md:rounded-[2rem] md:p-6">
-          <p className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-stone-400 md:text-[10px] md:tracking-[0.22em]">Own this business?</p>
+          <Eyebrow className="mb-2">Own this business?</Eyebrow>
           <Link href={`/claim/${vendor.slug}`} className="cursor-pointer text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 underline underline-offset-4 md:text-[11px]">
             {profile.ctas.claimLabel}
           </Link>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { MoreHorizontal } from "lucide-react";
+import { CardTitle, MetaText } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
 import type { CollectionsListCardView } from "@/lib/types/collections";
 
@@ -11,9 +12,10 @@ type CollectionCardProps = {
   list: CollectionsListCardView;
   privateLabel: string;
   sharedLabel: string;
+  onOpenActions?: (list: CollectionsListCardView) => void;
 };
 
-export function CollectionCard({ list, privateLabel, sharedLabel }: CollectionCardProps) {
+export function CollectionCard({ list, privateLabel, sharedLabel, onOpenActions }: CollectionCardProps) {
   const [first, second, third] = list.previewImageUrls;
   const visibilityLabel = list.visibility === "private" ? privateLabel : sharedLabel;
   const showCollage = Boolean(first && second && third && list.extraCount > 0);
@@ -49,12 +51,17 @@ export function CollectionCard({ list, privateLabel, sharedLabel }: CollectionCa
 
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-xl">{list.name}</h3>
-          <p className="text-[13px] font-medium text-stone-400">
+          <CardTitle className="max-w-[14rem] text-[2.2rem] leading-[0.94] md:max-w-none md:text-[2.4rem]">{list.name}</CardTitle>
+          <MetaText className="mt-1 normal-case tracking-normal text-stone-400">
             {list.vendorCount} vendors • {visibilityLabel}
-          </p>
+          </MetaText>
         </div>
-        <button type="button" className="rounded-full p-2 hover:bg-stone-100" aria-label="List options">
+        <button
+          type="button"
+          className="rounded-full p-2 hover:bg-stone-100"
+          aria-label={`List options for ${list.name}`}
+          onClick={() => onOpenActions?.(list)}
+        >
           <MoreHorizontal size={20} />
         </button>
       </div>

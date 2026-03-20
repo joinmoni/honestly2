@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { UserTopNav } from "@/components/ui/UserTopNav";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { BodyText, PageTitle } from "@/components/ui/Typography";
 import { ReviewFlowModal } from "@/components/vendor-detail/ReviewFlowModal";
 import { getUserNavLinks } from "@/lib/user-nav";
 import type { MockSession, RatingCriterion, Review } from "@/lib/types/domain";
@@ -46,10 +48,10 @@ export function MyReviewsScreen({ data, criteria, session }: MyReviewsScreenProp
         navLinks={getUserNavLinks("my_reviews")}
       />
 
-      <main className="mx-auto max-w-4xl px-6 py-16">
-        <header className="mb-12">
-          <h1 className="mb-2 text-4xl">{data.copy.heading}</h1>
-          <p className="italic text-stone-500">{data.copy.description}</p>
+      <main className="mx-auto max-w-4xl px-6 py-8 md:py-10">
+        <header className="mb-10 md:mb-12">
+          <PageTitle className="mb-2">{data.copy.heading}</PageTitle>
+          <BodyText className="italic text-stone-500">{data.copy.description}</BodyText>
         </header>
 
         <div className="mb-10 flex gap-8 overflow-x-auto border-b border-stone-100">
@@ -74,6 +76,19 @@ export function MyReviewsScreen({ data, criteria, session }: MyReviewsScreenProp
         </div>
 
         <div className="space-y-6">
+          {!filteredItems.length ? (
+            <EmptyState
+              eyebrow="Reviews"
+              title={activeFilter === "published" ? "No published reviews yet" : activeFilter === "under-review" ? "No reviews under review" : "No reviews yet"}
+              description={
+                activeFilter === "published"
+                  ? "Edited reviews move into Under Review until they are approved again."
+                  : activeFilter === "under-review"
+                    ? "Reviews awaiting moderation will appear here."
+                    : "Once you submit reviews, they will appear here."
+              }
+            />
+          ) : null}
           {filteredItems.map((item) => {
             const isPublished = item.review.status === "approved";
             const isPending = item.review.status === "pending";
