@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import type { AuthPageCopy } from "@/lib/types/auth-page";
 import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { setMockUserSession } from "@/lib/mock-auth-state.client";
 import { getBrowserSupabaseSession, signInWithEmailOtp, signInWithGoogle } from "@/lib/supabase/auth";
 
 type AuthScreenProps = {
@@ -51,8 +52,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
 
   const handleGoogleSignIn = async () => {
     if (!supabaseConfigured) {
-      setErrorMessage("Sign-in will be available once authentication is connected.");
-      setEmailSuccess(null);
+      setMockUserSession();
+      router.replace(nextPath);
+      router.refresh();
       return;
     }
 
@@ -71,8 +73,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
 
   const handleEmailContinue = async () => {
     if (!supabaseConfigured) {
-      setErrorMessage("Email sign-in will be available once authentication is connected.");
-      setEmailSuccess(null);
+      setMockUserSession();
+      router.replace(nextPath);
+      router.refresh();
       return;
     }
 

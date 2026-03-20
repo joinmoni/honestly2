@@ -56,7 +56,7 @@ export function HomeHeroSearch({
   const [whereQuery, setWhereQuery] = useState(initialWhereQuery);
   const [activeField, setActiveField] = useState<ActiveField>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [portalRect, setPortalRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [portalRect, setPortalRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const debouncedWhoQuery = useDebouncedValue(whoQuery, 220);
   const debouncedWhereQuery = useDebouncedValue(whereQuery, 220);
 
@@ -70,7 +70,8 @@ export function HomeHeroSearch({
       setPortalRect({
         top: rect.bottom + 12,
         left: rect.left,
-        width: rect.width
+        width: rect.width,
+        maxHeight: Math.max(200, window.innerHeight - rect.bottom - 28)
       });
     };
 
@@ -247,7 +248,7 @@ export function HomeHeroSearch({
             type="text"
             value={whoQuery}
             placeholder={searchWhoPlaceholder}
-            className="w-full bg-transparent text-[13px] placeholder:text-stone-300 focus:outline-none md:text-sm"
+            className="w-full bg-transparent text-base placeholder:text-stone-300 focus:outline-none md:text-sm"
             aria-expanded={activeField === "who"}
             aria-controls={activeField === "who" ? listboxId : undefined}
             role="combobox"
@@ -273,7 +274,7 @@ export function HomeHeroSearch({
             type="text"
             value={whereQuery}
             placeholder={searchWherePlaceholder}
-            className="w-full bg-transparent text-[13px] placeholder:text-stone-300 focus:outline-none md:text-sm"
+            className="w-full bg-transparent text-base placeholder:text-stone-300 focus:outline-none md:text-sm"
             aria-expanded={activeField === "where"}
             aria-controls={activeField === "where" ? listboxId : undefined}
             role="combobox"
@@ -312,12 +313,14 @@ export function HomeHeroSearch({
                   position: "fixed",
                   top: portalRect.top,
                   left: portalRect.left,
-                  width: portalRect.width
+                  width: portalRect.width,
+                  maxHeight: portalRect.maxHeight
                 }}
               >
                 {activeField === "who" ? (
                   <WhoDropdown
-                    id={listboxId ?? "who-search-listbox"}
+                  id={listboxId ?? "who-search-listbox"}
+                  maxHeight={portalRect.maxHeight}
                   query={whoQuery}
                   activeIndex={activeIndex}
                   categoryMatches={whoSuggestions.categoryMatches}
@@ -329,6 +332,7 @@ export function HomeHeroSearch({
                 ) : (
                   <WhereDropdown
                     id={listboxId ?? "where-search-listbox"}
+                    maxHeight={portalRect.maxHeight}
                   query={whereQuery}
                   activeIndex={activeIndex}
                   locations={whereSuggestions.locationMatches}
@@ -347,6 +351,7 @@ export function HomeHeroSearch({
 
 function WhoDropdown({
   id,
+  maxHeight,
   query,
   activeIndex,
   categoryMatches,
@@ -356,6 +361,7 @@ function WhoDropdown({
   onSearchAll
 }: {
   id: string;
+  maxHeight: number;
   query: string;
   activeIndex: number;
   categoryMatches: HomepageSearchIndex["categories"];
@@ -392,7 +398,7 @@ function WhoDropdown({
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-stone-100 bg-white shadow-2xl shadow-stone-200/50">
-      <div className="p-2" role="listbox" id={id}>
+      <div className="overflow-y-auto p-2" role="listbox" id={id} style={{ maxHeight }}>
         <div className="px-4 py-3">
           <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-stone-400">Suggested Categories</p>
           <div className="space-y-1">
@@ -489,6 +495,7 @@ function WhoDropdown({
 
 function WhereDropdown({
   id,
+  maxHeight,
   query,
   activeIndex,
   locations,
@@ -496,6 +503,7 @@ function WhereDropdown({
   onSelect
 }: {
   id: string;
+  maxHeight: number;
   query: string;
   activeIndex: number;
   locations: HomepageSearchIndex["locations"];
@@ -511,7 +519,7 @@ function WhereDropdown({
   }
 
   return (
-    <div className="rounded-[2rem] border border-stone-100 bg-white p-2 shadow-2xl shadow-stone-200/50" role="listbox" id={id}>
+    <div className="overflow-y-auto rounded-[2rem] border border-stone-100 bg-white p-2 shadow-2xl shadow-stone-200/50" role="listbox" id={id} style={{ maxHeight }}>
       <div className="px-4 py-3">
         <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-stone-400">{query.trim() ? "Matching Locations" : "Popular Locations"}</p>
         <div className="space-y-1">

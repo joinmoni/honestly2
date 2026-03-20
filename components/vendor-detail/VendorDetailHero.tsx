@@ -14,9 +14,10 @@ type VendorDetailHeroProps = {
   session: MockSession;
   onOpenContact?: () => void;
   onOpenShare?: () => void;
+  onOpenLeaveReview?: () => void;
 };
 
-export function VendorDetailHero({ vendor, profile, initialLists, session, onOpenContact, onOpenShare }: VendorDetailHeroProps) {
+export function VendorDetailHero({ vendor, profile, initialLists, session, onOpenContact, onOpenShare, onOpenLeaveReview }: VendorDetailHeroProps) {
   const location = vendor.locations.find((entry) => entry.isPrimary) ?? vendor.locations[0];
   const categoryLabel = vendor.primaryCategory?.name ?? profile.serviceDetails.categoryLabel ?? "Vendor";
   const subcategoryLabel = vendor.subcategories[0]?.name;
@@ -71,12 +72,23 @@ export function VendorDetailHero({ vendor, profile, initialLists, session, onOpe
             {profile.ctas.contactLabel}
           </button>
           <div className="flex items-center gap-3">
-            <VendorSaveButton
-              vendor={vendor}
-              label={profile.ctas.saveLabel}
-              initialLists={initialLists}
-              currentUserId={session.user?.id ?? null}
-            />
+            {session.user ? (
+              <VendorSaveButton
+                vendor={vendor}
+                label={profile.ctas.saveLabel}
+                initialLists={initialLists}
+                currentUserId={session.user?.id ?? null}
+              />
+            ) : (
+              <button
+                type="button"
+                className="flex flex-1 items-center justify-center rounded-full border border-stone-200 px-6 py-3 text-sm font-medium transition-all hover:bg-stone-50 md:flex-none"
+                aria-label={profile.ctas.leaveReviewLabel}
+                onClick={onOpenLeaveReview}
+              >
+                {profile.ctas.leaveReviewLabel}
+              </button>
+            )}
             <button
               type="button"
               className="flex-1 rounded-full border border-stone-200 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900 md:px-5 md:text-[11px]"

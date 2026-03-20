@@ -54,6 +54,15 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, cu
             searchWherePlaceholder={content.searchWherePlaceholder}
             searchIndex={searchIndex}
           />
+          {!currentUserName ? (
+            <div className="mt-5 text-center text-sm text-stone-500 md:mt-6">
+              Used a great vendor before?{" "}
+              <Link href="/for-professionals#claim" className="font-semibold text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-amber-700">
+                Add or claim them here
+              </Link>
+              .
+            </div>
+          ) : null}
         </section>
 
         <HomeCategoryRail shortcuts={shortcuts} />

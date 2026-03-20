@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowUpRight, Lock, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Lock, PencilLine, Share2 } from "lucide-react";
 import { useState } from "react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BodyText, CardTitle, Eyebrow, MetaText, PillText } from "@/components/ui/Typography";
@@ -91,7 +91,20 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
             <Eyebrow className="mb-4">Saved List</Eyebrow>
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="max-w-2xl">
-                <CardTitle className="max-w-[11ch] text-[2.55rem] leading-[0.94] md:max-w-[15ch] md:text-[3.6rem]">{listName}</CardTitle>
+                <div className="flex items-start gap-3">
+                  <CardTitle className="max-w-[11ch] text-[2.55rem] leading-[0.94] md:max-w-[15ch] md:text-[3.6rem]">{listName}</CardTitle>
+                  <button
+                    type="button"
+                    aria-label="Rename list"
+                    className="mt-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition-colors hover:border-stone-900 hover:text-stone-900"
+                    onClick={() => {
+                      setShowNamingPrompt(true);
+                      setErrorMessage(null);
+                    }}
+                  >
+                    <PencilLine size={16} />
+                  </button>
+                </div>
                 {data.description ? <BodyText className="mt-4 max-w-xl">{data.description}</BodyText> : null}
               </div>
               <div className="flex flex-wrap items-center gap-3">

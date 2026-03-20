@@ -17,11 +17,12 @@ type EditorialTopNavProps = {
   rightSlot: ReactNode;
   className?: string;
   innerClassName?: string;
+  sticky?: boolean;
 };
 
-export function EditorialTopNav({ brandLabel, navLinks, rightSlot, className, innerClassName }: EditorialTopNavProps) {
+export function EditorialTopNav({ brandLabel, navLinks, rightSlot, className, innerClassName, sticky = true }: EditorialTopNavProps) {
   return (
-    <nav className={cn("sticky top-0 z-50 border-b border-stone-100 bg-white/95 backdrop-blur-md", className)} aria-label={brandLabel}>
+    <nav className={cn(sticky ? "sticky top-0 z-50 border-b border-stone-100 bg-white/95 backdrop-blur-md" : "border-b border-stone-100 bg-white", className)} aria-label={brandLabel}>
       <div className={cn("mx-auto flex w-full items-center justify-between gap-6 px-6 py-6", innerClassName)}>
         <Link href="/" className="serif-italic shrink-0 text-4xl text-stone-800">
           {brandLabel}

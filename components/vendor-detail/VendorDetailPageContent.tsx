@@ -23,6 +23,7 @@ type VendorDetailPageContentProps = {
 
 export function VendorDetailPageContent({ vendor, profile, initialLists, session, criteria, approvedReviews }: VendorDetailPageContentProps) {
   const [modalMode, setModalMode] = useState<"contact" | "share" | null>(null);
+  const [reviewOpenRequest, setReviewOpenRequest] = useState(0);
 
   return (
     <>
@@ -33,6 +34,7 @@ export function VendorDetailPageContent({ vendor, profile, initialLists, session
         session={session}
         onOpenContact={() => setModalMode("contact")}
         onOpenShare={() => setModalMode("share")}
+        onOpenLeaveReview={() => setReviewOpenRequest((current) => current + 1)}
       />
       <VendorDetailGallery images={vendor.images} />
 
@@ -47,6 +49,7 @@ export function VendorDetailPageContent({ vendor, profile, initialLists, session
             initialReviews={approvedReviews}
             initialReviewCount={vendor.reviewCount}
             session={session}
+            openRequest={reviewOpenRequest}
           />
         </div>
 

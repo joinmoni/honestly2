@@ -4,6 +4,7 @@ import { CategoryListingScreen } from "@/components/category-listing/CategoryLis
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getCategoryListingPageData } from "@/lib/services/category-listing";
 import { getFooterContent } from "@/lib/services/footer";
+import { getCurrentSession } from "@/lib/services/session";
 import { buildPageMetadata } from "@/lib/seo";
 
 type CategoryPageProps = {
@@ -35,6 +36,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     getCategoryListingPageData(slug),
     getFooterContent()
   ]);
+  const session = await getCurrentSession();
 
   if (!data) {
     notFound();
@@ -42,7 +44,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <>
-      <CategoryListingScreen data={data} />
+      <CategoryListingScreen
+        data={data}
+        currentUserName={session.user?.name}
+        currentUserEmail={session.user?.email}
+        currentUserAvatarUrl={session.user?.avatarUrl}
+      />
       <SiteFooter content={footerContent} variant="dark" />
     </>
   );

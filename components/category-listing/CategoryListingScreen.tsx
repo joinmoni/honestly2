@@ -3,15 +3,22 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
+import { ProfileMenu } from "@/components/ui/ProfileMenu";
+import { UserTopNav } from "@/components/ui/UserTopNav";
+import { getUserNavLinks } from "@/lib/user-nav";
 import { CategoryVendorCard } from "@/components/category-listing/CategoryVendorCard";
 import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
 import type { CategoryListingPageData } from "@/lib/types/category-listing";
 
 type CategoryListingScreenProps = {
   data: CategoryListingPageData;
+  currentUserName?: string | null;
+  currentUserEmail?: string | null;
+  currentUserAvatarUrl?: string;
 };
 
-export function CategoryListingScreen({ data }: CategoryListingScreenProps) {
+export function CategoryListingScreen({ data, currentUserName, currentUserEmail, currentUserAvatarUrl }: CategoryListingScreenProps) {
   const [activeStyleId, setActiveStyleId] = useState("all");
   const activeStyle = data.styleChips.find((chip) => chip.id === activeStyleId);
   const hasAccentSplit =
@@ -29,19 +36,27 @@ export function CategoryListingScreen({ data }: CategoryListingScreenProps) {
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
-        <Link href="/" className="serif-italic text-2xl">
-          honestly<span className="text-amber-600">.</span>
-        </Link>
-        <div className="flex items-center gap-6 text-[13px] font-bold uppercase tracking-[0.15em] text-stone-500">
-          <Link href="/vendors" className="border-b-2 border-stone-900 pb-1 text-stone-900">
-            {data.copy.navSearchLabel}
-          </Link>
-          <Link href="/lists" className="transition-colors hover:text-stone-900">
-            {data.copy.navCollectionsLabel}
-          </Link>
-        </div>
-      </nav>
+      {currentUserName ? (
+        <UserTopNav
+          brandLabel={data.copy.brandLabel}
+          avatarName={currentUserName}
+          avatarEmail={currentUserEmail}
+          avatarUrl={currentUserAvatarUrl}
+          navLinks={getUserNavLinks("none")}
+          className="!static bg-white"
+        />
+      ) : (
+        <EditorialTopNav
+          brandLabel={data.copy.brandLabel}
+          navLinks={[
+            { label: data.copy.navSearchLabel, href: "/vendors", active: true },
+            { label: data.copy.navCollectionsLabel, href: "/lists" }
+          ]}
+          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
+          innerClassName="max-w-7xl md:px-12"
+          sticky={false}
+        />
+      )}
 
       <main className="mx-auto max-w-7xl px-6 py-12">
         <header className="mb-16 max-w-2xl">

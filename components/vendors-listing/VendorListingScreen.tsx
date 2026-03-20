@@ -60,7 +60,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <header className="sticky top-0 z-50 border-b border-stone-100 bg-white">
+      <header className="border-b border-stone-100 bg-white">
         {currentUserName ? (
           <UserTopNav
             brandLabel={data.copy.brandLabel}
@@ -68,7 +68,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             avatarEmail={currentUserEmail}
             avatarUrl={currentUserAvatarUrl}
             navLinks={getUserNavLinks("none")}
-            className="border-b-0 bg-white"
+            className="!static border-b-0 bg-white"
           />
         ) : (
           <EditorialTopNav
@@ -79,6 +79,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             }))}
             className="border-b-0 bg-white"
             innerClassName="max-w-7xl md:px-12"
+            sticky={false}
             rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
           />
         )}

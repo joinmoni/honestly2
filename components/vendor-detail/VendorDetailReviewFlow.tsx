@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { VendorDetailReviews } from "@/components/vendor-detail/VendorDetailReviews";
 import { ReviewFlowModal } from "@/components/vendor-detail/ReviewFlowModal";
 import type { MockSession, RatingCriterion, Review } from "@/lib/types/domain";
@@ -14,9 +14,10 @@ type VendorDetailReviewFlowProps = {
   initialReviews: Review[];
   initialReviewCount: number;
   session: MockSession;
+  openRequest?: number;
 };
 
-export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria, initialReviews, initialReviewCount, session }: VendorDetailReviewFlowProps) {
+export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria, initialReviews, initialReviewCount, session, openRequest = 0 }: VendorDetailReviewFlowProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [reviewCount, setReviewCount] = useState(initialReviewCount);
   const [open, setOpen] = useState(false);
@@ -25,6 +26,12 @@ export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria
     if (!session.user) return null;
     return reviews.find((review) => review.userId === session.user?.id) ?? null;
   }, [reviews, session.user]);
+
+  useEffect(() => {
+    if (openRequest > 0) {
+      setOpen(true);
+    }
+  }, [openRequest]);
 
   return (
     <>

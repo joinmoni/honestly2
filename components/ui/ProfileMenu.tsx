@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { usePreferredAvatar } from "@/lib/profile-avatar.client";
 import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { setMockAnonymousSession } from "@/lib/mock-auth-state.client";
 import { signOut } from "@/lib/supabase/auth";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +76,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
     setSignOutError(null);
 
     if (!isSupabaseConfigured()) {
+      setMockAnonymousSession();
       setOpen(false);
       router.push("/login");
       router.refresh();

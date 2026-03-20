@@ -14,10 +14,10 @@ export function ProfessionalCtaBanner({ className, compact = false }: Profession
         <div className="max-w-2xl">
           <Eyebrow className="mb-3 text-amber-700">For Professionals</Eyebrow>
           <CardTitle className={compact ? "mb-3 text-[2rem] leading-[0.98] md:text-[2.5rem]" : "mb-3"}>
-            Bring your business onto Honestly.
+            Add a vendor you trust or bring your business onto Honestly.
           </CardTitle>
           <BodyText>
-            Start with a professional account, claim an existing page, or learn how vendor submissions work before you apply.
+            Used a great vendor before? Help them get discovered, claim an existing page, or start a professional account to list your own business.
           </BodyText>
         </div>
 
@@ -29,7 +29,7 @@ export function ProfessionalCtaBanner({ className, compact = false }: Profession
             <PillText className="text-white">List your business</PillText>
           </Link>
           <Link href="/for-professionals#claim" className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 text-center transition-colors hover:border-stone-900">
-            <PillText>Claim your page</PillText>
+            <PillText>Add or claim a vendor</PillText>
           </Link>
         </div>
       </div>

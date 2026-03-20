@@ -15,6 +15,7 @@ import { mockVendorEditCopy } from "@/lib/mock-data/vendor-edit";
 import { mockVendorListingCopy, mockVendorListingFilterChips } from "@/lib/mock-data/vendor-listing";
 import { mockVendorProfiles } from "@/lib/mock-data/vendor-profiles";
 import { mockVendors } from "@/lib/mock-data/vendors";
+import { getServerMockAuthState } from "@/lib/mock-auth-state.server";
 import { getServerStoredMockLists } from "@/lib/mock-list-persistence.server";
 import { mergeMockLists } from "@/lib/mock-list-persistence.shared";
 import type { AppDataLayer } from "@/lib/services/contracts";
@@ -62,13 +63,18 @@ export const mockDataLayer: AppDataLayer = {
     return mockVendorClaims.filter((claim) => claim.vendorId === vendorId);
   },
   async getCurrentSession() {
+    const authState = await getServerMockAuthState();
+    if (authState === "anonymous") return mockAnonymousSession;
+    if (authState === "admin") return mockAdminSession;
     return mockUserSession;
   },
   async getAnonymousSession() {
     return mockAnonymousSession;
   },
   async getAdminSession() {
-    return mockAdminSession;
+    const authState = await getServerMockAuthState();
+    if (authState === "admin") return mockAdminSession;
+    return mockAnonymousSession;
   },
   async getVendorProfileByVendorId(vendorId) {
     return mockVendorProfiles.find((profile) => profile.vendorId === vendorId) ?? null;

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 
 import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { setMockAnonymousSession } from "@/lib/mock-auth-state.client";
 import { signOut } from "@/lib/supabase/auth";
 import type { AdminNavLink } from "@/lib/types/admin-dashboard";
 
@@ -20,6 +21,7 @@ export function AdminSidebarPanel({ brandLabel, queueNav, structureNav }: AdminS
 
   const handleLogout = async () => {
     if (!isSupabaseConfigured()) {
+      setMockAnonymousSession();
       router.push("/login");
       router.refresh();
       return;
