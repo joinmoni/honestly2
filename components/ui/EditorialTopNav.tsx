@@ -23,8 +23,8 @@ type EditorialTopNavProps = {
 export function EditorialTopNav({ brandLabel, navLinks, rightSlot, className, innerClassName, sticky = true }: EditorialTopNavProps) {
   return (
     <nav className={cn(sticky ? "sticky top-0 z-50 border-b border-stone-100 bg-white/95 backdrop-blur-md" : "border-b border-stone-100 bg-white", className)} aria-label={brandLabel}>
-      <div className={cn("mx-auto flex w-full items-center justify-between gap-6 px-6 py-6", innerClassName)}>
-        <Link href="/" className="serif-italic shrink-0 text-4xl text-stone-800">
+      <div className={cn("mx-auto flex w-full items-center justify-between gap-4 px-6 py-3 md:gap-6 md:py-6", innerClassName)}>
+        <Link href="/" className="serif-italic shrink-0 text-[2.65rem] leading-none text-stone-800 md:text-4xl">
           {brandLabel}
         </Link>
 

@@ -13,7 +13,7 @@ export const mockAuthPageCopy: AuthPageCopy = {
   termsPrefix: "By continuing, you agree to Honestly's",
   termsLabel: "Terms of Service",
   privacyLabel: "Privacy Policy",
-  professionalPrompt: "Are you a professional?",
-  listBusinessLabel: "List your business",
+  professionalPrompt: "Used a great vendor before?",
+  listBusinessLabel: "Tell us about them",
   heroImageUrl: "https://images.unsplash.com/photo-1517722014278-c256a911678b?auto=format&fit=crop&q=80&w=1000"
 };

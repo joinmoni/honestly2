@@ -8,29 +8,29 @@ export function ProfessionalLandingScreen() {
       <main className="mx-auto max-w-7xl px-6 py-10 md:px-12 md:py-16">
         <section className="grid gap-8 rounded-[2rem] border border-stone-200 bg-white px-6 py-8 shadow-[0_20px_60px_rgba(24,24,24,0.05)] md:grid-cols-[minmax(0,1.4fr)_340px] md:px-10 md:py-12">
           <div className="max-w-3xl">
-            <Eyebrow className="mb-4 text-amber-700">For Professionals</Eyebrow>
-            <PageTitle className="mb-5">Join Honestly as a vendor.</PageTitle>
+            <Eyebrow className="mb-4 text-amber-700">Recommend A Vendor</Eyebrow>
+            <PageTitle className="mb-5">Tell us about a vendor you trust.</PageTitle>
             <BodyText className="max-w-2xl">
-              Create your professional account, tell clients what you offer, and claim an existing page if your work is already featured on Honestly.
+              Honestly is driven by real client recommendations. If you have worked with a great vendor for a wedding, birthday, or event, you can help bring them onto the platform and claim an existing page if they are already here.
             </BodyText>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
-                <PillText className="text-white">Start with a professional account</PillText>
+                <PillText className="text-white">Recommend a vendor</PillText>
               </Link>
               <Link href="/vendors" className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
-                <PillText>Browse vendors to claim your page</PillText>
+                <PillText>Browse vendors to claim a page</PillText>
               </Link>
             </div>
           </div>
 
           <div className="rounded-[1.75rem] bg-stone-900 px-6 py-6 text-white">
-            <Eyebrow className="mb-4 text-stone-300">What happens next</Eyebrow>
+            <Eyebrow className="mb-4 text-stone-300">How it works</Eyebrow>
             <ol className="space-y-4">
               <li>
                 <MetaText className="mb-1 text-stone-400">1.</MetaText>
-                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Create your account</CardTitle>
-                <BodyText className="text-stone-300">Use email or Google to access the professional flow.</BodyText>
+                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Tell us who they are</CardTitle>
+                <BodyText className="text-stone-300">Share the vendor you used so we can understand their work and why they belong on Honestly.</BodyText>
               </li>
               <li id="claim">
                 <MetaText className="mb-1 text-stone-400">2.</MetaText>
@@ -39,8 +39,8 @@ export function ProfessionalLandingScreen() {
               </li>
               <li>
                 <MetaText className="mb-1 text-stone-400">3.</MetaText>
-                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Share your work</CardTitle>
-                <BodyText className="text-stone-300">Once approved, your profile can collect reviews, saves, and shortlist traffic.</BodyText>
+                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Help great vendors get discovered</CardTitle>
+                <BodyText className="text-stone-300">Once approved, the vendor can collect reviews, saves, and shortlist traffic from future clients.</BodyText>
               </li>
             </ol>
           </div>
@@ -48,9 +48,9 @@ export function ProfessionalLandingScreen() {
 
         <section className="mt-10 grid gap-6 md:grid-cols-3">
           <article className="rounded-[1.75rem] border border-stone-200 bg-white px-6 py-6">
-            <Eyebrow className="mb-3">Account</Eyebrow>
-            <SectionTitle className="mb-3 text-[1.85rem] leading-tight md:text-[2.1rem]">Sign in or create an account</SectionTitle>
-            <BodyText>Professionals start from the same login entry point as clients. We will route account setup from there.</BodyText>
+            <Eyebrow className="mb-3">Community-led</Eyebrow>
+            <SectionTitle className="mb-3 text-[1.85rem] leading-tight md:text-[2.1rem]">Client recommendations come first</SectionTitle>
+            <BodyText>Honestly is built around real people recommending the vendors they have actually used and trusted.</BodyText>
           </article>
           <article className="rounded-[1.75rem] border border-stone-200 bg-white px-6 py-6">
             <Eyebrow className="mb-3">Claims</Eyebrow>
@@ -58,9 +58,9 @@ export function ProfessionalLandingScreen() {
             <BodyText>Open your vendor page and use <span className="font-semibold text-stone-900">Claim this page</span> to submit ownership details for review.</BodyText>
           </article>
           <article className="rounded-[1.75rem] border border-stone-200 bg-white px-6 py-6">
-            <Eyebrow className="mb-3">Support</Eyebrow>
-            <SectionTitle className="mb-3 text-[1.85rem] leading-tight md:text-[2.1rem]">Need help before applying?</SectionTitle>
-            <BodyText>Use the claim path if you already have a profile, or start from login if you are new to the platform.</BodyText>
+            <Eyebrow className="mb-3">Professionals</Eyebrow>
+            <SectionTitle className="mb-3 text-[1.85rem] leading-tight md:text-[2.1rem]">Vendors can still join directly</SectionTitle>
+            <BodyText>If you are the vendor yourself, you can still use this path to claim or introduce your own business.</BodyText>
           </article>
         </section>
       </main>

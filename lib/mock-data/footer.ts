@@ -18,9 +18,9 @@ export const mockFooterContent: FooterContent = {
     },
     {
       id: "professionals",
-      title: "For Professionals",
+      title: "Recommend A Vendor",
       links: [
-        { label: "List your Business", href: "/for-professionals" },
+        { label: "Tell Us About a Vendor", href: "/for-professionals" },
         { label: "Claim your Page", href: "/for-professionals#claim" },
         { label: "Vendor Guidelines", href: "#" },
         { label: "Support Center", href: "#" }

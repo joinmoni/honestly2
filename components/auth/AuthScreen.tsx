@@ -24,6 +24,14 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const router = useRouter();
 
+  const clearFocusBeforeRedirect = () => {
+    if (typeof document === "undefined") return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  };
+
   useEffect(() => {
     if (!isSupabaseConfigured()) {
       return;
@@ -36,6 +44,7 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
         const session = await getBrowserSupabaseSession();
 
         if (!cancelled && session) {
+          clearFocusBeforeRedirect();
           router.replace(nextPath);
         }
       } catch {
@@ -53,6 +62,7 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
   const handleGoogleSignIn = async () => {
     if (!supabaseConfigured) {
       setMockUserSession();
+      clearFocusBeforeRedirect();
       router.replace(nextPath);
       router.refresh();
       return;
@@ -74,6 +84,7 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
   const handleEmailContinue = async () => {
     if (!supabaseConfigured) {
       setMockUserSession();
+      clearFocusBeforeRedirect();
       router.replace(nextPath);
       router.refresh();
       return;

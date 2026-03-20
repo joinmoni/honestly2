@@ -52,6 +52,7 @@ export function HomeHeroSearch({
   const whereInputId = useId();
   const whoFieldRef = useRef<HTMLDivElement | null>(null);
   const whereFieldRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [whoQuery, setWhoQuery] = useState(initialWhoQuery);
   const [whereQuery, setWhereQuery] = useState(initialWhereQuery);
   const [activeField, setActiveField] = useState<ActiveField>(null);
@@ -90,13 +91,27 @@ export function HomeHeroSearch({
 
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (whoFieldRef.current?.contains(target) || whereFieldRef.current?.contains(target)) return;
+      if (
+        whoFieldRef.current?.contains(target) ||
+        whereFieldRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      ) {
+        return;
+      }
       setActiveField(null);
     };
 
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [activeField]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.dataset.searchField === "true") {
+      active.blur();
+    }
+  }, []);
 
   const whoSuggestions = useMemo(() => {
     const term = debouncedWhoQuery.trim().toLowerCase();
@@ -249,6 +264,7 @@ export function HomeHeroSearch({
             value={whoQuery}
             placeholder={searchWhoPlaceholder}
             className="w-full bg-transparent text-base placeholder:text-stone-300 focus:outline-none md:text-sm"
+            data-search-field="true"
             aria-expanded={activeField === "who"}
             aria-controls={activeField === "who" ? listboxId : undefined}
             role="combobox"
@@ -275,6 +291,7 @@ export function HomeHeroSearch({
             value={whereQuery}
             placeholder={searchWherePlaceholder}
             className="w-full bg-transparent text-base placeholder:text-stone-300 focus:outline-none md:text-sm"
+            data-search-field="true"
             aria-expanded={activeField === "where"}
             aria-controls={activeField === "where" ? listboxId : undefined}
             role="combobox"
@@ -304,6 +321,7 @@ export function HomeHeroSearch({
         ? createPortal(
             <AnimatePresence>
               <motion.div
+                ref={dropdownRef}
                 initial={{ opacity: 0, y: -8, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
