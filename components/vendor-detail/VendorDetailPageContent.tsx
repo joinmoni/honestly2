@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
@@ -22,8 +23,10 @@ type VendorDetailPageContentProps = {
 };
 
 export function VendorDetailPageContent({ vendor, profile, initialLists, session, criteria, approvedReviews }: VendorDetailPageContentProps) {
+  const router = useRouter();
   const [modalMode, setModalMode] = useState<"contact" | "share" | null>(null);
-  const [reviewOpenRequest, setReviewOpenRequest] = useState(0);
+  const reviewHref = session.user ? `/reviews/new?vendorSlug=${vendor.slug}` : `/login?next=${encodeURIComponent(`/reviews/new?vendorSlug=${vendor.slug}`)}`;
+  const claimHref = session.user ? `/claim/${vendor.slug}` : `/login?next=${encodeURIComponent(`/claim/${vendor.slug}`)}`;
 
   return (
     <>
@@ -34,7 +37,7 @@ export function VendorDetailPageContent({ vendor, profile, initialLists, session
         session={session}
         onOpenContact={() => setModalMode("contact")}
         onOpenShare={() => setModalMode("share")}
-        onOpenLeaveReview={() => setReviewOpenRequest((current) => current + 1)}
+        onOpenLeaveReview={() => router.push(reviewHref)}
       />
       <VendorDetailGallery images={vendor.images} />
 
@@ -49,11 +52,11 @@ export function VendorDetailPageContent({ vendor, profile, initialLists, session
             initialReviews={approvedReviews}
             initialReviewCount={vendor.reviewCount}
             session={session}
-            openRequest={reviewOpenRequest}
+            onLeaveReviewNavigate={() => router.push(reviewHref)}
           />
         </div>
 
-        <VendorDetailSidebar vendor={vendor} profile={profile} onContactVendor={() => setModalMode("contact")} />
+        <VendorDetailSidebar vendor={vendor} profile={profile} claimHref={claimHref} onContactVendor={() => setModalMode("contact")} />
       </div>
 
       {!session.user ? <ProfessionalCtaBanner className="mt-8 md:mt-10" /> : null}

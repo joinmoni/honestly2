@@ -39,7 +39,6 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<SavedVendorRowView | null>(null);
   const [activeList, setActiveList] = useState<CollectionsListCardView | null>(null);
-  const [renamingListName, setRenamingListName] = useState("");
 
   const syncCardAfterToggle = (listId: string, didAdd: boolean, imageUrl?: string) => {
     setLists((current) =>
@@ -122,7 +121,7 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
 
   const handleOpenActions = (list: CollectionsListCardView) => {
     setActiveList(list);
-    setRenamingListName(list.name);
+    setErrorMessage(null);
   };
 
   const handleShareList = async () => {
@@ -133,47 +132,23 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
 
     try {
       const sourceList = savedLists.find((list) => list.id === activeList.id);
-      const nextName = renamingListName.trim() || activeList.name;
-      const requiresName = isGenericListName(sourceList?.name ?? activeList.name);
+      const sourceName = sourceList?.name ?? activeList.name;
 
-      if (requiresName && !renamingListName.trim()) {
+      if (isGenericListName(sourceName)) {
         setErrorMessage("Name this list before sharing it publicly.");
         setPending(false);
         return;
       }
 
       const nextLists = await persistUpdateListDetails(savedLists, activeList.id, {
-        name: nextName,
+        name: sourceName,
         isPublic: true
       });
 
       setSavedLists(nextLists);
       syncCardsFromSavedLists(nextLists);
-      setActiveList(null);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "This list could not be shared right now.");
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const handleRenameList = async () => {
-    if (!activeList) return;
-    const nextName = renamingListName.trim();
-    if (!nextName) {
-      setErrorMessage("Enter a list name first.");
-      return;
-    }
-
-    setPending(true);
-    setErrorMessage(null);
-    try {
-      const nextLists = await persistUpdateListDetails(savedLists, activeList.id, { name: nextName });
-      setSavedLists(nextLists);
-      syncCardsFromSavedLists(nextLists);
-      setActiveList(null);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "This list could not be renamed right now.");
     } finally {
       setPending(false);
     }
@@ -310,20 +285,8 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">List actions</p>
               <h3 className="mt-3 text-2xl leading-tight">{activeList.name}</h3>
               <div className="mt-5 space-y-3">
-                <label className="block">
-                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{copy.renameListLabel}</span>
-                  <input
-                    value={renamingListName}
-                    onChange={(event) => setRenamingListName(event.target.value)}
-                    className="w-full rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-900 outline-none transition-colors focus:border-stone-900"
-                    placeholder="Summer Wedding 2026"
-                  />
-                </label>
-                <button type="button" className="w-full rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-900" onClick={handleRenameList}>
-                  {copy.renameListLabel}
-                </button>
                 <button type="button" className="w-full rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white" onClick={handleShareList}>
-                  {copy.sharePubliclyLabel}
+                  {activeList.visibility === "shared" ? "Share" : copy.sharePubliclyLabel}
                 </button>
                 <button type="button" className="w-full rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700" onClick={handleDeleteList}>
                   {copy.deleteListLabel}

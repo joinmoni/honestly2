@@ -7,9 +7,10 @@ type VendorDetailSidebarProps = {
   vendor: Vendor;
   profile: VendorProfile;
   onContactVendor?: () => void;
+  claimHref?: string;
 };
 
-export function VendorDetailSidebar({ vendor, profile, onContactVendor }: VendorDetailSidebarProps) {
+export function VendorDetailSidebar({ vendor, profile, onContactVendor, claimHref }: VendorDetailSidebarProps) {
   const primaryLocation = vendor.locations.find((entry) => entry.isPrimary) ?? vendor.locations[0];
   const locationLabel = primaryLocation
     ? `${primaryLocation.city}${primaryLocation.region ? `, ${primaryLocation.region}` : ""}${primaryLocation.country ? `, ${primaryLocation.country}` : ""}`
@@ -62,7 +63,7 @@ export function VendorDetailSidebar({ vendor, profile, onContactVendor }: Vendor
 
         <div className="rounded-[1.6rem] border border-dashed border-stone-200 bg-stone-50/70 p-5 text-center md:rounded-[2rem] md:p-6">
           <Eyebrow className="mb-2">Own this business?</Eyebrow>
-          <Link href={`/claim/${vendor.slug}`} className="cursor-pointer text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 underline underline-offset-4 md:text-[11px]">
+          <Link href={claimHref ?? `/claim/${vendor.slug}`} className="cursor-pointer text-[10px] font-black uppercase tracking-[0.18em] text-stone-700 underline underline-offset-4 md:text-[11px]">
             {profile.ctas.claimLabel}
           </Link>
         </div>

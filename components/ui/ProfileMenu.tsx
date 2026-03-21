@@ -30,7 +30,7 @@ type ProfileMenuItem = {
 const menuItems: ProfileMenuItem[] = [
   {
     label: "New List",
-    href: "/lists?create=1",
+    href: "/lists/new",
     icon: Plus
   },
   {
@@ -41,6 +41,11 @@ const menuItems: ProfileMenuItem[] = [
   {
     label: "My Reviews",
     href: "/me/reviews",
+    icon: Star
+  },
+  {
+    label: "Claims",
+    href: "/claims",
     icon: Star
   },
   {
@@ -133,7 +138,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.98 }}
             transition={{ duration: 0.16, ease: "easeOut" }}
-            className="absolute right-0 top-full z-[80] mt-3 w-64 overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-2xl shadow-stone-200/40"
+            className="absolute right-0 top-full z-[200] mt-3 w-64 overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-2xl shadow-stone-200/40"
             role="menu"
           >
             <div className="border-b border-stone-100 px-5 py-4">

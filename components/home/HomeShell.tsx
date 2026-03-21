@@ -7,7 +7,7 @@ import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import { UserTopNav } from "@/components/ui/UserTopNav";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
 import { getUserNavLinks } from "@/lib/user-nav";
-import type { Vendor } from "@/lib/types/domain";
+import type { SavedList, Vendor } from "@/lib/types/domain";
 import type { HomeCategoryShortcut, HomeContent } from "@/lib/types/home";
 import type { HomepageSearchIndex } from "@/lib/types/search";
 
@@ -16,12 +16,14 @@ type HomeShellProps = {
   shortcuts: HomeCategoryShortcut[];
   featuredVendors: Vendor[];
   searchIndex: HomepageSearchIndex;
+  initialLists: SavedList[];
+  currentUserId?: string | null;
   currentUserName?: string | null;
   currentUserEmail?: string | null;
   currentUserAvatarUrl?: string;
 };
 
-export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, currentUserName, currentUserEmail, currentUserAvatarUrl }: HomeShellProps) {
+export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, initialLists, currentUserId, currentUserName, currentUserEmail, currentUserAvatarUrl }: HomeShellProps) {
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
       {currentUserName ? (
@@ -57,8 +59,8 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, cu
           {!currentUserName ? (
             <div className="mt-5 text-center text-sm text-stone-500 md:mt-6">
               Used a great vendor before?{" "}
-              <Link href="/for-professionals#claim" className="font-semibold text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-amber-700">
-                Add or claim them here
+              <Link href="/login?next=%2Freviews%2Fnew" className="font-semibold text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-amber-700">
+                Tell us about them
               </Link>
               .
             </div>
@@ -66,7 +68,7 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, cu
         </section>
 
         <HomeCategoryRail shortcuts={shortcuts} />
-        <HomeFeaturedSection title={content.featuredTitle} description={content.featuredDescription} vendors={featuredVendors} />
+        <HomeFeaturedSection title={content.featuredTitle} description={content.featuredDescription} vendors={featuredVendors} initialLists={initialLists} currentUserId={currentUserId ?? null} />
         {!currentUserName ? <ProfessionalCtaBanner className="mb-16 mt-12 md:mb-24 md:mt-16" compact /> : null}
       </main>
 

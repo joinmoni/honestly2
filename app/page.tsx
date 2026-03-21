@@ -3,6 +3,7 @@ import { HomeShell } from "@/components/home/HomeShell";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
 import { getHomeCategoryShortcuts, getHomeContent } from "@/lib/services/home";
+import { getListsByUserId } from "@/lib/services/lists";
 import { getHomepageSearchIndex } from "@/lib/services/search";
 import { getCurrentSession } from "@/lib/services/session";
 import { getFeaturedVendors } from "@/lib/services/vendors";
@@ -23,6 +24,7 @@ export default async function HomePage() {
     getHomepageSearchIndex(),
     getCurrentSession()
   ]);
+  const initialLists = session.user ? await getListsByUserId(session.user.id) : [];
 
   return (
     <>
@@ -31,6 +33,8 @@ export default async function HomePage() {
         shortcuts={shortcuts}
         featuredVendors={featuredVendors}
         searchIndex={searchIndex}
+        initialLists={initialLists}
+        currentUserId={session.user?.id ?? null}
         currentUserName={session.user?.name ?? null}
         currentUserEmail={session.user?.email ?? null}
         currentUserAvatarUrl={session.user?.avatarUrl}

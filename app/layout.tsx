@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "@/app/globals.css";
+import { RouteViewportReset } from "@/components/ui/RouteViewportReset";
 import { buildPageMetadata, SITE_DESCRIPTION } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -21,6 +23,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body className="font-sans">
+        <Suspense fallback={null}>
+          <RouteViewportReset />
+        </Suspense>
         {children}
       </body>
     </html>

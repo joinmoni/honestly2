@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { VendorDetailReviews } from "@/components/vendor-detail/VendorDetailReviews";
 import { ReviewFlowModal } from "@/components/vendor-detail/ReviewFlowModal";
 import type { MockSession, RatingCriterion, Review } from "@/lib/types/domain";
@@ -14,10 +14,10 @@ type VendorDetailReviewFlowProps = {
   initialReviews: Review[];
   initialReviewCount: number;
   session: MockSession;
-  openRequest?: number;
+  onLeaveReviewNavigate?: () => void;
 };
 
-export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria, initialReviews, initialReviewCount, session, openRequest = 0 }: VendorDetailReviewFlowProps) {
+export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria, initialReviews, initialReviewCount, session, onLeaveReviewNavigate }: VendorDetailReviewFlowProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [reviewCount, setReviewCount] = useState(initialReviewCount);
   const [open, setOpen] = useState(false);
@@ -27,12 +27,6 @@ export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria
     return reviews.find((review) => review.userId === session.user?.id) ?? null;
   }, [reviews, session.user]);
 
-  useEffect(() => {
-    if (openRequest > 0) {
-      setOpen(true);
-    }
-  }, [openRequest]);
-
   return (
     <>
       <VendorDetailReviews
@@ -40,7 +34,14 @@ export function VendorDetailReviewFlow({ vendorId, vendorName, profile, criteria
         reviews={reviews}
         profile={profile}
         leaveReviewLabel={existingUserReview ? "Edit your review" : profile.ctas.leaveReviewLabel}
-        onLeaveReview={() => setOpen(true)}
+        onLeaveReview={() => {
+          if (!existingUserReview && onLeaveReviewNavigate) {
+            onLeaveReviewNavigate();
+            return;
+          }
+
+          setOpen(true);
+        }}
         currentUserId={session.user?.id}
         onEditOwnReview={() => setOpen(true)}
       />

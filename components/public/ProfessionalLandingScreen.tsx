@@ -15,7 +15,7 @@ export function ProfessionalLandingScreen() {
             </BodyText>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
+              <Link href="/login?next=%2Freviews%2Fnew" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
                 <PillText className="text-white">Recommend a vendor</PillText>
               </Link>
               <Link href="/vendors" className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">

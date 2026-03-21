@@ -63,6 +63,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
     if (!supabaseConfigured) {
       setMockUserSession();
       clearFocusBeforeRedirect();
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
       router.replace(nextPath);
       router.refresh();
       return;
@@ -85,6 +88,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
     if (!supabaseConfigured) {
       setMockUserSession();
       clearFocusBeforeRedirect();
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
       router.replace(nextPath);
       router.refresh();
       return;

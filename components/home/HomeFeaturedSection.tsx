@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { HomeVendorCard } from "@/components/home/HomeVendorCard";
 import { BodyText, SectionTitle } from "@/components/ui/Typography";
-import type { Vendor } from "@/lib/types/domain";
+import type { SavedList, Vendor } from "@/lib/types/domain";
 
 type HomeFeaturedSectionProps = {
   title: string;
   description: string;
   vendors: Vendor[];
+  initialLists: SavedList[];
+  currentUserId: string | null;
 };
 
-export function HomeFeaturedSection({ title, description, vendors }: HomeFeaturedSectionProps) {
+export function HomeFeaturedSection({ title, description, vendors, initialLists, currentUserId }: HomeFeaturedSectionProps) {
   return (
     <section className="py-10 md:py-24">
       <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
@@ -24,7 +26,7 @@ export function HomeFeaturedSection({ title, description, vendors }: HomeFeature
 
       <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
         {vendors.map((vendor) => (
-          <HomeVendorCard key={vendor.id} vendor={vendor} />
+          <HomeVendorCard key={vendor.id} vendor={vendor} initialLists={initialLists} currentUserId={currentUserId} />
         ))}
       </div>
 

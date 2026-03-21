@@ -23,7 +23,7 @@ export function ProfessionalCtaBanner({ className, compact = false }: Profession
 
         <div className="flex flex-col gap-3 md:min-w-[250px] md:items-end">
           <Link
-            href="/for-professionals"
+            href="/login?next=%2Freviews%2Fnew"
             className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-center text-white transition-colors hover:bg-stone-800"
           >
             <PillText className="text-white">Recommend a vendor</PillText>

@@ -20,7 +20,7 @@ export const mockFooterContent: FooterContent = {
       id: "professionals",
       title: "Recommend A Vendor",
       links: [
-        { label: "Tell Us About a Vendor", href: "/for-professionals" },
+        { label: "Tell Us About a Vendor", href: "/login?next=%2Freviews%2Fnew" },
         { label: "Claim your Page", href: "/for-professionals#claim" },
         { label: "Vendor Guidelines", href: "#" },
         { label: "Support Center", href: "#" }
