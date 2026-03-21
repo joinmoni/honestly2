@@ -333,7 +333,7 @@ export function HomeHeroSearch({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
-                className="z-[100]"
+                className="z-[260]"
                 style={{
                   position: "fixed",
                   top: portalRect.top,
