@@ -59,6 +59,11 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
   };
 
   const handleCreateList = async (name?: string) => {
+    if (name) {
+      router.push("/lists/new");
+      return;
+    }
+
     setPending(true);
     setErrorMessage(null);
 
@@ -147,6 +152,14 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
 
       setSavedLists(nextLists);
       syncCardsFromSavedLists(nextLists);
+      const nextActiveList = nextLists.find((list) => list.id === activeList.id);
+      if (nextActiveList) {
+        setActiveList({
+          ...activeList,
+          name: nextActiveList.name,
+          visibility: nextActiveList.isPublic ? "shared" : "private"
+        });
+      }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "This list could not be shared right now.");
     } finally {
@@ -189,7 +202,7 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
         {lists.map((list) => (
           <CollectionCard key={list.id} list={list} privateLabel={copy.visibilityPrivateLabel} sharedLabel={copy.visibilitySharedLabel} onOpenActions={handleOpenActions} />
         ))}
-        <NewMoodboardCard label={copy.newListCardLabel} onClick={() => handleCreateList(copy.newListCardLabel)} />
+        <NewMoodboardCard label={copy.newListCardLabel} onClick={() => router.push("/lists/new")} />
       </section>
 
       {pending ? <p className="mt-6 text-sm text-stone-500">Creating your new list…</p> : null}

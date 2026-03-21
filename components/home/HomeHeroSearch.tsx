@@ -101,8 +101,8 @@ export function HomeHeroSearch({
       setActiveField(null);
     };
 
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [activeField]);
 
   useEffect(() => {
@@ -441,6 +441,7 @@ function WhoDropdown({
                     isActive && "border-l-amber-500 bg-stone-50/30"
                   )}
                   onMouseEnter={() => setActiveIndex(categoryIndex)}
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() =>
                     onSelect({
                       id: `category-${category.id}`,
@@ -484,6 +485,7 @@ function WhoDropdown({
                     isActive && "border-l-amber-500 bg-stone-50/30"
                   )}
                   onMouseEnter={() => setActiveIndex(optionIndex)}
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() =>
                     onSelect({
                       id: `vendor-${vendor.id}`,
@@ -561,6 +563,7 @@ function WhereDropdown({
                   isActive && "border-l-amber-500 bg-stone-50/30"
                 )}
                 onMouseEnter={() => setActiveIndex(index)}
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={() =>
                   onSelect({
                     id: `location-${location.id}`,

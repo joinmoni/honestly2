@@ -92,7 +92,7 @@ export function HomeVendorCard({ vendor, initialLists, currentUserId }: HomeVend
           <p className="text-sm font-semibold text-stone-900">Sign in to add this vendor to a list.</p>
           <p className="mt-1 text-sm text-stone-500">Save vendors to your lists so you can share them with friends and family.</p>
           <div className="mt-3 flex gap-3">
-            <Link href={`/login?next=${encodeURIComponent("/lists")}`} className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white">
+            <Link href={`/login?next=${encodeURIComponent(`/vendor/${vendor.slug}`)}`} className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white">
               Sign in
             </Link>
             <button type="button" className="rounded-full border border-stone-200 px-4 py-2 text-sm" onClick={() => setShowAuthPrompt(false)}>

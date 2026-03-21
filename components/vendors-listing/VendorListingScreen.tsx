@@ -73,7 +73,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <header className="border-b border-stone-100 bg-white">
+      <header className="relative z-[180] border-b border-stone-100 bg-white">
         {currentUserName ? (
           <UserTopNav
             brandLabel={data.copy.brandLabel}
@@ -113,7 +113,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
                 if (where) params.set("where", where);
                 if (activeChipId !== "all") params.set("category", activeChipId);
                 const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-                router.replace(nextUrl, { scroll: false });
+                router.replace(nextUrl, { scroll: true });
               }}
             />
           </div>
@@ -141,7 +141,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
                     if (currentSearch.where.trim()) params.set("where", currentSearch.where.trim());
                     if (chip.id !== "all") params.set("category", chip.id);
                     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-                    router.replace(nextUrl, { scroll: false });
+                    router.replace(nextUrl, { scroll: true });
                   }}
                 >
                   {chip.emoji ? `${chip.emoji} ${chip.label}` : chip.label}
@@ -191,7 +191,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             onCta={() => {
               setActiveChipId("all");
               setCurrentSearch({ query: "", where: "" });
-              router.replace(pathname, { scroll: false });
+              router.replace(pathname, { scroll: true });
             }}
           />
         )}

@@ -11,6 +11,7 @@ type ReviewSubmissionPageProps = {
   vendors: Vendor[];
   criteria: RatingCriterion[];
   initialVendorSlug?: string;
+  reviewId?: string;
 };
 
 type ReviewFormValues = {
@@ -22,7 +23,7 @@ type ReviewFormValues = {
 
 const DEFAULT_RATING = 4;
 
-export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug }: ReviewSubmissionPageProps) {
+export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, reviewId }: ReviewSubmissionPageProps) {
   const [selectedVendorSlug, setSelectedVendorSlug] = useState(initialVendorSlug ?? "");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -213,7 +214,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug }: R
                   Cancel
                 </Link>
                 <button type="submit" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
-                  Submit review
+                  {reviewId ? "Update review" : "Submit review"}
                 </button>
               </div>
             </form>

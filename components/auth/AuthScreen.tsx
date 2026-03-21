@@ -177,7 +177,7 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
                 placeholder={copy.emailPlaceholder}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-100"
+                className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-base transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-100"
               />
               <motion.button
                 whileHover={{ y: -1 }}
@@ -212,7 +212,7 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
           <div className="mt-auto border-t border-stone-50 pt-8 text-center">
             <p className="text-xs font-bold text-stone-600">
               {copy.professionalPrompt}
-              <Link href="/for-professionals" className="ml-1 text-amber-700 underline decoration-amber-200">
+              <Link href="/login?next=%2Freviews%2Fnew" className="ml-1 text-amber-700 underline decoration-amber-200">
                 {copy.listBusinessLabel}
               </Link>
             </p>

@@ -21,7 +21,7 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
           <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="hidden text-[10px] font-bold uppercase tracking-widest text-stone-500 transition-colors hover:text-stone-900 sm:block">
             {data.copy.navFollowListLabel}
           </motion.button>
-          <Link href="/login?next=%2Flists" className="rounded-full bg-stone-900 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-stone-800">
+          <Link href="/login?next=%2Flists%2Fnew" className="rounded-full bg-stone-900 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-stone-800">
             {data.copy.navSignUpLabel}
           </Link>
         </div>
@@ -99,7 +99,7 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
             <h2 className="serif-italic mb-6 text-4xl md:text-6xl">{data.copy.ctaTitle}</h2>
             <p className="mx-auto mb-10 max-w-sm text-lg leading-relaxed text-stone-400">{data.copy.ctaDescription}</p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="/login?next=%2Flists" className="rounded-full bg-white px-10 py-4 font-bold text-stone-900 transition-colors hover:bg-stone-100">
+              <Link href="/login?next=%2Flists%2Fnew" className="rounded-full bg-white px-10 py-4 font-bold text-stone-900 transition-colors hover:bg-stone-100">
                 {data.copy.ctaPrimaryButtonLabel}
               </Link>
               <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} type="button" className="rounded-full border border-stone-700 bg-stone-800 px-10 py-4 font-bold text-white transition-colors hover:bg-stone-700">
