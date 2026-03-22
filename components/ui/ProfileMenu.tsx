@@ -34,16 +34,6 @@ const menuItems: ProfileMenuItem[] = [
     icon: Plus
   },
   {
-    label: "Saved Vendors",
-    href: "/lists",
-    icon: Heart
-  },
-  {
-    label: "My Reviews",
-    href: "/me/reviews",
-    icon: Star
-  },
-  {
     label: "Claims",
     href: "/claims",
     icon: Star
@@ -120,7 +110,18 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
     <div ref={rootRef} className={cn("relative", className)}>
       <button
         type="button"
-        className="flex items-center gap-2 rounded-full bg-stone-900 px-2 py-2 text-white shadow-lg shadow-stone-200/40 transition-colors hover:bg-stone-800"
+        className="flex items-center justify-center rounded-full bg-stone-900 p-2 text-white shadow-lg shadow-stone-200/40 transition-colors hover:bg-stone-800 sm:hidden"
+        onClick={() => setOpen((current) => !current)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Open account menu"
+      >
+        <Avatar name={name} imageUrl={preferredAvatarUrl} size={size} />
+      </button>
+
+      <button
+        type="button"
+        className="hidden items-center gap-2 rounded-full bg-stone-900 px-2 py-2 text-white shadow-lg shadow-stone-200/40 transition-colors hover:bg-stone-800 sm:flex"
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
