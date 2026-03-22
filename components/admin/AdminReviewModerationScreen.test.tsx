@@ -15,6 +15,7 @@ const data: AdminReviewModerationData = {
   brandLabel: "honestly. admin",
   title: "Review Moderation",
   description: "Moderate reviews",
+  createReviewLabel: "Seed review",
   navLinks: [{ id: "reviews", label: "Reviews", href: "/admin/reviews", active: true }],
   filters: [
     { id: "pending", label: "Pending", count: 1 },
@@ -29,12 +30,15 @@ const data: AdminReviewModerationData = {
       reviewerName: "Avery Johnson",
       reviewerEmail: "avery@example.com",
       submittedDate: "March 04, 2026",
+      submittedAtIso: "2026-03-04T12:00:00.000Z",
       reviewTitle: "Great",
       reviewBody: "Lovely to work with.",
       overallRating: 5,
       status: "pending"
     }
   ],
+  vendors: [{ id: "ven-1", name: "Wildflower Archive", slug: "wildflower-archive" }],
+  criteria: [],
   pagination: {
     currentPage: 1,
     totalPages: 1,

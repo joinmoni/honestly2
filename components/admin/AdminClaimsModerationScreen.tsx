@@ -43,7 +43,7 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
       <main className="mx-auto max-w-5xl px-6 py-12">
         <header className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <PageTitle className="mb-2 text-[2.8rem] leading-[0.98] md:text-[3.35rem]">{data.title}</PageTitle>
+            <PageTitle className="mb-2">{data.title}</PageTitle>
             <BodyText className="italic">{data.description}</BodyText>
           </div>
           <div className="flex rounded-2xl border border-stone-200 bg-white p-1 shadow-sm">
@@ -86,7 +86,7 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                         {claim.vendorImageUrl ? <Image src={claim.vendorImageUrl} alt={claim.vendorName} width={400} height={400} className="h-full w-full object-cover" /> : null}
                       </div>
                       <div>
-                        <CardTitle className="text-[2rem] leading-tight md:text-[2.2rem]">{claim.vendorName}</CardTitle>
+                        <CardTitle>{claim.vendorName}</CardTitle>
                         <MetaText>{claim.vendorCategoryLabel}</MetaText>
                       </div>
                     </div>
@@ -101,7 +101,7 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                       <div className="space-y-4">
                         <Eyebrow className="text-amber-700">Claimant Identity</Eyebrow>
                         <div className="space-y-2">
-                          <CardTitle className="text-[1.7rem] leading-tight md:text-[1.9rem]">{claim.claimantName}</CardTitle>
+                          <CardTitle>{claim.claimantName}</CardTitle>
                           {claim.claimantEmail ? (
                             <BodyText className="flex items-center gap-2 text-sm">
                               <Mail size={14} />
@@ -168,7 +168,7 @@ export function AdminClaimsModerationScreen({ data }: AdminClaimsModerationScree
                       <Check size={20} strokeWidth={3} />
                     </div>
                     <div>
-                      <CardTitle className="text-[1.6rem] leading-tight md:text-[1.8rem]">{claim.vendorName}</CardTitle>
+                      <CardTitle>{claim.vendorName}</CardTitle>
                       <MetaText className="mt-1">
                         {claim.status === "approved" ? "Claim Approved" : "Claim Rejected"} • {claim.submittedDate}
                       </MetaText>

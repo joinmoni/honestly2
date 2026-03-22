@@ -1,5 +1,6 @@
-import type { VendorClaim } from "@/lib/types/domain";
 import { Button } from "@/components/ui/Button";
+import { BodyText, CardTitle, MetaText } from "@/components/ui/Typography";
+import type { VendorClaim } from "@/lib/types/domain";
 
 type ClaimModerationCardProps = {
   claim: VendorClaim;
@@ -11,10 +12,10 @@ export function ClaimModerationCard({ claim, onApprove, onReject }: ClaimModerat
   return (
     <article className="surface space-y-3 p-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg">Claim {claim.id}</h4>
-        <span className="text-xs uppercase tracking-[0.18em] text-muted">{claim.status}</span>
+        <CardTitle className="text-lg">Claim {claim.id}</CardTitle>
+        <MetaText className="normal-case tracking-normal text-stone-500">{claim.status}</MetaText>
       </div>
-      {claim.note ? <p className="text-sm text-muted">{claim.note}</p> : null}
+      {claim.note ? <BodyText className="text-sm text-stone-500">{claim.note}</BodyText> : null}
       <div className="flex gap-2">
         <Button variant="secondary" onClick={() => onReject?.(claim.id)}>
           Reject

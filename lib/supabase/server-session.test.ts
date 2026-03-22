@@ -1,5 +1,5 @@
 import { getSupabaseServerSession, mapSupabaseUserToSession } from "@/lib/supabase/server-session";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient, getSupabaseServerClientForAccessToken } from "@/lib/supabase/server";
 
 const { cookiesMock } = vi.hoisted(() => ({
   cookiesMock: vi.fn()
@@ -10,7 +10,8 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
-  getSupabaseServerClient: vi.fn()
+  getSupabaseServerClient: vi.fn(),
+  getSupabaseServerClientForAccessToken: vi.fn()
 }));
 
 describe("supabase server session", () => {
@@ -42,6 +43,30 @@ describe("supabase server session", () => {
     });
   });
 
+  it("treats the user as admin when honestly_user_profiles.role is admin (without JWT role)", () => {
+    expect(
+      mapSupabaseUserToSession(
+        {
+          id: "usr-123",
+          email: "onedebos@gmail.com",
+          app_metadata: { provider: "google", providers: ["google"] },
+          user_metadata: { full_name: "Adebola Adeniran", name: "Adebola Adeniran" },
+          identities: [{ provider: "google" }]
+        },
+        "admin"
+      )
+    ).toEqual({
+      user: {
+        id: "usr-123",
+        name: "Adebola Adeniran",
+        email: "onedebos@gmail.com",
+        role: "admin",
+        authProvider: "google",
+        avatarUrl: undefined
+      }
+    });
+  });
+
   it("returns an anonymous session when the auth cookie is missing", async () => {
     cookiesMock.mockResolvedValue({
       get: vi.fn().mockReturnValue(undefined)
@@ -55,6 +80,12 @@ describe("supabase server session", () => {
     cookiesMock.mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: "token-123" })
     });
+
+    const profileScoped = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { role: "user" }, error: null })
+    };
 
     vi.mocked(getSupabaseServerClient).mockReturnValue({
       auth: {
@@ -72,6 +103,10 @@ describe("supabase server session", () => {
       }
     } as never);
 
+    vi.mocked(getSupabaseServerClientForAccessToken).mockReturnValue({
+      from: vi.fn().mockReturnValue(profileScoped)
+    } as never);
+
     await expect(getSupabaseServerSession()).resolves.toEqual({
       user: {
         id: "usr-123",
@@ -82,5 +117,8 @@ describe("supabase server session", () => {
         avatarUrl: undefined
       }
     });
+
+    expect(getSupabaseServerClientForAccessToken).toHaveBeenCalledWith("token-123");
+    expect(profileScoped.maybeSingle).toHaveBeenCalled();
   });
 });

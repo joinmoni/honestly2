@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { AdminRatingCriteriaScreen } from "@/components/admin/AdminRatingCriteriaScreen";
 import {
   createAdminRatingCriterion,
+  deleteAdminRatingCriterion,
   reorderAdminRatingCriteria,
   toggleAdminRatingCriterion,
   updateAdminRatingCriterion
@@ -17,13 +18,15 @@ vi.mock("@/lib/admin-rating-criteria.client", async () => {
     createAdminRatingCriterion: vi.fn(actual.createAdminRatingCriterion),
     updateAdminRatingCriterion: vi.fn(actual.updateAdminRatingCriterion),
     toggleAdminRatingCriterion: vi.fn(actual.toggleAdminRatingCriterion),
-    reorderAdminRatingCriteria: vi.fn(actual.reorderAdminRatingCriteria)
+    reorderAdminRatingCriteria: vi.fn(actual.reorderAdminRatingCriteria),
+    deleteAdminRatingCriterion: vi.fn(actual.deleteAdminRatingCriterion)
   };
 });
 
 describe("AdminRatingCriteriaScreen", () => {
   it("adds, edits, toggles, and reorders criteria locally", async () => {
     const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     const data = await getAdminRatingCriteriaData();
 
     render(<AdminRatingCriteriaScreen data={data} />);
@@ -34,24 +37,30 @@ describe("AdminRatingCriteriaScreen", () => {
     expect(await screen.findByText("New Criterion 4")).toBeInTheDocument();
     expect(createAdminRatingCriterion).toHaveBeenCalled();
 
+    await user.click(screen.getByRole("button", { name: "Delete Professionalism" }));
+    expect(deleteAdminRatingCriterion).toHaveBeenCalled();
+    expect(screen.queryByText("Professionalism")).not.toBeInTheDocument();
+
     await user.click(screen.getAllByRole("button", { name: "Edit" })[0]!);
     const editInput = screen.getByDisplayValue("Communication");
     await user.clear(editInput);
     await user.type(editInput, "Client Communication");
-    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByText("Client Communication")).toBeInTheDocument();
     expect(updateAdminRatingCriterion).toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Toggle Professionalism" }));
-    const professionalismHeading = screen.getByText("Professionalism");
-    const professionalismRow = professionalismHeading.closest("article");
-    if (!professionalismRow) throw new Error("expected professionalism row");
-    expect(within(professionalismRow).getByText("Active")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Toggle Quality of Work" }));
+    const qualityHeading = screen.getByText("Quality of Work");
+    const qualityRow = qualityHeading.closest("article");
+    if (!qualityRow) throw new Error("expected quality row");
+    expect(within(qualityRow).getByText("Inactive")).toBeInTheDocument();
     expect(toggleAdminRatingCriterion).toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Move Professionalism" }));
+    await user.click(screen.getByRole("button", { name: "Move New Criterion 4" }));
     const headings = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
-    expect(headings[1]).toBe("Professionalism");
+    expect(headings[1]).toBe("New Criterion 4");
     expect(reorderAdminRatingCriteria).toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
   });
 });

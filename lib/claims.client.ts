@@ -6,7 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 async function resolveProfileId(userId: string): Promise<string | null> {
   const supabase = getSupabaseBrowserClient();
 
-  const directResult = await supabase.from("user_profiles").select("id").eq("id", userId).maybeSingle();
+  const directResult = await supabase.from("honestly_user_profiles").select("id").eq("id", userId).maybeSingle();
   if (directResult.error) {
     throw directResult.error;
   }
@@ -14,7 +14,7 @@ async function resolveProfileId(userId: string): Promise<string | null> {
     return directResult.data.id as string;
   }
 
-  const authResult = await supabase.from("user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
+  const authResult = await supabase.from("honestly_user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
   if (authResult.error) {
     throw authResult.error;
   }
@@ -47,7 +47,7 @@ export async function submitVendorClaim(input: SubmitVendorClaimInput): Promise<
   }
 
   const existingResult = await supabase
-    .from("vendor_claims")
+    .from("honestly_vendor_claims")
     .select("id")
     .eq("vendor_id", input.vendorId)
     .eq("user_id", profileId)
@@ -72,7 +72,7 @@ export async function submitVendorClaim(input: SubmitVendorClaimInput): Promise<
 
   if (existingResult.data?.id) {
     const { error } = await supabase
-      .from("vendor_claims")
+      .from("honestly_vendor_claims")
       .update(payload)
       .eq("id", existingResult.data.id);
 
@@ -80,7 +80,7 @@ export async function submitVendorClaim(input: SubmitVendorClaimInput): Promise<
       throw error;
     }
   } else {
-    const { error } = await supabase.from("vendor_claims").insert(payload);
+    const { error } = await supabase.from("honestly_vendor_claims").insert(payload);
 
     if (error) {
       throw error;

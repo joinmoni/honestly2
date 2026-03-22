@@ -13,8 +13,8 @@ type HomeFeaturedSectionProps = {
 
 export function HomeFeaturedSection({ title, description, vendors, initialLists, currentUserId }: HomeFeaturedSectionProps) {
   return (
-    <section className="py-10 md:py-24">
-      <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
+    <section className="py-8 md:py-16">
+      <div className="mb-8 flex flex-col gap-5 md:mb-10 md:flex-row md:items-end md:justify-between">
         <div>
           <SectionTitle className="text-[2.2rem] leading-tight md:text-[2.6rem]">{title}</SectionTitle>
           <BodyText className="mt-1 text-sm">{description}</BodyText>
@@ -24,7 +24,7 @@ export function HomeFeaturedSection({ title, description, vendors, initialLists,
         </Link>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-8 md:justify-start">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
         {vendors.map((vendor) => (
           <HomeVendorCard key={vendor.id} vendor={vendor} initialLists={initialLists} currentUserId={currentUserId} />
         ))}

@@ -47,16 +47,31 @@ export type AdminReviewModerationItem = {
   reviewerName: string;
   reviewerEmail: string;
   submittedDate: string;
+  submittedAtIso: string;
   reviewTitle?: string;
   reviewBody?: string;
   overallRating: number;
   status: "pending" | "approved" | "rejected";
+  seededByAdmin?: boolean;
+};
+
+export type AdminReviewVendorOption = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type AdminReviewCriterionOption = {
+  id: string;
+  name: string;
+  description?: string;
 };
 
 export type AdminReviewModerationData = {
   brandLabel: string;
   title: string;
   description: string;
+  createReviewLabel: string;
   navLinks: AdminNavLink[];
   filters: Array<{
     id: AdminReviewFilter;
@@ -64,6 +79,8 @@ export type AdminReviewModerationData = {
     count: number;
   }>;
   reviews: AdminReviewModerationItem[];
+  vendors: AdminReviewVendorOption[];
+  criteria: AdminReviewCriterionOption[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -143,13 +160,27 @@ export type AdminVendorDirectoryItem = {
   categoryLabel: string;
 };
 
+export type AdminVendorCategoryOption = {
+  id: string;
+  name: string;
+  slug: string;
+  subcategories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+};
+
 export type AdminVendorDirectoryData = {
   brandLabel: string;
   title: string;
   description: string;
   searchPlaceholder: string;
+  createVendorLabel: string;
   navLinks: AdminNavLink[];
   vendors: AdminVendorDirectoryItem[];
+  categories: AdminVendorCategoryOption[];
+  criteria: AdminReviewCriterionOption[];
   pagination: {
     currentPage: number;
     totalPages: number;

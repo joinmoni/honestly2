@@ -49,6 +49,8 @@ export type Vendor = {
   locations: VendorLocation[];
   images: VendorImage[];
   socials: VendorSocial[];
+  contactEmail?: string;
+  contactPhone?: string;
   travels?: boolean;
   serviceRadiusKm?: number | null;
 };
@@ -65,6 +67,8 @@ export type Category = {
   name: string;
   slug: string;
   description?: string;
+  /** ISO timestamp from the database; used for ordering (e.g. home browse strip). */
+  createdAt?: string;
   subcategories: Subcategory[];
 };
 
@@ -77,9 +81,12 @@ export type ReviewCriterionRating = {
 export type Review = {
   id: string;
   vendorId: string;
-  userId: string;
+  userId: string | null;
   userName: string;
   userAvatar?: string;
+  reviewerEmail?: string;
+  seededByAdmin?: boolean;
+  source?: "user" | "admin" | "import";
   overallRating: number;
   title?: string;
   body?: string;

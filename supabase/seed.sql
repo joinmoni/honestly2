@@ -1,4 +1,4 @@
-insert into public.user_profiles (id, email, full_name, role, auth_provider, avatar_url)
+insert into public.honestly_user_profiles (id, email, full_name, role, auth_provider, avatar_url)
 values
   ('11111111-1111-1111-1111-111111111111', 'avery@example.com', 'Avery Johnson', 'user', 'google', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200'),
   ('22222222-2222-2222-2222-222222222222', 'admin@example.com', 'Admin User', 'admin', 'password', null)
@@ -9,7 +9,7 @@ on conflict (email) do update set
   avatar_url = excluded.avatar_url,
   updated_at = now();
 
-insert into public.categories (id, slug, name, description, featured_on_home, home_order, promoted_subcategories)
+insert into public.honestly_categories (id, slug, name, description, featured_on_home, home_order, promoted_subcategories)
 values
   ('10000000-0000-0000-0000-000000000001', 'venues', 'Venues', 'Character-filled venues for intimate and large events.', true, 1, array['Garden Venues']),
   ('10000000-0000-0000-0000-000000000002', 'floral-design', 'Floral Design', 'Modern and sculptural floral design studios.', true, 2, array['Wedding Florals']),
@@ -22,7 +22,7 @@ on conflict (slug) do update set
   promoted_subcategories = excluded.promoted_subcategories,
   updated_at = now();
 
-insert into public.subcategories (id, category_id, slug, name)
+insert into public.honestly_subcategories (id, category_id, slug, name)
 values
   ('11000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000003', 'fine-art-film', 'Fine Art Film'),
   ('11000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', 'editorial', 'Editorial'),
@@ -37,7 +37,7 @@ on conflict (category_id, slug) do update set
   name = excluded.name,
   updated_at = now();
 
-insert into public.rating_criteria (id, name, description, active, position)
+insert into public.honestly_rating_criteria (id, name, description, active, position)
 values
   ('12000000-0000-0000-0000-000000000001', 'Communication', 'How responsive and clear was the vendor during the process?', true, 1),
   ('12000000-0000-0000-0000-000000000002', 'Quality of Work', 'The aesthetic finish, durability, and craftsmanship of the final result.', true, 2),
@@ -49,7 +49,7 @@ on conflict (id) do update set
   position = excluded.position,
   updated_at = now();
 
-insert into public.vendors (
+insert into public.honestly_vendors (
   id, slug, name, headline, description, verified, claimed, status, rating_avg, review_count, price_tier, primary_category_id, travels, service_radius_km, owner_user_id
 )
 values
@@ -75,7 +75,7 @@ on conflict (slug) do update set
   owner_user_id = excluded.owner_user_id,
   updated_at = now();
 
-insert into public.vendor_category_links (vendor_id, category_id)
+insert into public.honestly_vendor_category_links (vendor_id, category_id)
 values
   ('13000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000002'),
   ('13000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002'),
@@ -85,7 +85,7 @@ values
   ('13000000-0000-0000-0000-000000000006', '10000000-0000-0000-0000-000000000001')
 on conflict do nothing;
 
-insert into public.vendor_subcategory_links (vendor_id, subcategory_id)
+insert into public.honestly_vendor_subcategory_links (vendor_id, subcategory_id)
 values
   ('13000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000008'),
   ('13000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000008'),
@@ -95,7 +95,7 @@ values
   ('13000000-0000-0000-0000-000000000006', '11000000-0000-0000-0000-000000000006')
 on conflict do nothing;
 
-insert into public.vendor_locations (id, vendor_id, city, region, country, is_primary)
+insert into public.honestly_vendor_locations (id, vendor_id, city, region, country, is_primary)
 values
   ('14000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000001', 'Hudson Valley', 'NY', 'USA', true),
   ('14000000-0000-0000-0000-000000000002', '13000000-0000-0000-0000-000000000001', 'Brooklyn', 'NY', 'USA', false),
@@ -106,7 +106,7 @@ values
   ('14000000-0000-0000-0000-000000000007', '13000000-0000-0000-0000-000000000006', 'Joshua Tree', 'CA', 'USA', true)
 on conflict (id) do nothing;
 
-insert into public.vendor_images (id, vendor_id, url, alt, kind, position)
+insert into public.honestly_vendor_images (id, vendor_id, url, alt, kind, position)
 values
   ('15000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000001', 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=1200', 'Floral arrangement', 'cover', 0),
   ('15000000-0000-0000-0000-000000000002', '13000000-0000-0000-0000-000000000001', 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800', 'Wedding table setup', 'gallery', 1),
@@ -119,7 +119,7 @@ values
   ('15000000-0000-0000-0000-000000000009', '13000000-0000-0000-0000-000000000006', 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800', 'Venue in desert', 'cover', 0)
 on conflict (id) do nothing;
 
-insert into public.vendor_socials (id, vendor_id, platform, url)
+insert into public.honestly_vendor_socials (id, vendor_id, platform, url)
 values
   ('16000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000001', 'instagram', 'https://instagram.com'),
   ('16000000-0000-0000-0000-000000000002', '13000000-0000-0000-0000-000000000001', 'website', 'https://example.com'),
@@ -130,7 +130,7 @@ values
   ('16000000-0000-0000-0000-000000000007', '13000000-0000-0000-0000-000000000006', 'website', 'https://example.com')
 on conflict (id) do nothing;
 
-insert into public.reviews (id, vendor_id, user_id, overall_rating, title, body, status, created_at, updated_at)
+insert into public.honestly_reviews (id, vendor_id, user_id, overall_rating, title, body, status, created_at, updated_at)
 values
   ('17000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 5.00, 'The highlight of our wedding day', 'Elena brought our vision to life in a way I could not have imagined. The textures and the scent of the local peonies were breathtaking. Worth every penny.', 'approved', '2025-10-12T10:22:00.000Z', '2025-10-12T10:22:00.000Z'),
   ('17000000-0000-0000-0000-000000000002', '13000000-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111', 4.00, 'Sublime light and quiet professionalism', 'Our photographer was a dream to work with. We are just waiting for the final gallery, but the sneak peeks are gorgeous.', 'pending', '2026-03-04T15:00:00.000Z', '2026-03-04T15:00:00.000Z'),
@@ -142,7 +142,7 @@ on conflict (id) do update set
   status = excluded.status,
   updated_at = excluded.updated_at;
 
-insert into public.review_ratings (review_id, criterion_id, score)
+insert into public.honestly_review_ratings (review_id, criterion_id, score)
 values
   ('17000000-0000-0000-0000-000000000001', '12000000-0000-0000-0000-000000000001', 5.00),
   ('17000000-0000-0000-0000-000000000001', '12000000-0000-0000-0000-000000000002', 5.00),
@@ -153,7 +153,7 @@ values
 on conflict (review_id, criterion_id) do update set
   score = excluded.score;
 
-insert into public.saved_lists (id, user_id, name, description, is_public, share_slug)
+insert into public.honestly_saved_lists (id, user_id, name, description, is_public, share_slug)
 values
   ('18000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Summer Wedding 2026', 'Ceremony and reception vendor shortlist', false, null),
   ('18000000-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'Living Room Refresh', 'Styling references and interior vendors', true, 'living-room-refresh')
@@ -164,7 +164,7 @@ on conflict (id) do update set
   share_slug = excluded.share_slug,
   updated_at = now();
 
-insert into public.saved_list_items (list_id, vendor_id, created_at)
+insert into public.honestly_saved_list_items (list_id, vendor_id, created_at)
 values
   ('18000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000001', '2026-02-20T09:00:00.000Z'),
   ('18000000-0000-0000-0000-000000000001', '13000000-0000-0000-0000-000000000004', '2026-02-22T12:30:00.000Z'),
@@ -174,7 +174,7 @@ values
 on conflict (list_id, vendor_id) do update set
   created_at = excluded.created_at;
 
-insert into public.vendor_claims (
+insert into public.honestly_vendor_claims (
   id, vendor_id, user_id, claimant_name, verification_email, verification_instagram, verification_tiktok, status, note, created_at
 )
 values

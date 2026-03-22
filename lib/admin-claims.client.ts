@@ -14,7 +14,7 @@ export async function updateAdminClaimStatus(
   const supabase = getSupabaseBrowserClient();
   const targetClaim = claims.find((claim) => claim.id === claimId);
 
-  const { error } = await supabase.from("vendor_claims").update({ status }).eq("id", claimId);
+  const { error } = await supabase.from("honestly_vendor_claims").update({ status }).eq("id", claimId);
 
   if (error) {
     throw error;
@@ -22,7 +22,7 @@ export async function updateAdminClaimStatus(
 
   if (status === "approved" && targetClaim) {
     const { error: vendorError } = await supabase
-      .from("vendors")
+      .from("honestly_vendors")
       .update({ claimed: true })
       .eq("id", targetClaim.vendorId);
 

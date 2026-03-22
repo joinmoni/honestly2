@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
+
+import { BodyText, SectionTitle } from "@/components/ui/Typography";
 import type { AdminClaimItem } from "@/lib/types/admin-dashboard";
 
 type AdminClaimsSectionProps = {
@@ -12,7 +14,7 @@ export function AdminClaimsSection({ claims }: AdminClaimsSectionProps) {
   return (
     <section className="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
       <div className="border-b border-stone-100 p-6">
-        <h2 className="text-xl italic">New Vendor Claims</h2>
+        <SectionTitle className="text-xl italic md:text-2xl">New Vendor Claims</SectionTitle>
       </div>
 
       <div className="divide-y divide-stone-50">
@@ -21,8 +23,8 @@ export function AdminClaimsSection({ claims }: AdminClaimsSectionProps) {
             <div className="flex items-center gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 font-bold text-amber-600">{claim.initial}</div>
               <div>
-                <p className="text-sm font-bold">{claim.vendorName}</p>
-                <p className="text-xs italic text-stone-400">Requested by: {claim.requesterEmail}</p>
+                <BodyText className="text-sm font-semibold text-stone-900">{claim.vendorName}</BodyText>
+                <BodyText className="text-xs italic text-stone-400">Requested by: {claim.requesterEmail}</BodyText>
               </div>
             </div>
 

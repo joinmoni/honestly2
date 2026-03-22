@@ -5,6 +5,7 @@ export const mockCategories: Category[] = [
     id: "cat-photography",
     name: "Photography",
     slug: "photography",
+    createdAt: "2026-01-20T12:00:00.000Z",
     description: "Photographers for weddings, portraits, and editorial campaigns.",
     subcategories: [
       { id: "sub-fine-art-film", name: "Fine Art Film", slug: "fine-art-film", categoryId: "cat-photography" },
@@ -18,6 +19,7 @@ export const mockCategories: Category[] = [
     id: "cat-venue",
     name: "Venues",
     slug: "venues",
+    createdAt: "2026-01-05T12:00:00.000Z",
     description: "Character-filled venues for intimate and large events.",
     subcategories: [
       { id: "sub-garden-venue", name: "Garden Venues", slug: "garden-venues", categoryId: "cat-venue" },
@@ -28,6 +30,7 @@ export const mockCategories: Category[] = [
     id: "cat-floral",
     name: "Floral Design",
     slug: "floral-design",
+    createdAt: "2026-01-12T12:00:00.000Z",
     description: "Modern and sculptural floral design studios.",
     subcategories: [
       { id: "sub-wedding-floral", name: "Wedding Florals", slug: "wedding-florals", categoryId: "cat-floral" },

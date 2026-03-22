@@ -6,7 +6,6 @@ import { Map as MapIcon, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { HomeHeroSearch } from "@/components/home/HomeHeroSearch";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
 import { ProfessionalCtaBanner } from "@/components/public/ProfessionalCtaBanner";
 import { ProfileMenu } from "@/components/ui/ProfileMenu";
@@ -15,7 +14,6 @@ import { VendorListingCard } from "@/components/vendors-listing/VendorListingCar
 import { createListWithVendor, getSavedVendorIds, toggleVendorInList } from "@/lib/lists.client";
 import { getUserNavLinks } from "@/lib/user-nav";
 import type { SavedList } from "@/lib/types/domain";
-import type { HomepageSearchIndex } from "@/lib/types/search";
 import type { VendorListingPageData } from "@/lib/types/vendor-listing";
 
 type VendorListingScreenProps = {
@@ -25,14 +23,21 @@ type VendorListingScreenProps = {
   currentUserName?: string | null;
   currentUserEmail?: string | null;
   currentUserAvatarUrl?: string;
-  searchIndex: HomepageSearchIndex;
+  currentUserRole?: "user" | "admin";
 };
 
-export function VendorListingScreen({ data, initialLists, currentUserId, currentUserName, currentUserEmail, currentUserAvatarUrl, searchIndex }: VendorListingScreenProps) {
+export function VendorListingScreen({
+  data,
+  initialLists,
+  currentUserId,
+  currentUserName,
+  currentUserEmail,
+  currentUserAvatarUrl,
+  currentUserRole
+}: VendorListingScreenProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [activeChipId, setActiveChipId] = useState<string>(data.searchState.categorySlug);
-  const [currentSearch, setCurrentSearch] = useState({ query: data.searchState.query, where: data.searchState.where });
   const [lists, setLists] = useState<SavedList[]>(initialLists);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [activeVendorId, setActiveVendorId] = useState<string | null>(null);
@@ -80,12 +85,14 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             avatarName={currentUserName}
             avatarEmail={currentUserEmail}
             avatarUrl={currentUserAvatarUrl}
+            accountRole={currentUserRole}
             navLinks={getUserNavLinks("none")}
             className="!static border-b-0 bg-white"
           />
         ) : (
           <EditorialTopNav
             brandLabel={data.copy.brandLabel}
+            desktopNavSource="navLinks"
             navLinks={data.copy.navLinks.map((link) => ({
               ...link,
               active: link.href === "/vendors"
@@ -93,31 +100,9 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             className="border-b-0 bg-white"
             innerClassName="max-w-7xl md:px-12"
             sticky={false}
-            rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
+            rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} accountRole={currentUserRole} />}
           />
         )}
-
-        <div className="border-t border-stone-100/80">
-          <div className="mx-auto flex max-w-[1600px] px-6 py-5 md:justify-center">
-            <HomeHeroSearch
-              className="w-full shadow-sm md:min-w-[640px] md:max-w-[760px]"
-              searchWhoPlaceholder={data.copy.searchAnyCategoryLabel}
-              searchWherePlaceholder={data.copy.searchAnywhereLabel}
-              searchIndex={searchIndex}
-              initialWhoQuery={data.searchState.query}
-              initialWhereQuery={data.searchState.where}
-              onSubmitSearch={({ who, where }) => {
-                setCurrentSearch({ query: who, where });
-                const params = new URLSearchParams();
-                if (who) params.set("q", who);
-                if (where) params.set("where", where);
-                if (activeChipId !== "all") params.set("category", activeChipId);
-                const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-                router.replace(nextUrl, { scroll: true });
-              }}
-            />
-          </div>
-        </div>
 
         <div className="border-t border-stone-100/80">
           <div className="scrollbar-hide mx-auto flex max-w-[1600px] items-center gap-3 overflow-x-auto px-6 py-3">
@@ -137,8 +122,8 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
                   onClick={() => {
                     setActiveChipId(chip.id);
                     const params = new URLSearchParams();
-                    if (currentSearch.query.trim()) params.set("q", currentSearch.query.trim());
-                    if (currentSearch.where.trim()) params.set("where", currentSearch.where.trim());
+                    if (data.searchState.query.trim()) params.set("q", data.searchState.query.trim());
+                    if (data.searchState.where.trim()) params.set("where", data.searchState.where.trim());
                     if (chip.id !== "all") params.set("category", chip.id);
                     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
                     router.replace(nextUrl, { scroll: true });
@@ -159,7 +144,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
       </header>
 
       <main className="mx-auto max-w-[1600px] px-4 py-10 md:px-6 md:py-16">
-        <div className="mb-20">
+        <div className="mb-6 md:mb-12">
           <p className="text-xs font-sans font-black uppercase tracking-widest text-stone-400">
             {data.copy.showingPrefix} {data.resultCount.toLocaleString()} {data.copy.showingSuffix}
           </p>
@@ -167,7 +152,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
 
         {data.vendors.length ? (
           <>
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-10 md:justify-start">
+            <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
               {data.vendors.map((vendor) => (
                 <VendorListingCard
                   key={vendor.id}
@@ -190,7 +175,6 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
             ctaLabel="Clear filters"
             onCta={() => {
               setActiveChipId("all");
-              setCurrentSearch({ query: "", where: "" });
               router.replace(pathname, { scroll: true });
             }}
           />

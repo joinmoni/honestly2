@@ -32,7 +32,7 @@ export function HomeVendorCard({ vendor, initialLists, currentUserId }: HomeVend
   }));
 
   return (
-    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="group mx-auto w-full max-w-[336px] cursor-pointer sm:w-[298px] sm:max-w-none">
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="group w-full min-w-0 cursor-pointer">
       <Link href={`/vendor/${vendor.slug}`} className="block">
         <VendorImageCarousel
           vendor={vendor}

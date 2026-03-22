@@ -8,6 +8,19 @@ vi.mock("@/lib/supabase/client", () => ({
 const ORIGINAL_ENV = process.env;
 
 function createBrowserClientMock() {
+  const profileTable = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    maybeSingle: vi.fn(),
+    insert: vi.fn(),
+    upsert: vi.fn()
+  };
+  profileTable.select.mockReturnValue(profileTable);
+  profileTable.eq.mockReturnValue(profileTable);
+  profileTable.maybeSingle.mockResolvedValue({ data: null, error: null });
+  profileTable.insert.mockResolvedValue({ error: null });
+  profileTable.upsert.mockResolvedValue({ error: null });
+
   return {
     auth: {
       signInWithOAuth: vi.fn(),
@@ -17,7 +30,12 @@ function createBrowserClientMock() {
       exchangeCodeForSession: vi.fn(),
       verifyOtp: vi.fn()
     },
-    from: vi.fn()
+    from: vi.fn((table: string) => {
+      if (table === "honestly_user_profiles") {
+        return profileTable;
+      }
+      return { upsert: vi.fn().mockResolvedValue({ error: null }) };
+    })
   };
 }
 
@@ -44,7 +62,10 @@ describe("supabase auth helpers", () => {
 
   it("passes the callback URL into Google sign-in", async () => {
     const browserClient = createBrowserClientMock();
-    browserClient.auth.signInWithOAuth.mockResolvedValue({ error: null });
+    browserClient.auth.signInWithOAuth.mockResolvedValue({
+      data: { url: "https://accounts.google.com/o/oauth2/v2/auth", provider: "google" },
+      error: null
+    });
     vi.mocked(getSupabaseBrowserClient).mockReturnValue(browserClient as never);
 
     await signInWithGoogle("/lists");
@@ -84,20 +105,55 @@ describe("supabase auth helpers", () => {
     const browserClient = createBrowserClientMock();
     browserClient.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
     browserClient.auth.getSession.mockResolvedValue({
-      data: { session: { access_token: "token-123" } },
+      data: {
+        session: {
+          access_token: "token-123",
+          user: {
+            id: "auth-user-1",
+            email: "avery@example.com",
+            user_metadata: { full_name: "Avery Johnson" },
+            app_metadata: { provider: "google" }
+          }
+        }
+      },
       error: null
     });
     vi.mocked(getSupabaseBrowserClient).mockReturnValue(browserClient as never);
 
     await expect(completeBrowserAuthCallback(new URLSearchParams("code=abc123&next=/lists"))).resolves.toBe("/lists");
     expect(browserClient.auth.exchangeCodeForSession).toHaveBeenCalledWith("abc123");
+    expect(browserClient.from).toHaveBeenCalledWith("honestly_user_profiles");
+    const profileTable = browserClient.from("honestly_user_profiles") as {
+      insert: ReturnType<typeof vi.fn>;
+      maybeSingle: ReturnType<typeof vi.fn>;
+    };
+    expect(profileTable.maybeSingle).toHaveBeenCalled();
+    expect(profileTable.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auth_user_id: "auth-user-1",
+        email: "avery@example.com",
+        full_name: "Avery Johnson",
+        role: "user",
+        auth_provider: "google"
+      })
+    );
   });
 
   it("verifies OTP callbacks when token hash links are used", async () => {
     const browserClient = createBrowserClientMock();
     browserClient.auth.verifyOtp.mockResolvedValue({ error: null });
     browserClient.auth.getSession.mockResolvedValue({
-      data: { session: { access_token: "token-123" } },
+      data: {
+        session: {
+          access_token: "token-123",
+          user: {
+            id: "auth-user-2",
+            email: "otp@example.com",
+            user_metadata: {},
+            app_metadata: {}
+          }
+        }
+      },
       error: null
     });
     vi.mocked(getSupabaseBrowserClient).mockReturnValue(browserClient as never);

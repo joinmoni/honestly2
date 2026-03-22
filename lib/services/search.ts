@@ -70,33 +70,33 @@ const SEARCH_VENDOR_SELECT = `
   slug,
   headline,
   status,
-  primary_category:categories!vendors_primary_category_id_fkey (
+  primary_category:honestly_categories!vendors_primary_category_id_fkey (
     id,
     name,
     slug
   ),
-  vendor_category_links (
-    category:categories (
+  vendor_category_links:honestly_vendor_category_links (
+    category:honestly_categories (
       id,
       name,
       slug
     )
   ),
-  vendor_subcategory_links (
-    subcategory:subcategories (
+  vendor_subcategory_links:honestly_vendor_subcategory_links (
+    subcategory:honestly_subcategories (
       id,
       name,
       slug
     )
   ),
-  vendor_locations (
+  vendor_locations:honestly_vendor_locations (
     id,
     city,
     region,
     country,
     is_primary
   ),
-  vendor_images (
+  vendor_images:honestly_vendor_images (
     id,
     url,
     kind,
@@ -173,7 +173,7 @@ async function getSearchCategories(): Promise<Category[]> {
   }
 
   const client = getSupabaseServerClient();
-  const { data, error } = await client.from("categories").select("id, name, slug").order("name", { ascending: true });
+  const { data, error } = await client.from("honestly_categories").select("id, name, slug").order("name", { ascending: true });
 
   if (error) {
     throw new Error(`Failed to load search categories from Supabase: ${error.message}`);
@@ -193,7 +193,7 @@ async function getSearchVendors(): Promise<Vendor[]> {
   }
 
   const client = getSupabaseServerClient();
-  const { data, error } = await client.from("vendors").select(SEARCH_VENDOR_SELECT).eq("status", "active").order("name", { ascending: true });
+  const { data, error } = await client.from("honestly_vendors").select(SEARCH_VENDOR_SELECT).eq("status", "active").order("name", { ascending: true });
 
   if (error) {
     throw new Error(`Failed to load search vendors from Supabase: ${error.message}`);
@@ -228,7 +228,7 @@ async function getSearchLocations(): Promise<HomepageSearchIndex["locations"]> {
   }
 
   const client = getSupabaseServerClient();
-  const { data, error } = await client.from("vendor_locations").select("id, city, region, country").order("city", { ascending: true });
+  const { data, error } = await client.from("honestly_vendor_locations").select("id, city, region, country").order("city", { ascending: true });
 
   if (error) {
     throw new Error(`Failed to load search locations from Supabase: ${error.message}`);
@@ -444,7 +444,10 @@ export async function searchVendorDirectory({
       vendor.headline?.toLowerCase().includes(normalizedQuery) ||
       vendor.primaryCategory?.name.toLowerCase().includes(normalizedQuery) ||
       vendor.categories.some((category) => category.name.toLowerCase().includes(normalizedQuery)) ||
-      vendor.subcategories.some((subcategory) => subcategory.name.toLowerCase().includes(normalizedQuery));
+      vendor.subcategories.some((subcategory) => subcategory.name.toLowerCase().includes(normalizedQuery)) ||
+      vendor.locations.some((location) =>
+        [location.city, location.region, location.country].filter(Boolean).some((value) => value?.toLowerCase().includes(normalizedQuery))
+      );
 
     const matchesWhere =
       !normalizedWhere ||

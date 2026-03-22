@@ -100,9 +100,9 @@ describe("search service", () => {
 
     vi.mocked(getSupabaseServerClient).mockReturnValue({
       from: vi.fn((table: string) => {
-        if (table === "categories") return categoriesBuilder;
-        if (table === "vendors") return vendorsBuilder;
-        if (table === "vendor_locations") return locationsBuilder;
+        if (table === "honestly_categories") return categoriesBuilder;
+        if (table === "honestly_vendors") return vendorsBuilder;
+        if (table === "honestly_vendor_locations") return locationsBuilder;
         throw new Error(`Unexpected table ${table}`);
       })
     } as never);

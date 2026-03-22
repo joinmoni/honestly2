@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import { mockAnonymousSession } from "@/lib/mock-data/session";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient, getSupabaseServerClientForAccessToken } from "@/lib/supabase/server";
 import { HONESTLY_SUPABASE_ACCESS_TOKEN_COOKIE } from "@/lib/supabase/session-cookie";
 import type { MockSession } from "@/lib/types/domain";
 
@@ -19,10 +19,18 @@ function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length ? value.trim() : undefined;
 }
 
-function getRole(user: SupabaseUserLike): "user" | "admin" {
+function getRoleFromJwt(user: SupabaseUserLike): "user" | "admin" {
   const appRole = readString(user.app_metadata?.role);
   const userRole = readString(user.user_metadata?.role);
   return appRole === "admin" || userRole === "admin" ? "admin" : "user";
+}
+
+function resolveSessionRole(user: SupabaseUserLike, profileRole: string | null | undefined): "user" | "admin" {
+  if (readString(profileRole) === "admin") {
+    return "admin";
+  }
+
+  return getRoleFromJwt(user);
 }
 
 function getAuthProvider(user: SupabaseUserLike): "google" | "password" {
@@ -45,7 +53,10 @@ function getAvatarUrl(user: SupabaseUserLike): string | undefined {
   return readString(user.user_metadata?.avatar_url) ?? readString(user.user_metadata?.picture);
 }
 
-export function mapSupabaseUserToSession(user: SupabaseUserLike | null): MockSession {
+export function mapSupabaseUserToSession(
+  user: SupabaseUserLike | null,
+  profileRole?: string | null
+): MockSession {
   if (!user || !user.email) {
     return mockAnonymousSession;
   }
@@ -55,7 +66,7 @@ export function mapSupabaseUserToSession(user: SupabaseUserLike | null): MockSes
       id: user.id,
       name: getDisplayName(user),
       email: user.email,
-      role: getRole(user),
+      role: resolveSessionRole(user, profileRole),
       authProvider: getAuthProvider(user),
       avatarUrl: getAvatarUrl(user)
     }
@@ -78,7 +89,15 @@ export async function getSupabaseServerSession(): Promise<MockSession> {
       return mockAnonymousSession;
     }
 
-    return mapSupabaseUserToSession(data.user as SupabaseUserLike);
+    const user = data.user as SupabaseUserLike;
+    const scoped = getSupabaseServerClientForAccessToken(accessToken);
+    const { data: profile } = await scoped
+      .from("honestly_user_profiles")
+      .select("role")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    return mapSupabaseUserToSession(user, profile?.role as string | undefined);
   } catch {
     return mockAnonymousSession;
   }

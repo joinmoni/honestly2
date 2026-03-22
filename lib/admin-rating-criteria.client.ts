@@ -1,6 +1,6 @@
 import { isSupabaseConfigured } from "@/lib/config/app-env";
+import type { AdminRatingCriterionRow } from "@/lib/services/admin-rating-criteria";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { RatingCriterion } from "@/lib/types/domain";
 
 type CreateCriterionInput = {
   name: string;
@@ -12,7 +12,11 @@ type UpdateCriterionInput = {
   description?: string;
 };
 
-function reorderLocalCriteria(criteria: RatingCriterion[], criterionId: string, targetIndex: number): RatingCriterion[] {
+function reorderLocalCriteria(
+  criteria: AdminRatingCriterionRow[],
+  criterionId: string,
+  targetIndex: number
+): AdminRatingCriterionRow[] {
   const sourceIndex = criteria.findIndex((criterion) => criterion.id === criterionId);
   if (sourceIndex === -1 || targetIndex < 0 || targetIndex >= criteria.length) {
     return criteria;
@@ -29,7 +33,10 @@ function reorderLocalCriteria(criteria: RatingCriterion[], criterionId: string, 
   }));
 }
 
-export async function createAdminRatingCriterion(criteria: RatingCriterion[], input: CreateCriterionInput): Promise<RatingCriterion[]> {
+export async function createAdminRatingCriterion(
+  criteria: AdminRatingCriterionRow[],
+  input: CreateCriterionInput
+): Promise<AdminRatingCriterionRow[]> {
   if (!isSupabaseConfigured()) {
     return [
       ...criteria,
@@ -38,14 +45,15 @@ export async function createAdminRatingCriterion(criteria: RatingCriterion[], in
         name: input.name,
         description: input.description,
         active: true,
-        position: criteria.length + 1
+        position: criteria.length + 1,
+        reviewUsageCount: 0
       }
     ];
   }
 
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
-    .from("rating_criteria")
+    .from("honestly_rating_criteria")
     .insert({
       name: input.name,
       description: input.description,
@@ -66,23 +74,24 @@ export async function createAdminRatingCriterion(criteria: RatingCriterion[], in
       name: data.name as string,
       description: (data.description as string | null) ?? undefined,
       active: Boolean(data.active),
-      position: Number(data.position)
+      position: Number(data.position),
+      reviewUsageCount: 0
     }
   ];
 }
 
 export async function updateAdminRatingCriterion(
-  criteria: RatingCriterion[],
+  criteria: AdminRatingCriterionRow[],
   criterionId: string,
   input: UpdateCriterionInput
-): Promise<RatingCriterion[]> {
+): Promise<AdminRatingCriterionRow[]> {
   if (!isSupabaseConfigured()) {
     return criteria.map((criterion) => (criterion.id === criterionId ? { ...criterion, ...input } : criterion));
   }
 
   const supabase = getSupabaseBrowserClient();
   const { error } = await supabase
-    .from("rating_criteria")
+    .from("honestly_rating_criteria")
     .update({
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.description !== undefined ? { description: input.description } : {})
@@ -96,7 +105,10 @@ export async function updateAdminRatingCriterion(
   return criteria.map((criterion) => (criterion.id === criterionId ? { ...criterion, ...input } : criterion));
 }
 
-export async function toggleAdminRatingCriterion(criteria: RatingCriterion[], criterionId: string): Promise<RatingCriterion[]> {
+export async function toggleAdminRatingCriterion(
+  criteria: AdminRatingCriterionRow[],
+  criterionId: string
+): Promise<AdminRatingCriterionRow[]> {
   const currentCriterion = criteria.find((criterion) => criterion.id === criterionId);
   if (!currentCriterion) {
     return criteria;
@@ -109,7 +121,7 @@ export async function toggleAdminRatingCriterion(criteria: RatingCriterion[], cr
   }
 
   const supabase = getSupabaseBrowserClient();
-  const { error } = await supabase.from("rating_criteria").update({ active: nextActive }).eq("id", criterionId);
+  const { error } = await supabase.from("honestly_rating_criteria").update({ active: nextActive }).eq("id", criterionId);
 
   if (error) {
     throw error;
@@ -119,10 +131,10 @@ export async function toggleAdminRatingCriterion(criteria: RatingCriterion[], cr
 }
 
 export async function reorderAdminRatingCriteria(
-  criteria: RatingCriterion[],
+  criteria: AdminRatingCriterionRow[],
   criterionId: string,
   targetIndex: number
-): Promise<RatingCriterion[]> {
+): Promise<AdminRatingCriterionRow[]> {
   const nextCriteria = reorderLocalCriteria(criteria, criterionId, targetIndex);
 
   if (!isSupabaseConfigured()) {
@@ -135,11 +147,67 @@ export async function reorderAdminRatingCriteria(
     position: criterion.position
   }));
 
-  const { error } = await supabase.from("rating_criteria").upsert(updates, { onConflict: "id" });
+  const { error } = await supabase.from("honestly_rating_criteria").upsert(updates, { onConflict: "id" });
 
   if (error) {
     throw error;
   }
 
   return nextCriteria;
+}
+
+const DELETE_BLOCKED =
+  "This rubric has been used in reviews and cannot be deleted. Turn it off with the toggle instead.";
+
+export async function deleteAdminRatingCriterion(
+  criteria: AdminRatingCriterionRow[],
+  criterionId: string
+): Promise<AdminRatingCriterionRow[]> {
+  const target = criteria.find((c) => c.id === criterionId);
+  if (!target) {
+    return criteria;
+  }
+  if (target.reviewUsageCount > 0) {
+    throw new Error(DELETE_BLOCKED);
+  }
+
+  if (!isSupabaseConfigured()) {
+    return criteria
+      .filter((c) => c.id !== criterionId)
+      .map((criterion, index) => ({ ...criterion, position: index + 1 }));
+  }
+
+  const supabase = getSupabaseBrowserClient();
+  const { error: countError, count } = await supabase
+    .from("honestly_review_ratings")
+    .select("*", { count: "exact", head: true })
+    .eq("criterion_id", criterionId);
+
+  if (countError) {
+    throw countError;
+  }
+  if (count !== null && count > 0) {
+    throw new Error(DELETE_BLOCKED);
+  }
+
+  const { error: deleteError } = await supabase.from("honestly_rating_criteria").delete().eq("id", criterionId);
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  const next = criteria
+    .filter((c) => c.id !== criterionId)
+    .map((criterion, index) => ({ ...criterion, position: index + 1 }));
+
+  const positionUpdates = next.map((criterion) => ({
+    id: criterion.id,
+    position: criterion.position
+  }));
+
+  const { error: positionError } = await supabase.from("honestly_rating_criteria").upsert(positionUpdates, { onConflict: "id" });
+  if (positionError) {
+    throw positionError;
+  }
+
+  return next;
 }

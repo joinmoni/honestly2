@@ -28,11 +28,13 @@ export default async function ForProfessionalsPage() {
             avatarName={session.user.name}
             avatarEmail={session.user.email}
             avatarUrl={session.user.avatarUrl}
+            accountRole={session.user.role}
             navLinks={getUserNavLinks("none")}
           />
         ) : (
           <EditorialTopNav
             brandLabel="honestly."
+            desktopNavSource="navLinks"
             navLinks={[
               { label: "Browse Vendors", href: "/vendors" },
               { label: "How it works", href: "/for-professionals", active: true }

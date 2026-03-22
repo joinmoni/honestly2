@@ -60,8 +60,8 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
         <main className="mx-auto max-w-7xl px-6 py-12">
           <header className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <PageTitle className="mb-2 text-4xl md:text-4xl">{data.title}</PageTitle>
-              <BodyText className="font-medium italic text-stone-500">{data.description}</BodyText>
+              <PageTitle className="mb-2">{data.title}</PageTitle>
+              <BodyText className="italic text-stone-500">{data.description}</BodyText>
             </div>
             <motion.button
               whileHover={{ y: -1 }}
@@ -93,7 +93,7 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
                         {category.icon}
                       </div>
                       <div>
-                        <CardTitle className={`text-2xl md:text-2xl ${category.muted ? "text-stone-500" : ""}`}>{category.name}</CardTitle>
+                        <CardTitle className={category.muted ? "text-stone-500" : undefined}>{category.name}</CardTitle>
                         <Eyebrow>Slug: {category.slug}</Eyebrow>
                       </div>
                     </div>
@@ -196,7 +196,7 @@ export function AdminTaxonomyScreen({ data }: AdminTaxonomyScreenProps) {
             <aside className="xl:sticky xl:top-28 xl:self-start">
               <div className="rounded-[2.25rem] border border-stone-200 bg-white p-6 shadow-sm">
                 <Eyebrow className="mb-2">Homepage Layout</Eyebrow>
-                <SectionTitle className="text-2xl md:text-2xl">Arrange Featured Rows</SectionTitle>
+                <SectionTitle>Arrange Featured Rows</SectionTitle>
                 <BodyText className="mt-2 text-sm">
                   Drag featured categories to control the order they appear in the homepage shortcut rail and merchandising stack.
                 </BodyText>

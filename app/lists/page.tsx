@@ -24,7 +24,9 @@ export default async function ListsPage() {
         <CollectionsTopNav
           brandLabel={copy.brandLabel}
           avatarName={user.name}
+          avatarEmail={user.email}
           avatarUrl={user.avatarUrl}
+          accountRole={user.role}
           navLinks={getUserNavLinks("saved_vendors")}
         />
 

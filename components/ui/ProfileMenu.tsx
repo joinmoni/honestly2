@@ -3,7 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Heart, LogOut, Plus, Settings, SquarePen, Star } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  Home,
+  Inbox,
+  Layers,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Plus,
+  Settings,
+  SlidersHorizontal,
+  SquarePen,
+  Star,
+  Store
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -17,6 +32,8 @@ type ProfileMenuProps = {
   name?: string | null;
   email?: string | null;
   imageUrl?: string;
+  /** When `"admin"`, show admin workspace links instead of the member menu. */
+  accountRole?: "user" | "admin";
   size?: "sm" | "md";
   className?: string;
 };
@@ -27,16 +44,26 @@ type ProfileMenuItem = {
   icon: typeof Heart;
 };
 
-const menuItems: ProfileMenuItem[] = [
+const memberMenuItems: ProfileMenuItem[] = [
   {
     label: "New List",
     href: "/lists/new",
     icon: Plus
   },
   {
+    label: "Saved Vendors",
+    href: "/lists",
+    icon: Heart
+  },
+  {
     label: "Review",
     href: "/reviews/new",
     icon: SquarePen
+  },
+  {
+    label: "My Reviews",
+    href: "/me/reviews",
+    icon: Star
   },
   {
     label: "Claims",
@@ -50,7 +77,18 @@ const menuItems: ProfileMenuItem[] = [
   }
 ];
 
-export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: ProfileMenuProps) {
+const adminMenuItems: ProfileMenuItem[] = [
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Vendors", href: "/admin/vendors", icon: Store },
+  { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },
+  { label: "Claims", href: "/admin/claims", icon: Inbox },
+  { label: "Categories", href: "/admin/categories", icon: Layers },
+  { label: "Rating criteria", href: "/admin/rating-criteria", icon: SlidersHorizontal },
+  { label: "Browse vendors", href: "/vendors", icon: Home },
+  { label: "Preferences", href: "/preferences", icon: Settings }
+];
+
+export function ProfileMenu({ name, email, imageUrl, accountRole = "user", size = "sm", className }: ProfileMenuProps) {
   const preferredAvatarUrl = usePreferredAvatar(imageUrl);
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -58,6 +96,8 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
   const rootRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const isAnonymous = !name && !email && !imageUrl;
+  const menuItems = accountRole === "admin" ? adminMenuItems : memberMenuItems;
+  const menuHeading = accountRole === "admin" ? "Admin" : null;
 
   useEffect(() => {
     if (!open) return;
@@ -119,7 +159,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Open account menu"
+        aria-label={accountRole === "admin" ? "Open admin menu" : "Open account menu"}
       >
         <Avatar name={name} imageUrl={preferredAvatarUrl} size={size} />
       </button>
@@ -130,7 +170,7 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Open profile menu"
+        aria-label={accountRole === "admin" ? "Open admin menu" : "Open profile menu"}
       >
         <Avatar name={name} imageUrl={preferredAvatarUrl} size={size} />
         <span className="hidden text-[11px] font-black uppercase tracking-[0.18em] sm:block">{name ?? "Account"}</span>
@@ -148,7 +188,10 @@ export function ProfileMenu({ name, email, imageUrl, size = "sm", className }: P
             role="menu"
           >
             <div className="border-b border-stone-100 px-5 py-4">
-              <p className="text-sm font-semibold text-stone-900">{name ?? "Guest User"}</p>
+              {menuHeading ? (
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">{menuHeading}</p>
+              ) : null}
+              <p className={cn("text-sm font-semibold text-stone-900", menuHeading && "mt-1")}>{name ?? "Guest User"}</p>
               {email ? <p className="mt-1 text-xs text-stone-400">{email}</p> : null}
             </div>
 

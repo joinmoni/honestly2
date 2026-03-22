@@ -43,7 +43,7 @@ export async function createAdminCategory(
 
   const supabase = getSupabaseBrowserClient();
   const { data: createdCategory, error: categoryError } = await supabase
-    .from("categories")
+    .from("honestly_categories")
     .insert({
       name: input.name,
       slug,
@@ -59,7 +59,7 @@ export async function createAdminCategory(
   }
 
   if (input.subcategories.length) {
-    const { error: subcategoryError } = await supabase.from("subcategories").insert(
+    const { error: subcategoryError } = await supabase.from("honestly_subcategories").insert(
       input.subcategories.map((subcategory) => ({
         category_id: createdCategory.id,
         name: subcategory,
@@ -97,7 +97,7 @@ export async function deleteAdminCategory(
   }
 
   const supabase = getSupabaseBrowserClient();
-  const { error } = await supabase.from("categories").delete().eq("id", categoryId);
+  const { error } = await supabase.from("honestly_categories").delete().eq("id", categoryId);
 
   if (error) {
     throw error;
@@ -121,7 +121,7 @@ export async function addAdminSubcategory(
   const targetCategory = categories.find((category) => category.id === categoryId);
   if (!targetCategory) return categories;
 
-  const { error } = await supabase.from("subcategories").insert({
+  const { error } = await supabase.from("honestly_subcategories").insert({
     category_id: categoryId,
     name,
     slug: slugify(name)
@@ -155,7 +155,7 @@ export async function removeAdminSubcategory(
 
   const supabase = getSupabaseBrowserClient();
   const { error: deleteError } = await supabase
-    .from("subcategories")
+    .from("honestly_subcategories")
     .delete()
     .eq("category_id", categoryId)
     .eq("name", name);
@@ -169,7 +169,7 @@ export async function removeAdminSubcategory(
   const nextPromoted = targetCategory.promotedSubcategories.filter((subcategory) => subcategory !== name);
 
   const { error: updateError } = await supabase
-    .from("categories")
+    .from("honestly_categories")
     .update({ promoted_subcategories: nextPromoted })
     .eq("id", categoryId);
 
@@ -208,7 +208,7 @@ export async function toggleAdminHomepageCategory(
 
   const supabase = getSupabaseBrowserClient();
   const { error } = await supabase
-    .from("categories")
+    .from("honestly_categories")
     .update({
       featured_on_home: nextFeatured,
       home_order: nextHomeOrder
@@ -258,7 +258,7 @@ export async function reorderAdminHomepageCategories(
     home_order: index + 1
   }));
 
-  const { error } = await supabase.from("categories").upsert(updates, { onConflict: "id" });
+  const { error } = await supabase.from("honestly_categories").upsert(updates, { onConflict: "id" });
 
   if (error) {
     throw error;

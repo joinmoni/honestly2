@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getFooterContent } from "@/lib/services/footer";
 import { getListsByUserId } from "@/lib/services/lists";
-import { getHomepageSearchIndex } from "@/lib/services/search";
 import { getCurrentSession } from "@/lib/services/session";
 import { VendorListingScreen } from "@/components/vendors-listing/VendorListingScreen";
 import { getVendorListingPageData } from "@/lib/services/vendor-listing";
@@ -45,15 +44,14 @@ export async function generateMetadata({ searchParams }: VendorsPageProps): Prom
 export default async function VendorsPage({ searchParams }: VendorsPageProps) {
   const session = await getCurrentSession();
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const [data, footerContent, lists, searchIndex] = await Promise.all([
+  const [data, footerContent, lists] = await Promise.all([
     getVendorListingPageData({
       query: resolvedSearchParams?.q,
       where: resolvedSearchParams?.where,
       categorySlug: resolvedSearchParams?.category
     }),
     getFooterContent(),
-    session.user ? getListsByUserId(session.user.id) : Promise.resolve([]),
-    getHomepageSearchIndex()
+    session.user ? getListsByUserId(session.user.id) : Promise.resolve([])
   ]);
 
   return (
@@ -66,7 +64,7 @@ export default async function VendorsPage({ searchParams }: VendorsPageProps) {
         currentUserName={session.user?.name ?? null}
         currentUserEmail={session.user?.email ?? null}
         currentUserAvatarUrl={session.user?.avatarUrl}
-        searchIndex={searchIndex}
+        currentUserRole={session.user?.role}
       />
       <SiteFooter content={footerContent} variant="dark" />
     </>

@@ -51,7 +51,7 @@ type SupabaseAdminCategoryRow = {
 async function getSupabaseAdminCategories() {
   const client = getSupabaseServerClient();
   const { data, error } = await client
-    .from("categories")
+    .from("honestly_categories")
     .select(
       `
         id,
@@ -60,7 +60,7 @@ async function getSupabaseAdminCategories() {
         featured_on_home,
         home_order,
         promoted_subcategories,
-        subcategories (
+        subcategories:honestly_subcategories (
           id,
           name,
           slug
@@ -90,8 +90,8 @@ export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
         { id: "vendors", label: "Vendors", href: "/admin/vendors" },
         { id: "reviews", label: "Reviews", href: "/admin/reviews" },
         { id: "claims", label: "Claims", href: "/admin/claims" },
-        { id: "taxonomy", label: "Taxonomy", href: "/admin/categories", active: true },
-        { id: "rating-criteria", label: "Review Rubric", href: "/admin/rating-criteria" }
+        { id: "taxonomy", label: "Categories", href: "/admin/categories", active: true },
+        { id: "rating-criteria", label: "Rating criteria", href: "/admin/rating-criteria" }
       ],
       categories: categories.map((category, index) => ({
         id: category.id,
@@ -124,8 +124,8 @@ export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews" },
       { id: "claims", label: "Claims", href: "/admin/claims" },
-      { id: "taxonomy", label: "Taxonomy", href: "/admin/categories", active: true },
-      { id: "rating-criteria", label: "Review Rubric", href: "/admin/rating-criteria" }
+      { id: "taxonomy", label: "Categories", href: "/admin/categories", active: true },
+      { id: "rating-criteria", label: "Rating criteria", href: "/admin/rating-criteria" }
     ],
     categories: categories.map((category, index) => ({
       id: category.id,

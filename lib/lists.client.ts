@@ -97,7 +97,7 @@ export function deleteList(lists: SavedList[], listId: string): SavedList[] {
 async function resolveProfileId(userId: string): Promise<string | null> {
   const supabase = getSupabaseBrowserClient();
 
-  const directResult = await supabase.from("user_profiles").select("id").eq("id", userId).maybeSingle();
+  const directResult = await supabase.from("honestly_user_profiles").select("id").eq("id", userId).maybeSingle();
   if (directResult.error) {
     throw directResult.error;
   }
@@ -105,7 +105,7 @@ async function resolveProfileId(userId: string): Promise<string | null> {
     return directResult.data.id as string;
   }
 
-  const authResult = await supabase.from("user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
+  const authResult = await supabase.from("honestly_user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
   if (authResult.error) {
     throw authResult.error;
   }
@@ -135,12 +135,12 @@ export async function persistToggleVendorInList(
   const hasVendor = targetList.items.some((item) => item.vendorId === vendorId);
 
   if (hasVendor) {
-    const { error } = await supabase.from("saved_list_items").delete().eq("list_id", listId).eq("vendor_id", vendorId);
+    const { error } = await supabase.from("honestly_saved_list_items").delete().eq("list_id", listId).eq("vendor_id", vendorId);
     if (error) {
       throw error;
     }
   } else {
-    const { error } = await supabase.from("saved_list_items").insert({
+    const { error } = await supabase.from("honestly_saved_list_items").insert({
       list_id: listId,
       vendor_id: vendorId,
       created_at: new Date().toISOString()
@@ -179,7 +179,7 @@ export async function persistCreateListWithVendor(
   const nextName = input.name ?? `New List ${nextListNumber}`;
 
   const { data: createdList, error: listError } = await supabase
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .insert({
       user_id: profileId,
       name: nextName,
@@ -193,7 +193,7 @@ export async function persistCreateListWithVendor(
   }
 
   const createdAt = new Date().toISOString();
-  const { error: itemError } = await supabase.from("saved_list_items").insert({
+  const { error: itemError } = await supabase.from("honestly_saved_list_items").insert({
     list_id: createdList.id,
     vendor_id: input.vendorId,
     created_at: createdAt
@@ -250,7 +250,7 @@ export async function persistCreateEmptyList(
   const nextName = input.name ?? `New List ${nextListNumber}`;
 
   const { data: createdList, error } = await supabase
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .insert({
       user_id: profileId,
       name: nextName,
@@ -303,7 +303,7 @@ export async function persistUpdateListDetails(
 
   const supabase = getSupabaseBrowserClient();
   const { error } = await supabase
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .update({
       name: nextName,
       is_public: input.isPublic ?? targetList.isPublic,
@@ -331,7 +331,7 @@ export async function persistDeleteList(lists: SavedList[], listId: string): Pro
   }
 
   const supabase = getSupabaseBrowserClient();
-  const { error } = await supabase.from("saved_lists").delete().eq("id", listId);
+  const { error } = await supabase.from("honestly_saved_lists").delete().eq("id", listId);
 
   if (error) {
     throw error;

@@ -55,8 +55,8 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews", count: pendingReviewsCount },
       { id: "claims", label: "Claims", href: "/admin/claims", count: pendingClaims.length },
-      { id: "taxonomy", label: "Taxonomy", href: "/admin/categories" },
-      { id: "rating-criteria", label: "Review Rubric", href: "/admin/rating-criteria" }
+      { id: "taxonomy", label: "Categories", href: "/admin/categories" },
+      { id: "rating-criteria", label: "Rating criteria", href: "/admin/rating-criteria" }
     ],
     claims: claimItems,
     categories: categoryGroups,

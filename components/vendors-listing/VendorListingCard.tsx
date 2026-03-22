@@ -16,7 +16,7 @@ export function VendorListingCard({ vendor, saved, onSaveClick }: VendorListingC
   const location = vendor.locations.find((entry) => entry.isPrimary) ?? vendor.locations[0];
 
   return (
-    <motion.article whileHover={{ y: -4 }} transition={{ duration: 0.22 }} className="group mx-auto w-full max-w-[336px] cursor-pointer sm:w-[298px] sm:max-w-none md:hover:-translate-y-0">
+    <motion.article whileHover={{ y: -4 }} transition={{ duration: 0.22 }} className="group w-full min-w-0 cursor-pointer md:hover:-translate-y-0">
       <Link href={`/vendor/${vendor.slug}`} className="block">
         <VendorImageCarousel vendor={vendor} saved={saved} onSaveClick={onSaveClick} />
       </Link>

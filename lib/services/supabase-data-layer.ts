@@ -11,6 +11,7 @@ type SupabaseCategoryRow = {
   slug: string;
   name: string;
   description?: string | null;
+  created_at?: string | null;
   subcategories?: Array<{
     id: string;
     slug: string;
@@ -33,6 +34,8 @@ type SupabaseVendorRow = {
   price_tier?: "$" | "$$" | "$$$" | null;
   travels: boolean;
   service_radius_km?: number | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
   primary_category?: {
     id: string;
     slug: string;
@@ -85,16 +88,22 @@ type SupabaseCriterionRow = {
 type SupabaseReviewRow = {
   id: string;
   vendor_id: string;
-  user_id: string;
+  user_id: string | null;
   overall_rating: number | string;
   title?: string | null;
   body?: string | null;
   status: "pending" | "approved" | "rejected";
   created_at: string;
   updated_at: string;
+  reviewer_name?: string | null;
+  reviewer_email?: string | null;
+  reviewer_avatar_url?: string | null;
+  seeded_by_admin?: boolean | null;
+  source?: string | null;
   user_profile?: {
     full_name: string;
     avatar_url?: string | null;
+    email?: string | null;
   } | null;
   review_ratings?: Array<{
     score: number | string;
@@ -150,27 +159,29 @@ const VENDOR_SELECT = `
   price_tier,
   travels,
   service_radius_km,
-  primary_category:categories!vendors_primary_category_id_fkey (
+  contact_email,
+  contact_phone,
+  primary_category:honestly_categories!vendors_primary_category_id_fkey (
     id,
     slug,
     name
   ),
-  vendor_category_links (
-    category:categories (
+  vendor_category_links:honestly_vendor_category_links (
+    category:honestly_categories (
       id,
       slug,
       name
     )
   ),
-  vendor_subcategory_links (
-    subcategory:subcategories (
+  vendor_subcategory_links:honestly_vendor_subcategory_links (
+    subcategory:honestly_subcategories (
       id,
       slug,
       name,
       category_id
     )
   ),
-  vendor_locations (
+  vendor_locations:honestly_vendor_locations (
     id,
     label,
     city,
@@ -178,14 +189,14 @@ const VENDOR_SELECT = `
     country,
     is_primary
   ),
-  vendor_images (
+  vendor_images:honestly_vendor_images (
     id,
     url,
     alt,
     kind,
     position
   ),
-  vendor_socials (
+  vendor_socials:honestly_vendor_socials (
     platform,
     url
   )
@@ -201,18 +212,24 @@ const REVIEW_SELECT = `
   status,
   created_at,
   updated_at,
-  user_profile:user_profiles!reviews_user_id_fkey (
+  reviewer_name,
+  reviewer_email,
+  reviewer_avatar_url,
+  seeded_by_admin,
+  source,
+  user_profile:honestly_user_profiles!reviews_user_id_fkey (
     full_name,
-    avatar_url
+    avatar_url,
+    email
   ),
-  review_ratings (
+  review_ratings:honestly_review_ratings (
     score,
-    criterion:rating_criteria (
+    criterion:honestly_rating_criteria (
       id,
       name
     )
   ),
-  review_social_suggestions (
+  review_social_suggestions:honestly_review_social_suggestions (
     platform,
     url
   )
@@ -233,6 +250,7 @@ function mapCategory(row: SupabaseCategoryRow): Category {
     slug: row.slug,
     name: row.name,
     description: row.description ?? undefined,
+    ...(row.created_at ? { createdAt: row.created_at } : {}),
     subcategories: (row.subcategories ?? []).map(mapSubcategory)
   };
 }
@@ -293,6 +311,8 @@ function mapVendor(row: SupabaseVendorRow): Vendor {
       platform: social.platform,
       url: social.url
     })),
+    contactEmail: row.contact_email?.trim() || undefined,
+    contactPhone: row.contact_phone?.trim() || undefined,
     travels: row.travels,
     serviceRadiusKm: row.service_radius_km ?? null
   };
@@ -309,12 +329,25 @@ function mapRatingCriterion(row: SupabaseCriterionRow): RatingCriterion {
 }
 
 function mapReview(row: SupabaseReviewRow): Review {
+  const displayName =
+    row.user_id && row.user_profile?.full_name
+      ? row.user_profile.full_name
+      : (row.reviewer_name?.trim() || row.user_profile?.full_name || "Anonymous");
+
+  const displayAvatar = row.user_id ? (row.user_profile?.avatar_url ?? undefined) : (row.reviewer_avatar_url?.trim() || undefined);
+
+  const reviewerEmail =
+    row.reviewer_email?.trim() || row.user_profile?.email?.trim() || undefined;
+
   return {
     id: row.id,
     vendorId: row.vendor_id,
     userId: row.user_id,
-    userName: row.user_profile?.full_name ?? "Anonymous",
-    userAvatar: row.user_profile?.avatar_url ?? undefined,
+    userName: displayName,
+    userAvatar: displayAvatar,
+    reviewerEmail,
+    seededByAdmin: Boolean(row.seeded_by_admin),
+    source: row.source === "admin" || row.source === "import" || row.source === "user" ? row.source : undefined,
     overallRating: Number(row.overall_rating),
     title: row.title ?? undefined,
     body: row.body ?? undefined,
@@ -407,14 +440,15 @@ function buildVendorProfile(vendor: Vendor): VendorProfile {
 async function getSupabaseCategories(): Promise<Category[]> {
   const client = getSupabaseServerClient();
   const query = client
-    .from("categories")
+    .from("honestly_categories")
     .select(
       `
         id,
         slug,
         name,
         description,
-        subcategories (
+        created_at,
+        subcategories:honestly_subcategories (
           id,
           slug,
           name,
@@ -435,7 +469,7 @@ async function getSupabaseCategories(): Promise<Category[]> {
 
 async function getSupabaseVendors(): Promise<Vendor[]> {
   const client = getSupabaseServerClient();
-  const query = client.from("vendors").select(VENDOR_SELECT).order("name", { ascending: true });
+  const query = client.from("honestly_vendors").select(VENDOR_SELECT).order("name", { ascending: true });
   const { data, error } = await query;
 
   if (error) {
@@ -447,7 +481,7 @@ async function getSupabaseVendors(): Promise<Vendor[]> {
 
 async function getSupabaseReviews(): Promise<Review[]> {
   const client = getSupabaseServerClient();
-  const query = client.from("reviews").select(REVIEW_SELECT).order("created_at", { ascending: false });
+  const query = client.from("honestly_reviews").select(REVIEW_SELECT).order("created_at", { ascending: false });
   const { data, error } = await query;
 
   if (error) {
@@ -459,7 +493,7 @@ async function getSupabaseReviews(): Promise<Review[]> {
 
 async function getSupabaseRatingCriteria(): Promise<RatingCriterion[]> {
   const client = getSupabaseServerClient();
-  const query = client.from("rating_criteria").select("id, name, description, active, position").order("position", { ascending: true });
+  const query = client.from("honestly_rating_criteria").select("id, name, description, active, position").order("position", { ascending: true });
   const { data, error } = await query;
 
   if (error) {
@@ -471,7 +505,7 @@ async function getSupabaseRatingCriteria(): Promise<RatingCriterion[]> {
 
 async function resolveSupabaseProfileId(userId: string): Promise<string | null> {
   const client = getSupabaseServerClient();
-  const directQuery = client.from("user_profiles").select("id").eq("id", userId).maybeSingle();
+  const directQuery = client.from("honestly_user_profiles").select("id").eq("id", userId).maybeSingle();
   const directResult = await directQuery;
 
   if (directResult.error) {
@@ -482,7 +516,7 @@ async function resolveSupabaseProfileId(userId: string): Promise<string | null> 
     return directResult.data.id as string;
   }
 
-  const authQuery = client.from("user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
+  const authQuery = client.from("honestly_user_profiles").select("id").eq("auth_user_id", userId).maybeSingle();
   const authResult = await authQuery;
 
   if (authResult.error) {
@@ -498,7 +532,7 @@ async function getSupabaseListsByUserId(userId: string) {
 
   const client = getSupabaseServerClient();
   const query = client
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .select(
       `
         id,
@@ -507,7 +541,7 @@ async function getSupabaseListsByUserId(userId: string) {
         description,
         is_public,
         share_slug,
-        saved_list_items (
+        saved_list_items:honestly_saved_list_items (
           vendor_id,
           note,
           created_at
@@ -528,7 +562,7 @@ async function getSupabaseListsByUserId(userId: string) {
 async function getSupabaseListById(id: string) {
   const client = getSupabaseServerClient();
   const query = client
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .select(
       `
         id,
@@ -537,7 +571,7 @@ async function getSupabaseListById(id: string) {
         description,
         is_public,
         share_slug,
-        saved_list_items (
+        saved_list_items:honestly_saved_list_items (
           vendor_id,
           note,
           created_at
@@ -558,7 +592,7 @@ async function getSupabaseListById(id: string) {
 async function getSupabasePublicListByShareSlug(shareSlug: string) {
   const client = getSupabaseServerClient();
   const query = client
-    .from("saved_lists")
+    .from("honestly_saved_lists")
     .select(
       `
         id,
@@ -567,7 +601,7 @@ async function getSupabasePublicListByShareSlug(shareSlug: string) {
         description,
         is_public,
         share_slug,
-        saved_list_items (
+        saved_list_items:honestly_saved_list_items (
           vendor_id,
           note,
           created_at
@@ -589,7 +623,7 @@ async function getSupabasePublicListByShareSlug(shareSlug: string) {
 async function getSupabaseClaims() {
   const client = getSupabaseServerClient();
   const query = client
-    .from("vendor_claims")
+    .from("honestly_vendor_claims")
     .select(
       `
         id,
@@ -626,7 +660,7 @@ export function getSupabaseDataLayer(): AppDataLayer {
     },
     async getVendorBySlug(slug) {
       const client = getSupabaseServerClient();
-      const query = client.from("vendors").select(VENDOR_SELECT).eq("slug", slug).maybeSingle();
+      const query = client.from("honestly_vendors").select(VENDOR_SELECT).eq("slug", slug).maybeSingle();
       const { data, error } = await query;
 
       if (error) {

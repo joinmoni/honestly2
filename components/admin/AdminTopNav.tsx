@@ -1,27 +1,51 @@
 "use client";
 
-import { Avatar } from "@/components/ui/Avatar";
+import { AdminChromeProvider, useAdminChromeOptional } from "@/components/admin/AdminChromeContext";
+import { ProfileMenu } from "@/components/ui/ProfileMenu";
 import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import type { AdminNavLink } from "@/lib/types/admin-dashboard";
 
 type AdminTopNavProps = {
   brandLabel: string;
   navLinks: AdminNavLink[];
+  /** When set, wraps with chrome so ProfileMenu works outside `app/admin` layout (tests). */
   avatarName?: string;
 };
 
-export function AdminTopNav({ brandLabel, navLinks, avatarName = "Admin User" }: AdminTopNavProps) {
+function AdminTopNavInner({ brandLabel, navLinks, avatarName }: AdminTopNavProps) {
+  const chrome = useAdminChromeOptional();
+  const displayName = avatarName ?? chrome?.displayName ?? "Admin user";
+  const email = chrome?.email;
+  const imageUrl = chrome?.avatarUrl;
+
+  const centerLinks = navLinks.map((link) => ({
+    label: link.label,
+    href: link.href,
+    active: link.active,
+    count: link.count
+  }));
+
   return (
     <EditorialTopNav
       brandLabel={brandLabel}
-      navLinks={navLinks}
+      brandHref="/admin"
+      navLinks={centerLinks}
+      desktopNavSource="navLinks"
       innerClassName="max-w-[1400px] px-8"
-      rightSlot={
-        <div className="flex items-center gap-2 rounded-full bg-stone-900 px-2 py-2 text-white shadow-lg shadow-stone-200/40">
-          <Avatar name={avatarName} size="sm" />
-          <span className="hidden pr-2 text-[11px] font-black uppercase tracking-[0.18em] md:block">{avatarName}</span>
-        </div>
-      }
+      rightSlot={<ProfileMenu name={displayName} email={email} imageUrl={imageUrl} accountRole="admin" />}
     />
   );
+}
+
+/** Renders admin top nav; outside `app/admin` layout, pass `avatarName` (and wrap with `AdminChromeProvider` if ProfileMenu needs email/avatar). */
+export function AdminTopNav(props: AdminTopNavProps) {
+  if (props.avatarName !== undefined) {
+    return (
+      <AdminChromeProvider value={{ displayName: props.avatarName, email: "", avatarUrl: undefined }}>
+        <AdminTopNavInner {...props} />
+      </AdminChromeProvider>
+    );
+  }
+
+  return <AdminTopNavInner {...props} />;
 }

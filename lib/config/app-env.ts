@@ -28,6 +28,13 @@ function readEnv(name: string): string | undefined {
   return trimmed.length ? trimmed : undefined;
 }
 
+/** Public client vars must use static `process.env.NEXT_PUBLIC_*` reads so Next can inline them in the browser bundle. */
+function trimPublicEnv(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
 export function getDataProvider(): DataProvider {
   const raw = readEnv("HONESTLY_DATA_PROVIDER");
   if (raw === "supabase") return "supabase";
@@ -41,8 +48,10 @@ export function getSearchProvider(): SearchProvider {
 }
 
 export function getSupabasePublicEnv(): SupabasePublicEnv | null {
-  const url = readEnv("NEXT_PUBLIC_SUPABASE_URL");
-  const publishableKey = readEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+  const url = trimPublicEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const publishableKey =
+    trimPublicEnv(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) ??
+    trimPublicEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   if (!url || !publishableKey) return null;
 

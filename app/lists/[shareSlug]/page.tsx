@@ -47,7 +47,9 @@ export default async function SharedCollectionPage({ params }: SharedCollectionP
           <CollectionsTopNav
             brandLabel="honestly."
             avatarName={session.user.name}
+            avatarEmail={session.user.email}
             avatarUrl={session.user.avatarUrl}
+            accountRole={session.user.role}
             navLinks={getUserNavLinks("saved_vendors")}
           />
           <ListDetailScreen data={listData} />

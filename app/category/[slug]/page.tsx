@@ -49,6 +49,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         currentUserName={session.user?.name}
         currentUserEmail={session.user?.email}
         currentUserAvatarUrl={session.user?.avatarUrl}
+        currentUserRole={session.user?.role}
       />
       <SiteFooter content={footerContent} variant="dark" />
     </>

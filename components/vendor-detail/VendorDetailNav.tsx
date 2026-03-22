@@ -13,6 +13,7 @@ export function VendorDetailNav({ session }: VendorDetailNavProps) {
       avatarName={session.user?.name}
       avatarEmail={session.user?.email}
       avatarUrl={session.user?.avatarUrl}
+      accountRole={session.user?.role}
       navLinks={getUserNavLinks("none")}
     />
   );

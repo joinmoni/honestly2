@@ -1,3 +1,6 @@
+import { metaTextClassName } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
+
 type Column<T> = {
   key: keyof T;
   label: string;
@@ -13,9 +16,9 @@ export function AdminTable<T extends Record<string, string | number | boolean | 
     <div className="surface overflow-x-auto">
       <table className="w-full min-w-[600px] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-muted">
+          <tr className="border-b border-line text-left">
             {columns.map((column) => (
-              <th key={String(column.key)} className="px-4 py-3 font-medium">
+              <th key={String(column.key)} className={cn("px-4 py-3 text-left font-normal", metaTextClassName)}>
                 {column.label}
               </th>
             ))}

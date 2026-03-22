@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 
+import { BrandWordmark, Eyebrow } from "@/components/ui/Typography";
 import { isSupabaseConfigured } from "@/lib/config/app-env";
 import { setMockAnonymousSession } from "@/lib/mock-auth-state.client";
 import { signOut } from "@/lib/supabase/auth";
@@ -38,12 +39,12 @@ export function AdminSidebarPanel({ brandLabel, queueNav, structureNav }: AdminS
 
   return (
     <aside className="flex w-full flex-col border-b border-stone-200 bg-white p-8 md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r">
-      <Link href="/" className="serif-italic mb-12 inline-block text-4xl">
-        {brandLabel}
+      <Link href="/" className="mb-12 inline-block">
+        <BrandWordmark>{brandLabel}</BrandWordmark>
       </Link>
 
       <nav className="flex-1 space-y-2">
-        <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Queue</p>
+        <Eyebrow className="mb-4">Queue</Eyebrow>
         {queueNav.map((item) => (
           <motion.div key={item.id} whileHover={{ x: 2 }}>
             <Link
@@ -64,7 +65,7 @@ export function AdminSidebarPanel({ brandLabel, queueNav, structureNav }: AdminS
           </motion.div>
         ))}
 
-        <p className="mb-4 mt-10 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Structure</p>
+        <Eyebrow className="mb-4 mt-10">Structure</Eyebrow>
         {structureNav.map((item) => (
           <motion.div key={item.id} whileHover={{ x: 2 }}>
             <Link href={item.href} className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-stone-500 transition-colors hover:bg-stone-50">

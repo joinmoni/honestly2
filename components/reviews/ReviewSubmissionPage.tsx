@@ -14,6 +14,13 @@ type ReviewSubmissionPageProps = {
   reviewId?: string;
 };
 
+type NewVendorDraft = {
+  name: string;
+  category: string;
+  location: string;
+  website: string;
+};
+
 type ReviewFormValues = {
   headline: string;
   body: string;
@@ -25,7 +32,14 @@ const DEFAULT_RATING = 4;
 export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, reviewId }: ReviewSubmissionPageProps) {
   const [selectedVendorSlug, setSelectedVendorSlug] = useState(initialVendorSlug ?? "");
   const [query, setQuery] = useState("");
+  const [isReviewingNewVendor, setIsReviewingNewVendor] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [newVendor, setNewVendor] = useState<NewVendorDraft>({
+    name: "",
+    category: "",
+    location: "",
+    website: ""
+  });
   const [values, setValues] = useState<ReviewFormValues>(() => ({
     headline: "",
     body: "",
@@ -60,12 +74,14 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
     return Math.round(average * 10) / 10;
   }, [criteria, values.criteria]);
 
-  if (submitted && selectedVendor) {
+  const activeVendorName = selectedVendor?.name ?? newVendor.name.trim();
+
+  if (submitted && activeVendorName) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-14">
         <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm md:p-10">
           <Eyebrow className="mb-4 text-amber-700">Review submitted</Eyebrow>
-          <PageTitle className="mb-4 text-[2.75rem] leading-[0.95] md:text-6xl">Thanks for recommending {selectedVendor.name}.</PageTitle>
+          <PageTitle className="mb-4 text-[2.75rem] leading-[0.95] md:text-6xl">Thanks for recommending {activeVendorName}.</PageTitle>
           <BodyText className="max-w-2xl">
             Your review is now under review. Once approved, it will appear in your feedback history and help others discover this vendor.
           </BodyText>
@@ -73,9 +89,15 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
             <Link href="/me/reviews" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
               View my reviews
             </Link>
-            <Link href={`/vendor/${selectedVendor.slug}`} className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
-              Back to vendor
-            </Link>
+            {selectedVendor ? (
+              <Link href={`/vendor/${selectedVendor.slug}`} className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
+                Back to vendor
+              </Link>
+            ) : (
+              <Link href="/vendors" className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
+                Explore vendors
+              </Link>
+            )}
           </div>
         </div>
       </main>
@@ -87,20 +109,20 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
       <div className="mb-6">
         <Link href={selectedVendor ? `/vendor/${selectedVendor.slug}` : "/vendors"} className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900">
           <ArrowLeft size={14} />
-          {selectedVendor ? "Back to vendor" : "Back to vendors"}
+          {selectedVendor ? "Back to vendor" : isReviewingNewVendor ? "Back to vendor search" : "Back to vendors"}
         </Link>
       </div>
 
       <section className="rounded-[1.75rem] border border-stone-200 bg-white p-4 shadow-sm md:rounded-[2rem] md:p-10">
         <Eyebrow className="mb-4 text-amber-700">Recommend a vendor</Eyebrow>
         <PageTitle className="mb-4 text-[2.75rem] leading-[0.95] md:text-6xl">
-          {selectedVendor ? `Tell us about ${selectedVendor.name}.` : "Tell us about a vendor you trust."}
+          {selectedVendor ? `Tell us about ${selectedVendor.name}.` : isReviewingNewVendor ? "Tell us about the vendor you used." : "Tell us about a vendor you trust."}
         </PageTitle>
         <BodyText className="max-w-2xl">
           Share the vendor you used so Honestly can surface more great recommendations from real clients.
         </BodyText>
 
-        {!selectedVendor ? (
+        {!selectedVendor && !isReviewingNewVendor ? (
           <div className="mt-6">
             <label className="block">
               <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Find the vendor</span>
@@ -130,20 +152,75 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
                 );
               })}
             </div>
+            <div className="mt-4 rounded-[1.35rem] border border-dashed border-stone-300 bg-stone-50/80 p-4">
+              <p className="text-sm font-semibold text-stone-900">Can&apos;t find the vendor?</p>
+              <p className="mt-1 text-sm text-stone-500">Add the vendor details and still submit your review.</p>
+              <button
+                type="button"
+                className="mt-3 inline-flex items-center justify-center rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-stone-800"
+                onClick={() => setIsReviewingNewVendor(true)}
+              >
+                Review a new vendor
+              </button>
+            </div>
           </div>
         ) : (
           <div className="mt-8 space-y-8">
             <div className="border-b border-stone-200 pb-5">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Reviewing</p>
-              <CardTitle className="mt-2 text-[1.9rem] leading-tight md:text-[2.1rem]">{selectedVendor.name}</CardTitle>
+              <CardTitle className="mt-2 text-[1.9rem] leading-tight md:text-[2.1rem]">{selectedVendor?.name || newVendor.name || "New vendor"}</CardTitle>
               <button
                 type="button"
                 className="mt-3 text-sm font-semibold text-amber-700 underline underline-offset-4"
-                onClick={() => setSelectedVendorSlug("")}
+                onClick={() => {
+                  setSelectedVendorSlug("");
+                  setIsReviewingNewVendor(false);
+                }}
               >
                 Choose a different vendor
               </button>
             </div>
+
+            {isReviewingNewVendor ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Vendor name</span>
+                  <input
+                    value={newVendor.name}
+                    onChange={(event) => setNewVendor((current) => ({ ...current, name: event.target.value }))}
+                    placeholder="Wildflower Archive"
+                    className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900 outline-none focus:border-stone-900"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Category</span>
+                  <input
+                    value={newVendor.category}
+                    onChange={(event) => setNewVendor((current) => ({ ...current, category: event.target.value }))}
+                    placeholder="Floral Design"
+                    className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900 outline-none focus:border-stone-900"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Location</span>
+                  <input
+                    value={newVendor.location}
+                    onChange={(event) => setNewVendor((current) => ({ ...current, location: event.target.value }))}
+                    placeholder="Hudson Valley, NY"
+                    className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900 outline-none focus:border-stone-900"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Website or Instagram</span>
+                  <input
+                    value={newVendor.website}
+                    onChange={(event) => setNewVendor((current) => ({ ...current, website: event.target.value }))}
+                    placeholder="https://..."
+                    className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900 outline-none focus:border-stone-900"
+                  />
+                </label>
+              </div>
+            ) : null}
 
             <form
               className="space-y-6"
@@ -218,10 +295,14 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
               </label>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Link href={`/vendor/${selectedVendor.slug}`} className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
+                <Link href={selectedVendor ? `/vendor/${selectedVendor.slug}` : "/vendors"} className="inline-flex items-center justify-center rounded-full border border-stone-200 px-6 py-3 transition-colors hover:border-stone-900">
                   Cancel
                 </Link>
-                <button type="submit" className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800">
+                <button
+                  type="submit"
+                  disabled={isReviewingNewVendor && !newVendor.name.trim()}
+                  className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-white transition-colors hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+                >
                   {reviewId ? "Update review" : "Submit review"}
                 </button>
               </div>

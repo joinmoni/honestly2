@@ -3,6 +3,9 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { metaTextClassName } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
+
 type AdminPaginationProps = {
   currentPage: number;
   totalPages: number;
@@ -21,7 +24,7 @@ export function AdminPagination({
       <button
         type="button"
         disabled={currentPage <= 1}
-        className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 transition-colors hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-50"
+        className={cn(metaTextClassName, "group flex items-center gap-2 transition-colors hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-50")}
         onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
       >
         <ChevronLeft size={14} />
@@ -67,7 +70,7 @@ export function AdminPagination({
       <button
         type="button"
         disabled={currentPage >= totalPages}
-        className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 transition-colors hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-50"
+        className={cn(metaTextClassName, "group flex items-center gap-2 transition-colors hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-50")}
         onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
       >
         Next

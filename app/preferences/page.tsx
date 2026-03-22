@@ -13,7 +13,9 @@ export default async function PreferencesPage() {
       <CollectionsTopNav
         brandLabel="honestly."
         avatarName={user.name}
+        avatarEmail={user.email}
         avatarUrl={user.avatarUrl}
+        accountRole={user.role}
         navLinks={getUserNavLinks("preferences")}
       />
       <PreferencesScreen session={user} />

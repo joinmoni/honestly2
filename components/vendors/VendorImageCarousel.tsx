@@ -40,11 +40,11 @@ export function VendorImageCarousel({ vendor, saved = false, onSaveClick, classN
   };
 
   return (
-    <div className={cn("relative h-[246px] w-[min(100%,298px)] max-w-[336px] overflow-hidden rounded-[1.75rem] bg-stone-100 sm:w-[298px] sm:max-w-none", className)}>
+    <div className={cn("relative aspect-[298/246] w-full overflow-hidden rounded-[1.75rem] bg-stone-100", className)}>
       <div ref={scrollRef} className="scrollbar-hide flex h-full snap-x snap-mandatory overflow-x-auto">
         {images.map((image) => (
           <div key={image.id} className="relative h-full w-full shrink-0 snap-center">
-            <Image src={image.url} alt={image.alt ?? vendor.name} fill className="object-cover" sizes="(max-width: 640px) calc(100vw - 2rem), 298px" />
+            <Image src={image.url} alt={image.alt ?? vendor.name} fill className="object-cover" sizes="(max-width: 768px) calc(100vw - 2rem), (max-width: 1280px) 25vw, 298px" />
           </div>
         ))}
       </div>

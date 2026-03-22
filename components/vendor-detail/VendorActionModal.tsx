@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Globe, Instagram, Link as LinkIcon, Mail, MapPin, X } from "lucide-react";
+import { Globe, Instagram, Link as LinkIcon, Mail, MapPin, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -106,6 +106,40 @@ export function VendorActionModal({ open, mode, vendor, onClose }: VendorActionM
               </div>
             ) : (
               <div className="mt-6 space-y-3">
+                {vendor.contactEmail ? (
+                  <a
+                    href={`mailto:${encodeURIComponent(vendor.contactEmail)}?subject=${encodeURIComponent(`Inquiry for ${vendor.name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in learning more about ${vendor.name}.\n`)}`}
+                    className="flex items-center justify-between rounded-[1.5rem] border border-stone-200 px-4 py-4 transition-colors hover:border-stone-900"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-stone-100 p-2 text-stone-700">
+                        <Mail size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-stone-900">Email</p>
+                        <p className="text-xs text-stone-400">{vendor.contactEmail}</p>
+                      </div>
+                    </div>
+                    <LinkIcon size={16} className="text-stone-400" />
+                  </a>
+                ) : null}
+                {vendor.contactPhone ? (
+                  <a
+                    href={`tel:${vendor.contactPhone.replace(/\s+/g, "")}`}
+                    className="flex items-center justify-between rounded-[1.5rem] border border-stone-200 px-4 py-4 transition-colors hover:border-stone-900"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-stone-100 p-2 text-stone-700">
+                        <Phone size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-stone-900">Phone</p>
+                        <p className="text-xs text-stone-400">{vendor.contactPhone}</p>
+                      </div>
+                    </div>
+                    <LinkIcon size={16} className="text-stone-400" />
+                  </a>
+                ) : null}
                 {vendor.socials.length ? (
                   vendor.socials.map((social) => {
                     const Icon = getSocialIcon(social.platform);
@@ -136,7 +170,11 @@ export function VendorActionModal({ open, mode, vendor, onClose }: VendorActionM
                   </div>
                 )}
                 <a
-                  href={`mailto:?subject=${encodeURIComponent(`Inquiry for ${vendor.name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in learning more about ${vendor.name}.\n`)}`}
+                  href={
+                    vendor.contactEmail
+                      ? `mailto:${encodeURIComponent(vendor.contactEmail)}?subject=${encodeURIComponent(`Inquiry for ${vendor.name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in learning more about ${vendor.name}.\n`)}`
+                      : `mailto:?subject=${encodeURIComponent(`Inquiry for ${vendor.name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in learning more about ${vendor.name}.\n`)}`
+                  }
                   className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-stone-700"
                 >
                   <Mail size={14} />

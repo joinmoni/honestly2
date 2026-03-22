@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type { HomeCategoryShortcut } from "@/lib/types/home";
 
 type HomeCategoryRailProps = {
@@ -10,22 +7,17 @@ type HomeCategoryRailProps = {
 
 export function HomeCategoryRail({ shortcuts }: HomeCategoryRailProps) {
   return (
-    <section className="border-t border-stone-100 py-8 md:py-16">
-      <div className="scrollbar-hide flex snap-x snap-mandatory items-center justify-start gap-3 overflow-x-auto pb-2 md:justify-center md:gap-8 md:pb-4">
+    <section className="py-3 md:py-6">
+      <div className="scrollbar-hide flex items-center gap-3 overflow-x-auto pb-2">
         {shortcuts.map((shortcut, index) => (
-          <motion.div
+          <Link
             key={shortcut.id}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.7 }}
-            transition={{ duration: 0.28, delay: index * 0.05 }}
-            className="snap-start"
+            href={shortcut.href}
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900"
           >
-            <Link href={shortcut.href} className="group flex min-w-[64px] cursor-pointer flex-col items-center gap-2 md:min-w-[82px] md:gap-2.5">
-              <span className="rounded-2xl bg-stone-100 p-2 text-lg transition-colors duration-300 group-hover:bg-amber-50 md:p-4 md:text-2xl">{shortcut.emoji}</span>
-              <span className="ui-meta text-stone-500">{shortcut.label}</span>
-            </Link>
-          </motion.div>
+            <span className="text-base">{shortcut.emoji}</span>
+            <span>{shortcut.label}</span>
+          </Link>
         ))}
       </div>
     </section>

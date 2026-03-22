@@ -36,7 +36,14 @@ export default async function ClaimsPage() {
   return (
     <>
       <div className="bg-[#FDFCFB] text-stone-900">
-        <UserTopNav brandLabel="honestly." avatarName={user.name} avatarEmail={user.email} avatarUrl={user.avatarUrl} navLinks={getUserNavLinks("none")} />
+        <UserTopNav
+          brandLabel="honestly."
+          avatarName={user.name}
+          avatarEmail={user.email}
+          avatarUrl={user.avatarUrl}
+          accountRole={user.role}
+          navLinks={getUserNavLinks("none")}
+        />
         <ClaimsOverviewScreen claims={userClaims} />
       </div>
       <SiteFooter content={footerContent} variant="dark" />

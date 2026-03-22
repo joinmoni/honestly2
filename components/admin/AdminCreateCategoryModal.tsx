@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, X } from "lucide-react";
 
+import { BodyText, SectionTitle } from "@/components/ui/Typography";
+
 type AdminCreateCategoryModalProps = {
   open: boolean;
   onClose: () => void;
@@ -45,11 +47,17 @@ export function AdminCreateCategoryModal({ open, onClose, onCreateCategory }: Ad
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center bg-stone-100/85 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+        <motion.div
+          className="fixed inset-0 z-[200] flex min-h-screen items-center justify-center overflow-y-auto bg-stone-100/85 p-6 pt-24 pb-10 sm:pt-28"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
           <motion.div initial={{ opacity: 0, scale: 0.97, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 12 }} transition={{ duration: 0.2 }} className="w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-stone-100 bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="border-b border-stone-50 px-8 pb-6 pt-10">
-              <h2 className="text-3xl">Create New Category</h2>
-              <p className="mt-1 text-sm text-stone-500">Define a primary category and its associated subcategories.</p>
+              <SectionTitle>Create New Category</SectionTitle>
+              <BodyText className="mt-2 text-sm text-stone-500">Define a primary category and its associated subcategories.</BodyText>
             </div>
 
             <form

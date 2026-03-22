@@ -17,6 +17,7 @@ describe("app env", () => {
     delete process.env.HONESTLY_DATA_PROVIDER;
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     delete process.env.HONESTLY_SEARCH_PROVIDER;
     delete process.env.MEILISEARCH_HOST;
@@ -45,6 +46,17 @@ describe("app env", () => {
     expect(getSupabasePublicEnv()).toEqual({
       url: "https://example.supabase.co",
       publishableKey: "pk_test_123"
+    });
+    expect(isSupabaseConfigured()).toBe(true);
+  });
+
+  it("falls back to anon key when publishable key is absent", () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon_123";
+
+    expect(getSupabasePublicEnv()).toEqual({
+      url: "https://example.supabase.co",
+      publishableKey: "anon_123"
     });
     expect(isSupabaseConfigured()).toBe(true);
   });

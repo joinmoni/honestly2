@@ -352,7 +352,8 @@ describe("supabase data layer wiring", () => {
         updated_at: "2025-10-12T10:22:00.000Z",
         user_profile: {
           full_name: "Avery Johnson",
-          avatar_url: "https://example.com/avatar.jpg"
+          avatar_url: "https://example.com/avatar.jpg",
+          email: "avery@example.com"
         },
         review_ratings: [
           {
@@ -385,6 +386,8 @@ describe("supabase data layer wiring", () => {
         userId: "usr-001",
         userName: "Avery Johnson",
         userAvatar: "https://example.com/avatar.jpg",
+        reviewerEmail: "avery@example.com",
+        seededByAdmin: false,
         overallRating: 5,
         title: "The highlight of our wedding day",
         body: "Worth every penny.",

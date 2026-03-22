@@ -17,6 +17,27 @@ export function getSupabaseServerClient(): SupabaseClient {
   });
 }
 
+/** Same anon key, but sends the user JWT so PostgREST/RLS see auth.uid() (e.g. read own profile row). */
+export function getSupabaseServerClientForAccessToken(accessToken: string): SupabaseClient {
+  const env = getSupabasePublicEnv();
+
+  if (!env) {
+    throw new Error("Supabase server client requested before NEXT_PUBLIC_SUPABASE_URL and a client key were configured.");
+  }
+
+  return createClient(env.url, env.publishableKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+}
+
 export function getSupabaseAdminClient(): SupabaseClient {
   const env = getSupabaseServerEnv();
 

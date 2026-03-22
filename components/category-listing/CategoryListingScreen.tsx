@@ -16,9 +16,10 @@ type CategoryListingScreenProps = {
   currentUserName?: string | null;
   currentUserEmail?: string | null;
   currentUserAvatarUrl?: string;
+  currentUserRole?: "user" | "admin";
 };
 
-export function CategoryListingScreen({ data, currentUserName, currentUserEmail, currentUserAvatarUrl }: CategoryListingScreenProps) {
+export function CategoryListingScreen({ data, currentUserName, currentUserEmail, currentUserAvatarUrl, currentUserRole }: CategoryListingScreenProps) {
   const [activeStyleId, setActiveStyleId] = useState("all");
   const activeStyle = data.styleChips.find((chip) => chip.id === activeStyleId);
   const hasAccentSplit =
@@ -42,17 +43,19 @@ export function CategoryListingScreen({ data, currentUserName, currentUserEmail,
           avatarName={currentUserName}
           avatarEmail={currentUserEmail}
           avatarUrl={currentUserAvatarUrl}
+          accountRole={currentUserRole}
           navLinks={getUserNavLinks("none")}
           className="!static bg-white"
         />
       ) : (
         <EditorialTopNav
           brandLabel={data.copy.brandLabel}
+          desktopNavSource="navLinks"
           navLinks={[
             { label: data.copy.navSearchLabel, href: "/vendors", active: true },
             { label: data.copy.navCollectionsLabel, href: "/lists" }
           ]}
-          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
+          rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} accountRole={currentUserRole} />}
           innerClassName="max-w-7xl md:px-12"
           sticky={false}
         />

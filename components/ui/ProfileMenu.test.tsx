@@ -34,6 +34,18 @@ describe("ProfileMenu", () => {
     expect(routerRefreshMock).toHaveBeenCalledTimes(1);
   });
 
+  it("shows admin workspace links when accountRole is admin", async () => {
+    const user = userEvent.setup();
+    render(<ProfileMenu name="Admin" email="admin@example.com" accountRole="admin" />);
+
+    const menuButtons = screen.getAllByRole("button", { name: "Open admin menu" });
+    await user.click(menuButtons[0]!);
+
+    const dashboard = screen.getByRole("menuitem", { name: "Dashboard" });
+    expect(dashboard).toHaveAttribute("href", "/admin");
+    expect(screen.queryByRole("menuitem", { name: "New List" })).toBeNull();
+  });
+
   it("falls back to a local login redirect when Supabase is not configured", async () => {
     const user = userEvent.setup();
     vi.mocked(isSupabaseConfigured).mockReturnValue(false);
