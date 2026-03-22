@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Search, Settings, Star } from "lucide-react";
+import { Heart, Search, Settings, SquarePen, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ type MobileBottomNavProps = {
 };
 
 const iconByHref: Record<string, typeof Search> = {
+  "/reviews/new": SquarePen,
   "/lists": Heart,
   "/me/reviews": Star,
   "/preferences": Settings

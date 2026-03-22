@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Heart, LogOut, Plus, Settings, Star } from "lucide-react";
+import { ChevronDown, Heart, LogOut, Plus, Settings, SquarePen, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -32,6 +32,11 @@ const menuItems: ProfileMenuItem[] = [
     label: "New List",
     href: "/lists/new",
     icon: Plus
+  },
+  {
+    label: "Review",
+    href: "/reviews/new",
+    icon: SquarePen
   },
   {
     label: "Claims",

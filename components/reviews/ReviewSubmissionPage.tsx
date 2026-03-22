@@ -193,7 +193,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
                     return <Star key={score} size={28} className={active ? "fill-current text-amber-400" : "text-stone-200"} />;
                   })}
                 </div>
-                <p className="text-sm font-semibold text-stone-700">{overallRating.toFixed(1)} / 5 based on your rubric ratings</p>
+                <p className="text-sm font-semibold text-stone-700">{Math.round(overallRating)}/5 based on your ratings</p>
               </div>
 
               <label className="block">

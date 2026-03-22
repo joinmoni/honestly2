@@ -24,6 +24,11 @@ type HomeShellProps = {
 };
 
 export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, initialLists, currentUserId, currentUserName, currentUserEmail, currentUserAvatarUrl }: HomeShellProps) {
+  const reviewHref = currentUserName ? "/reviews/new" : "/login?next=%2Freviews%2Fnew";
+  const topNavLinks = currentUserName
+    ? getUserNavLinks("none")
+    : [{ label: "Review", href: reviewHref }, ...content.navLinks.filter((link) => link.href !== "/reviews/new")];
+
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
       {currentUserName ? (
@@ -32,12 +37,12 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, in
           avatarName={currentUserName}
           avatarEmail={currentUserEmail}
           avatarUrl={currentUserAvatarUrl}
-          navLinks={getUserNavLinks("none")}
+          navLinks={topNavLinks}
         />
       ) : (
         <EditorialTopNav
           brandLabel={`${content.brandName}.`}
-          navLinks={content.navLinks}
+          navLinks={topNavLinks}
           innerClassName="max-w-7xl md:px-12"
           rightSlot={<ProfileMenu name={currentUserName} email={currentUserEmail} imageUrl={currentUserAvatarUrl} />}
         />
@@ -56,15 +61,17 @@ export function HomeShell({ content, shortcuts, featuredVendors, searchIndex, in
             searchWherePlaceholder={content.searchWherePlaceholder}
             searchIndex={searchIndex}
           />
-          {!currentUserName ? (
-            <div className="mt-5 text-center text-sm text-stone-500 md:mt-6">
-              Used a great vendor before?{" "}
-              <Link href="/login?next=%2Freviews%2Fnew" className="font-semibold text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-amber-700">
-                Tell us about them
-              </Link>
-              .
-            </div>
-          ) : null}
+          <div className="mt-5 flex flex-col items-center justify-center gap-3 md:mt-6 md:flex-row">
+            <Link
+              href={reviewHref}
+              className="inline-flex min-w-[190px] items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-stone-800"
+            >
+              Write a review
+            </Link>
+            <p className="text-center text-sm text-stone-500">
+              Used a great vendor before? <span className="font-medium text-stone-700">Share it with Honestly.</span>
+            </p>
+          </div>
         </section>
 
         <HomeCategoryRail shortcuts={shortcuts} />
