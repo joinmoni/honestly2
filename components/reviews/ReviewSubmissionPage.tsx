@@ -15,7 +15,6 @@ type ReviewSubmissionPageProps = {
 };
 
 type ReviewFormValues = {
-  overallRating: number;
   headline: string;
   body: string;
   criteria: Record<string, number>;
@@ -28,7 +27,6 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [values, setValues] = useState<ReviewFormValues>(() => ({
-    overallRating: DEFAULT_RATING,
     headline: "",
     body: "",
     criteria: Object.fromEntries(criteria.map((criterion) => [criterion.id, DEFAULT_RATING]))
@@ -53,6 +51,14 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
       );
     });
   }, [query, vendors]);
+
+  const overallRating = useMemo(() => {
+    const scores = criteria.map((criterion) => values.criteria[criterion.id] ?? DEFAULT_RATING);
+    if (!scores.length) return DEFAULT_RATING;
+
+    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    return Math.round(average * 10) / 10;
+  }, [criteria, values.criteria]);
 
   if (submitted && selectedVendor) {
     return (
@@ -146,26 +152,6 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
                 setSubmitted(true);
               }}
             >
-              <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-stone-100 bg-stone-50 p-5">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Overall rating</span>
-                <div className="flex gap-1">
-                  {Array.from({ length: 5 }).map((_, index) => {
-                    const score = index + 1;
-                    return (
-                      <button
-                        key={score}
-                        type="button"
-                        className={score <= values.overallRating ? "text-3xl text-amber-400" : "text-3xl text-stone-200"}
-                        onClick={() => setValues((current) => ({ ...current, overallRating: score }))}
-                        aria-label={`Rate ${score} out of 5`}
-                      >
-                        ★
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               <div className="grid gap-4 md:grid-cols-2">
                 {criteria.map((criterion) => (
                   <div key={criterion.id} className="rounded-[1.35rem] border border-stone-200 bg-white p-4">
@@ -195,6 +181,19 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-stone-100 bg-stone-50 p-5">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Overall rating</span>
+                <div className="flex gap-1" aria-label={`Overall rating ${overallRating} out of 5`}>
+                  {Array.from({ length: 5 }).map((_, index) => {
+                    const score = index + 1;
+                    const active = score <= Math.round(overallRating);
+
+                    return <Star key={score} size={28} className={active ? "fill-current text-amber-400" : "text-stone-200"} />;
+                  })}
+                </div>
+                <p className="text-sm font-semibold text-stone-700">{overallRating.toFixed(1)} / 5 based on your rubric ratings</p>
               </div>
 
               <label className="block">

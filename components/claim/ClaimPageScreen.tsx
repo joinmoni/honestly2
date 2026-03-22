@@ -67,7 +67,7 @@ export function ClaimPageScreen({ data, currentUser }: ClaimPageScreenProps) {
   const submittedLine = submittedAt ? `${data.copy.submittedPrefix} ${submittedAt}` : null;
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16 lg:py-24">
+    <main className="mx-auto max-w-2xl overflow-x-hidden px-4 py-12 md:px-6 md:py-16 lg:py-24">
       <div className="mb-8">
         <Link
           href={data.vendorHref}
@@ -89,10 +89,10 @@ export function ClaimPageScreen({ data, currentUser }: ClaimPageScreenProps) {
             <Image src={data.vendorImageUrl} alt={data.vendorName} width={64} height={64} className="h-full w-full object-cover" />
           ) : null}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="mb-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-600">{data.copy.targetProfileLabel}</p>
-          <h2 className="text-xl font-display">{data.vendorName}</h2>
-          <p className="text-[10px] font-medium tracking-tight text-stone-400">
+          <h2 className="truncate text-xl font-display">{data.vendorName}</h2>
+          <p className="truncate text-[10px] font-medium tracking-tight text-stone-400">
             {data.vendorCategoryLabel} • {data.vendorLocationLabel}
           </p>
         </div>
@@ -102,7 +102,7 @@ export function ClaimPageScreen({ data, currentUser }: ClaimPageScreenProps) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="rounded-[2.5rem] border border-stone-100 bg-white p-8 shadow-2xl shadow-stone-200/30 md:p-12"
+        className="rounded-[2.5rem] border border-stone-100 bg-white p-5 shadow-2xl shadow-stone-200/30 md:p-8 lg:p-12"
       >
         {state === "form" || state === "rejected" ? (
           <div className="space-y-8">

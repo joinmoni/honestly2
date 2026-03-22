@@ -3,7 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Check, Plus, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CardTitle, MetaText, SectionTitle } from "@/components/ui/Typography";
 
 type SaveToListOption = {
@@ -35,6 +36,13 @@ export function SaveToListModal({
   onCreateCollection,
   onDone
 }: SaveToListModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
@@ -46,7 +54,9 @@ export function SaveToListModal({
     };
   }, [open]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open ? (
         <motion.div className="fixed inset-0 z-[90] flex min-h-screen flex-col items-center justify-end bg-stone-100/80 p-4 md:justify-center md:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
@@ -135,5 +145,7 @@ export function SaveToListModal({
         </motion.div>
       ) : null}
     </AnimatePresence>
+    ,
+    document.body
   );
 }
