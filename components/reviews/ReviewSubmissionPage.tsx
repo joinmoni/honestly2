@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { BodyText, CardTitle, Eyebrow, PageTitle } from "@/components/ui/Typography";
@@ -56,7 +56,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
 
   if (submitted && selectedVendor) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-10 md:py-14">
+      <main className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-14">
         <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm md:p-10">
           <Eyebrow className="mb-4 text-amber-700">Review submitted</Eyebrow>
           <PageTitle className="mb-4 text-[2.75rem] leading-[0.95] md:text-6xl">Thanks for recommending {selectedVendor.name}.</PageTitle>
@@ -77,7 +77,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10 md:py-14">
+    <main className="mx-auto max-w-4xl px-4 py-6 md:px-6 md:py-14">
       <div className="mb-6">
         <Link href={selectedVendor ? `/vendor/${selectedVendor.slug}` : "/vendors"} className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900">
           <ArrowLeft size={14} />
@@ -85,7 +85,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
         </Link>
       </div>
 
-      <section className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-10">
+      <section className="rounded-[1.75rem] border border-stone-200 bg-white p-4 shadow-sm md:rounded-[2rem] md:p-10">
         <Eyebrow className="mb-4 text-amber-700">Recommend a vendor</Eyebrow>
         <PageTitle className="mb-4 text-[2.75rem] leading-[0.95] md:text-6xl">
           {selectedVendor ? `Tell us about ${selectedVendor.name}.` : "Tell us about a vendor you trust."}
@@ -95,7 +95,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
         </BodyText>
 
         {!selectedVendor ? (
-          <div className="mt-8 rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5">
+          <div className="mt-6">
             <label className="block">
               <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Find the vendor</span>
               <input
@@ -127,7 +127,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
           </div>
         ) : (
           <div className="mt-8 space-y-8">
-            <div className="rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5">
+            <div className="border-b border-stone-200 pb-5">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Reviewing</p>
               <CardTitle className="mt-2 text-[1.9rem] leading-tight md:text-[2.1rem]">{selectedVendor.name}</CardTitle>
               <button
@@ -146,7 +146,7 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
                 setSubmitted(true);
               }}
             >
-              <div className="flex flex-col items-center gap-3 rounded-[1.75rem] border border-stone-100 bg-stone-50 p-5">
+              <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-stone-100 bg-stone-50 p-5">
                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Overall rating</span>
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, index) => {
@@ -168,23 +168,32 @@ export function ReviewSubmissionPage({ vendors, criteria, initialVendorSlug, rev
 
               <div className="grid gap-4 md:grid-cols-2">
                 {criteria.map((criterion) => (
-                  <label key={criterion.id} className="rounded-[1.5rem] border border-stone-200 bg-white p-4">
+                  <div key={criterion.id} className="rounded-[1.35rem] border border-stone-200 bg-white p-4">
                     <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{criterion.name}</span>
-                    <input
-                      type="range"
-                      min={1}
-                      max={5}
-                      step={1}
-                      value={values.criteria[criterion.id] ?? DEFAULT_RATING}
-                      onChange={(event) =>
-                        setValues((current) => ({
-                          ...current,
-                          criteria: { ...current.criteria, [criterion.id]: Number(event.target.value) }
-                        }))
-                      }
-                      className="mt-4 h-1 w-full accent-amber-600"
-                    />
-                  </label>
+                    <div className="mt-4 flex gap-1.5">
+                      {Array.from({ length: 5 }).map((_, index) => {
+                        const score = index + 1;
+                        const active = score <= (values.criteria[criterion.id] ?? DEFAULT_RATING);
+
+                        return (
+                          <button
+                            key={score}
+                            type="button"
+                            aria-label={`${criterion.name}: ${score} stars`}
+                            className={active ? "text-amber-500" : "text-stone-200"}
+                            onClick={() =>
+                              setValues((current) => ({
+                                ...current,
+                                criteria: { ...current.criteria, [criterion.id]: score }
+                              }))
+                            }
+                          >
+                            <Star size={24} className={active ? "fill-current" : ""} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
               </div>
 

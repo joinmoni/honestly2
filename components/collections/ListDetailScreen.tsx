@@ -5,16 +5,20 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Lock, PencilLine, Share2 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BodyText, CardTitle, Eyebrow, MetaText, PillText } from "@/components/ui/Typography";
-import { isGenericListName, persistUpdateListDetails } from "@/lib/lists.client";
+import { isGenericListName, persistCreateEmptyList, persistUpdateListDetails } from "@/lib/lists.client";
 import type { ListDetailPageData } from "@/lib/types/collections";
 
 type ListDetailScreenProps = {
   data: ListDetailPageData;
+  isDraft?: boolean;
+  draftUserId?: string;
 };
 
-export function ListDetailScreen({ data }: ListDetailScreenProps) {
+export function ListDetailScreen({ data, isDraft = false, draftUserId }: ListDetailScreenProps) {
+  const router = useRouter();
   const [sourceList, setSourceList] = useState(data.sourceList);
   const [listName, setListName] = useState(data.name);
   const [visibility, setVisibility] = useState(data.visibility);
@@ -22,16 +26,50 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [showNamingPrompt, setShowNamingPrompt] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [savePending, setSavePending] = useState(false);
   const visibilityLabel = visibility === "shared" ? data.copy.visibilitySharedLabel : data.copy.visibilityPrivateLabel;
-  const shareButtonLabel = visibility === "shared" ? data.copy.shareLabel : "Share publicly";
+  const shareButtonLabel = visibility === "shared" ? data.copy.shareLabel : isDraft ? "Save list" : "Share publicly";
+
+  const persistDraftIfNeeded = async () => {
+    if (!isDraft || !draftUserId) {
+      return sourceList;
+    }
+
+    const trimmedName = listName.trim();
+    if (!trimmedName || isGenericListName(trimmedName)) {
+      setShowNamingPrompt(true);
+      throw new Error("Name this list before saving it.");
+    }
+
+    setSavePending(true);
+
+    try {
+      const createdList = await persistCreateEmptyList([], { userId: draftUserId, name: trimmedName });
+      setSourceList(createdList);
+      router.replace(`/lists/${createdList.id}`);
+      return createdList;
+    } finally {
+      setSavePending(false);
+    }
+  };
 
   const handleShare = async () => {
     if (typeof window === "undefined") return;
 
-    if (visibility === "private" && (isGenericListName(listName) || !listName.trim())) {
+    if ((visibility === "private" || isDraft) && (isGenericListName(listName) || !listName.trim())) {
       setShowNamingPrompt(true);
       setErrorMessage(null);
       return;
+    }
+
+    if (isDraft) {
+      try {
+        await persistDraftIfNeeded();
+        return;
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "This list could not be saved right now.");
+        return;
+      }
     }
 
     let nextList = sourceList;
@@ -78,7 +116,7 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
 
   return (
     <div className="bg-[#FDFCFB] text-stone-900">
-      <main className="mx-auto max-w-7xl px-6 py-8 md:py-12">
+      <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-12">
         <div className="mb-6 md:mb-8">
           <Link href={data.copy.backHref} className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900">
             <ArrowLeft size={14} />
@@ -87,7 +125,7 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
         </div>
 
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="rounded-[2.5rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm md:rounded-[2.5rem] md:p-8">
             <Eyebrow className="mb-4">Saved List</Eyebrow>
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="max-w-2xl">
@@ -118,10 +156,11 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800"
+                  className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+                  disabled={savePending}
                 >
                   <Share2 size={12} />
-                  {shareState === "copied" ? "Link copied" : shareButtonLabel}
+                  {savePending ? "Saving..." : shareState === "copied" ? "Link copied" : shareButtonLabel}
                 </button>
               </div>
             </div>
@@ -149,7 +188,11 @@ export function ListDetailScreen({ data }: ListDetailScreenProps) {
                 </div>
               </div>
             ) : null}
-            {visibility === "private" ? <BodyText className="mt-4 text-[12px] md:text-sm">This list stays private until you share it publicly.</BodyText> : null}
+            {visibility === "private" ? (
+              <BodyText className="mt-4 text-[12px] md:text-sm">
+                {isDraft ? "This list is still a draft. Name it to save it, then you can add vendors or share it publicly later." : "This list stays private until you share it publicly."}
+              </BodyText>
+            ) : null}
           </div>
 
           <aside className="rounded-[2.25rem] border border-stone-200 bg-stone-900 p-6 text-white shadow-sm">

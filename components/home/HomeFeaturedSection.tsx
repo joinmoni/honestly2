@@ -24,7 +24,7 @@ export function HomeFeaturedSection({ title, description, vendors, initialLists,
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-wrap justify-center gap-8 md:justify-start">
         {vendors.map((vendor) => (
           <HomeVendorCard key={vendor.id} vendor={vendor} initialLists={initialLists} currentUserId={currentUserId} />
         ))}

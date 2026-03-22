@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Lock, PencilLine, Share2 } from "lucide-react";
 
 import { CollectionCard } from "@/components/collections/CollectionCard";
 import { CollectionsHeader } from "@/components/collections/CollectionsHeader";
@@ -10,13 +11,11 @@ import { NewMoodboardCard } from "@/components/collections/NewMoodboardCard";
 import { SavedVendorsTable } from "@/components/collections/SavedVendorsTable";
 import { SaveToListModal } from "@/components/lists/SaveToListModal";
 import {
-  isGenericListName,
   isVendorSaved,
   persistCreateEmptyList,
   persistCreateListWithVendor,
   persistDeleteList,
-  persistToggleVendorInList,
-  persistUpdateListDetails
+  persistToggleVendorInList
 } from "@/lib/lists.client";
 import type { SavedList } from "@/lib/types/domain";
 import type { CollectionsListCardView, CollectionsPageCopy, SavedVendorRowView } from "@/lib/types/collections";
@@ -132,33 +131,25 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
   const handleShareList = async () => {
     if (!activeList) return;
 
+    const sourceList = savedLists.find((list) => list.id === activeList.id);
+    if (!sourceList) return;
+    if (!sourceList.isPublic) return;
+
+    const shareUrl =
+      typeof window !== "undefined" ? `${window.location.origin}/lists/${sourceList.shareSlug ?? sourceList.id}` : `/lists/${sourceList.shareSlug ?? sourceList.id}`;
+
     setPending(true);
     setErrorMessage(null);
 
     try {
-      const sourceList = savedLists.find((list) => list.id === activeList.id);
-      const sourceName = sourceList?.name ?? activeList.name;
-
-      if (isGenericListName(sourceName)) {
-        setErrorMessage("Name this list before sharing it publicly.");
-        setPending(false);
-        return;
-      }
-
-      const nextLists = await persistUpdateListDetails(savedLists, activeList.id, {
-        name: sourceName,
-        isPublic: true
-      });
-
-      setSavedLists(nextLists);
-      syncCardsFromSavedLists(nextLists);
-      const nextActiveList = nextLists.find((list) => list.id === activeList.id);
-      if (nextActiveList) {
-        setActiveList({
-          ...activeList,
-          name: nextActiveList.name,
-          visibility: nextActiveList.isPublic ? "shared" : "private"
+      if (navigator.share) {
+        await navigator.share({
+          title: sourceList.name,
+          text: `View ${sourceList.name} on Honestly.`,
+          url: shareUrl
         });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
       }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "This list could not be shared right now.");
@@ -298,8 +289,29 @@ export function CollectionsOverviewScreen({ userId, copy, initialLists, initialS
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">List actions</p>
               <h3 className="mt-3 text-2xl leading-tight">{activeList.name}</h3>
               <div className="mt-5 space-y-3">
-                <button type="button" className="w-full rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white" onClick={handleShareList}>
-                  {activeList.visibility === "shared" ? "Share" : copy.sharePubliclyLabel}
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700"
+                  onClick={() => {
+                    setActiveList(null);
+                    router.push(`/lists/${activeList.id}`);
+                  }}
+                >
+                  <PencilLine size={16} />
+                  {copy.renameListLabel}
+                </button>
+                <button
+                  type="button"
+                  className={
+                    activeList.visibility === "private"
+                      ? "flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-200 px-4 py-3 text-sm font-semibold text-stone-500"
+                      : "flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white"
+                  }
+                  onClick={handleShareList}
+                  disabled={activeList.visibility === "private"}
+                >
+                  {activeList.visibility === "private" ? <Lock size={16} /> : <Share2 size={16} />}
+                  {activeList.visibility === "private" ? "Share unavailable" : "Share"}
                 </button>
                 <button type="button" className="w-full rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700" onClick={handleDeleteList}>
                   {copy.deleteListLabel}

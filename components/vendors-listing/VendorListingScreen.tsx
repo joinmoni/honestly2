@@ -158,7 +158,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-6 py-16">
+      <main className="mx-auto max-w-[1600px] px-4 py-10 md:px-6 md:py-16">
         <div className="mb-20">
           <p className="text-xs font-sans font-black uppercase tracking-widest text-stone-400">
             {data.copy.showingPrefix} {data.resultCount.toLocaleString()} {data.copy.showingSuffix}
@@ -167,7 +167,7 @@ export function VendorListingScreen({ data, initialLists, currentUserId, current
 
         {data.vendors.length ? (
           <>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-10 md:justify-start">
               {data.vendors.map((vendor) => (
                 <VendorListingCard
                   key={vendor.id}
