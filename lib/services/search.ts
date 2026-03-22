@@ -104,6 +104,14 @@ const SEARCH_VENDOR_SELECT = `
   )
 `;
 
+function isMeilisearchEnabled(): boolean {
+  return getSearchProvider() === "meilisearch";
+}
+
+function logMeilisearchFallback(error: unknown, scope: string): void {
+  console.warn(`[search] Falling back from Meilisearch in ${scope}.`, error);
+}
+
 function mapSearchVendor(row: SupabaseSearchVendorRow): Vendor {
   return {
     id: row.id,
@@ -278,28 +286,29 @@ export async function getHomepageSearchIndex(): Promise<HomepageSearchIndex> {
 }
 
 export async function getHomepageSearchSuggestions(query: string): Promise<SearchSuggestions> {
-  if (getSearchProvider() === "meilisearch") {
-    const term = query.trim();
-    const [categories, vendors] = await Promise.all([
-      searchMeilisearchCategories(term, 5),
-      searchMeilisearchVendors(term, 5)
-    ]);
+  if (isMeilisearchEnabled()) {
+    try {
+      const term = query.trim();
+      const [categories, vendors] = await Promise.all([searchMeilisearchCategories(term, 5), searchMeilisearchVendors(term, 5)]);
 
-    return {
-      categories: categories.hits.map((category) => ({
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        emoji: category.emoji,
-        href: category.href
-      })),
-      vendors: vendors.hits.map((vendor) => ({
-        id: vendor.id,
-        name: vendor.name,
-        slug: vendor.slug
-      })),
-      locations: []
-    };
+      return {
+        categories: categories.hits.map((category) => ({
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          emoji: category.emoji,
+          href: category.href
+        })),
+        vendors: vendors.hits.map((vendor) => ({
+          id: vendor.id,
+          name: vendor.name,
+          slug: vendor.slug
+        })),
+        locations: []
+      };
+    } catch (error) {
+      logMeilisearchFallback(error, "getHomepageSearchSuggestions");
+    }
   }
 
   const index = await getHomepageSearchIndex();
@@ -336,14 +345,18 @@ export async function getHomepageSearchSuggestions(query: string): Promise<Searc
 }
 
 export async function getHomepageLocationSuggestions(query: string): Promise<SearchSuggestions["locations"]> {
-  if (getSearchProvider() === "meilisearch") {
-    const results = await searchMeilisearchLocations(query.trim(), 6);
-    return results.hits.map((location) => ({
-      city: location.city,
-      region: location.region,
-      country: location.country,
-      label: location.label
-    }));
+  if (isMeilisearchEnabled()) {
+    try {
+      const results = await searchMeilisearchLocations(query.trim(), 6);
+      return results.hits.map((location) => ({
+        city: location.city,
+        region: location.region,
+        country: location.country,
+        label: location.label
+      }));
+    } catch (error) {
+      logMeilisearchFallback(error, "getHomepageLocationSuggestions");
+    }
   }
 
   const index = await getHomepageSearchIndex();
@@ -357,58 +370,62 @@ export async function searchVendorDirectory({
   where,
   categorySlug
 }: VendorDirectorySearchInput): Promise<Vendor[]> {
-  if (getSearchProvider() === "meilisearch") {
-    const filters: string[] = [];
-    if (categorySlug && categorySlug !== "all") {
-      filters.push(`searchCategories = "${categorySlug}"`);
-    }
-    if (where?.trim()) {
-      filters.push(`searchLocations = "${where.trim()}"`);
-    }
+  if (isMeilisearchEnabled()) {
+    try {
+      const filters: string[] = [];
+      if (categorySlug && categorySlug !== "all") {
+        filters.push(`searchCategories = "${categorySlug}"`);
+      }
+      if (where?.trim()) {
+        filters.push(`searchLocations = "${where.trim()}"`);
+      }
 
-    const results = await searchMeilisearchVendors(query?.trim() ?? "", 24, filters);
+      const results = await searchMeilisearchVendors(query?.trim() ?? "", 24, filters);
 
-    return results.hits.map((vendor): Vendor => ({
-      id: vendor.id,
-      slug: vendor.slug,
-      name: vendor.name,
-      headline: undefined,
-      description: undefined,
-      verified: false,
-      claimed: false,
-      status: "active" as const,
-      ratingAvg: 0,
-      reviewCount: 0,
-      primaryCategory: {
-        id: vendor.categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        slug: vendor.categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        name: vendor.categoryLabel
-      },
-      categories: [],
-      subcategories: [],
-      locations: vendor.locationLabel
-        ? [
-            {
-              id: `${vendor.id}-primary`,
-              city: vendor.locationLabel.split(",")[0] ?? vendor.locationLabel,
-              region: vendor.locationLabel.split(",").slice(1).join(",").trim() || undefined,
-              isPrimary: true
-            }
-          ]
-        : [],
-      images: vendor.imageUrl
-        ? [
-            {
-              id: `${vendor.id}-cover`,
-              url: vendor.imageUrl,
-              kind: "cover"
-            }
-          ]
-        : [],
-      socials: [],
-      travels: false,
-      serviceRadiusKm: null
-    }));
+      return results.hits.map((vendor): Vendor => ({
+        id: vendor.id,
+        slug: vendor.slug,
+        name: vendor.name,
+        headline: undefined,
+        description: undefined,
+        verified: false,
+        claimed: false,
+        status: "active" as const,
+        ratingAvg: 0,
+        reviewCount: 0,
+        primaryCategory: {
+          id: vendor.categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          slug: vendor.categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          name: vendor.categoryLabel
+        },
+        categories: [],
+        subcategories: [],
+        locations: vendor.locationLabel
+          ? [
+              {
+                id: `${vendor.id}-primary`,
+                city: vendor.locationLabel.split(",")[0] ?? vendor.locationLabel,
+                region: vendor.locationLabel.split(",").slice(1).join(",").trim() || undefined,
+                isPrimary: true
+              }
+            ]
+          : [],
+        images: vendor.imageUrl
+          ? [
+              {
+                id: `${vendor.id}-cover`,
+                url: vendor.imageUrl,
+                kind: "cover"
+              }
+            ]
+          : [],
+        socials: [],
+        travels: false,
+        serviceRadiusKm: null
+      }));
+    } catch (error) {
+      logMeilisearchFallback(error, "searchVendorDirectory");
+    }
   }
 
   const vendors = await getVendors();
