@@ -15,6 +15,16 @@ body {
   @apply bg-canvas text-ink antialiased font-sans;
 }
 
+body[data-mobile-nav="true"] {
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  body[data-mobile-nav="true"] {
+    padding-bottom: 0;
+  }
+}
+
 @layer base {
   h1,
   h2 {

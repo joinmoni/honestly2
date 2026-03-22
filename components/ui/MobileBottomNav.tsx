@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart, Search, Settings, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 type MobileBottomNavProps = {
@@ -22,6 +23,13 @@ const iconByHref: Record<string, typeof Search> = {
 export function MobileBottomNav({ links }: MobileBottomNavProps) {
   const pathname = usePathname();
   const items = [{ label: "Explore", href: "/vendors", active: pathname === "/vendors" || pathname === "/" }, ...links];
+
+  useEffect(() => {
+    document.body.dataset.mobileNav = "true";
+    return () => {
+      delete document.body.dataset.mobileNav;
+    };
+  }, []);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[160] flex justify-center px-4 md:hidden">
