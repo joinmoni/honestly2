@@ -16,12 +16,30 @@ function normalizeNextPath(nextPath?: string): string {
   return nextPath;
 }
 
-function getAuthRedirectUrl(nextPath?: string): string {
+/**
+ * Base URL for OAuth / magic-link return paths. Prefer `NEXT_PUBLIC_SITE_URL` on production so
+ * Supabase receives the same origin you list under Authentication → URL Configuration (avoids
+ * falling back to the project's Site URL when it is still localhost).
+ */
+function getAuthRedirectOrigin(): string {
   if (typeof window === "undefined") {
     throw new Error("Auth redirects can only be created in the browser.");
   }
 
-  const url = new URL("/auth/callback", window.location.origin);
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (raw) {
+    try {
+      return new URL(raw).origin;
+    } catch {
+      // ignore invalid env; fall back to current page origin
+    }
+  }
+
+  return window.location.origin;
+}
+
+function getAuthRedirectUrl(nextPath?: string): string {
+  const url = new URL("/auth/callback", getAuthRedirectOrigin());
   url.searchParams.set("next", normalizeNextPath(nextPath));
   return url.toString();
 }

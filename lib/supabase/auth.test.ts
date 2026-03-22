@@ -78,6 +78,25 @@ describe("supabase auth helpers", () => {
     });
   });
 
+  it("uses NEXT_PUBLIC_SITE_URL for OAuth callback when set", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://app.example.com/";
+    const browserClient = createBrowserClientMock();
+    browserClient.auth.signInWithOAuth.mockResolvedValue({
+      data: { url: "https://accounts.google.com/o/oauth2/v2/auth", provider: "google" },
+      error: null
+    });
+    vi.mocked(getSupabaseBrowserClient).mockReturnValue(browserClient as never);
+
+    await signInWithGoogle();
+
+    expect(browserClient.auth.signInWithOAuth).toHaveBeenCalledWith({
+      provider: "google",
+      options: {
+        redirectTo: "https://app.example.com/auth/callback?next=%2Fvendors"
+      }
+    });
+  });
+
   it("passes the callback URL into email OTP sign-in", async () => {
     const browserClient = createBrowserClientMock();
     browserClient.auth.signInWithOtp.mockResolvedValue({ error: null });
