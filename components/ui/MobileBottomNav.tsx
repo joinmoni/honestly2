@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, Search, Settings, SquarePen, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import { cn } from "@/lib/utils";
 
 type MobileBottomNavProps = {
@@ -34,7 +35,7 @@ export function MobileBottomNav({ links }: MobileBottomNavProps) {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[160] flex justify-center px-4 md:hidden">
-      <nav className="pointer-events-auto flex w-full max-w-sm items-center justify-between rounded-[2rem] border border-white/30 bg-stone-900/85 p-2 text-white shadow-2xl shadow-stone-900/30 backdrop-blur-xl">
+      <nav className="pointer-events-auto flex w-full max-w-sm items-center justify-between rounded-[2rem] border border-white/30 bg-stone-900/85 p-2 shadow-2xl shadow-stone-900/30 backdrop-blur-xl">
         {items.map((item) => {
           const Icon = iconByHref[item.href] ?? Search;
           const active = item.active ?? pathname === item.href;
@@ -44,8 +45,8 @@ export function MobileBottomNav({ links }: MobileBottomNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[1.4rem] px-2 py-2.5 text-[10px] font-semibold text-white/72 transition-colors",
-                active && "bg-white/14 text-white"
+                "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[1.4rem] px-2 py-2.5 text-[10px] font-semibold transition-colors",
+                active ? "bg-white/14 text-white" : DARK_SURFACE_MUTED_TEXT
               )}
             >
               <Icon size={18} />

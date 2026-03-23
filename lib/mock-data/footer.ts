@@ -12,8 +12,8 @@ export const mockFooterContent: FooterContent = {
       links: [
         { label: "Browse All Vendors", href: "/vendors" },
         { label: "Featured Collections", href: "/lists" },
-        { label: "How it Works", href: "#" },
-        { label: "Safety & Trust", href: "#" }
+        { label: "How it Works", href: "/how-it-works" },
+        { label: "Safety & Trust", href: "/safety-and-trust" }
       ]
     },
     {
@@ -22,18 +22,17 @@ export const mockFooterContent: FooterContent = {
       links: [
         { label: "Tell Us About a Vendor", href: "/login?next=%2Freviews%2Fnew" },
         { label: "Claim your Page", href: "/for-professionals#claim" },
-        { label: "Vendor Guidelines", href: "#" },
-        { label: "Support Center", href: "#" }
+        { label: "Vendor Guidelines", href: "/vendor-guidelines" },
+        { label: "Support Center", href: "/support" }
       ]
     },
     {
       id: "company",
       title: "Company",
       links: [
-        { label: "About Honestly", href: "#" },
-        { label: "Privacy Policy", href: "#" },
-        { label: "Terms of Service", href: "#" },
-        { label: "Admin Portal", href: "/admin", highlighted: true }
+        { label: "About Honestly", href: "/about" },
+        { label: "Privacy Policy", href: "/privacy" },
+        { label: "Terms of Service", href: "/terms" }
       ]
     }
   ],

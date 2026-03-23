@@ -1,20 +1,17 @@
-import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { ConsumerTopChrome } from "@/components/layout/ConsumerTopChrome";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { ProfessionalLandingScreen } from "@/components/public/ProfessionalLandingScreen";
 import { getCategories } from "@/lib/services/categories";
 import { getFooterContent } from "@/lib/services/footer";
 import { getCurrentSession } from "@/lib/services/session";
-import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "For Professionals | Honestly",
-  description: "Learn how to create a professional account, claim your page, and bring your business onto Honestly.",
-  path: "/for-professionals"
-});
+type PublicMarketingLayoutProps = {
+  children: ReactNode;
+};
 
-export default async function ForProfessionalsPage() {
+/** Shared nav + footer for public marketing and policy pages (same as About). */
+export async function PublicMarketingLayout({ children }: PublicMarketingLayoutProps) {
   const [footerContent, session, categories] = await Promise.all([getFooterContent(), getCurrentSession(), getCategories()]);
 
   return (
@@ -28,7 +25,7 @@ export default async function ForProfessionalsPage() {
           currentUserAvatarUrl={session.user?.avatarUrl}
           currentUserRole={session.user?.role}
         />
-        <ProfessionalLandingScreen />
+        {children}
       </div>
       <SiteFooter content={footerContent} variant="dark" />
     </>

@@ -8,6 +8,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BodyText, CardTitle, Eyebrow, MetaText, PillText } from "@/components/ui/Typography";
+import { DARK_SURFACE_HEADING_TEXT, DARK_SURFACE_LINK_CLASS, DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
+import { cn } from "@/lib/utils";
 import { isGenericListName, persistCreateEmptyList, persistUpdateListDetails } from "@/lib/lists.client";
 import type { ListDetailPageData } from "@/lib/types/collections";
 
@@ -195,12 +197,20 @@ export function ListDetailScreen({ data, isDraft = false, draftUserId }: ListDet
             ) : null}
           </div>
 
-          <aside className="rounded-[2.25rem] border border-stone-200 bg-stone-900 p-6 text-white shadow-sm">
-            <Eyebrow>List Workspace</Eyebrow>
-            <p className="mt-4 text-3xl">{data.vendorCount}</p>
-            <BodyText className="mt-2 text-stone-400">Vendors currently tracked in this collection. Use this page to review the shortlist before sharing or outreach.</BodyText>
+          <aside className={`rounded-[2.25rem] border border-stone-200 bg-stone-900 p-6 shadow-sm ${DARK_SURFACE_MUTED_TEXT}`}>
+            <Eyebrow className={DARK_SURFACE_MUTED_TEXT}>List Workspace</Eyebrow>
+            <p className={`mt-4 text-3xl ${DARK_SURFACE_HEADING_TEXT}`}>{data.vendorCount}</p>
+            <BodyText className={`mt-2 ${DARK_SURFACE_MUTED_TEXT}`}>
+              Vendors currently tracked in this collection. Use this page to review the shortlist before sharing or outreach.
+            </BodyText>
             {visibility === "shared" && shareSlug ? (
-              <Link href={`/lists/${shareSlug}`} className="mt-6 inline-flex items-center gap-2 border-b border-white pb-1 text-[11px] font-black uppercase tracking-[0.18em] text-white">
+              <Link
+                href={`/lists/${shareSlug}`}
+                className={cn(
+                  "mt-6 inline-flex items-center gap-2 pb-1 text-[11px] font-black uppercase tracking-[0.18em]",
+                  DARK_SURFACE_LINK_CLASS
+                )}
+              >
                 View public version
                 <ArrowUpRight size={14} />
               </Link>

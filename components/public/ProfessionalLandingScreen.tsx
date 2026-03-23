@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DARK_SURFACE_HEADING_TEXT, DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import { BodyText, CardTitle, Eyebrow, MetaText, PageTitle, PillText, SectionTitle } from "@/components/ui/Typography";
 
 export function ProfessionalLandingScreen() {
@@ -24,23 +25,35 @@ export function ProfessionalLandingScreen() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] bg-stone-900 px-6 py-6 text-white">
-            <Eyebrow className="mb-4 text-stone-300">How it works</Eyebrow>
+          <div className={`rounded-[1.75rem] bg-stone-900 px-6 py-6 ${DARK_SURFACE_MUTED_TEXT}`}>
+            <Eyebrow className={`mb-4 ${DARK_SURFACE_MUTED_TEXT}`}>How it works</Eyebrow>
             <ol className="space-y-4">
               <li>
-                <MetaText className="mb-1 text-stone-400">1.</MetaText>
-                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Tell us who they are</CardTitle>
-                <BodyText className="text-stone-300">Share the vendor you used so we can understand their work and why they belong on Honestly.</BodyText>
+                <MetaText className={`mb-1 ${DARK_SURFACE_MUTED_TEXT}`}>1.</MetaText>
+                <CardTitle className={`mb-1 text-[1.55rem] leading-tight md:text-[1.75rem] ${DARK_SURFACE_HEADING_TEXT}`}>
+                  Tell us who they are
+                </CardTitle>
+                <BodyText className={DARK_SURFACE_MUTED_TEXT}>
+                  Share the vendor you used so we can understand their work and why they belong on Honestly.
+                </BodyText>
               </li>
               <li id="claim">
-                <MetaText className="mb-1 text-stone-400">2.</MetaText>
-                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Claim an existing page</CardTitle>
-                <BodyText className="text-stone-300">If you already appear on Honestly, open your profile and use the claim flow.</BodyText>
+                <MetaText className={`mb-1 ${DARK_SURFACE_MUTED_TEXT}`}>2.</MetaText>
+                <CardTitle className={`mb-1 text-[1.55rem] leading-tight md:text-[1.75rem] ${DARK_SURFACE_HEADING_TEXT}`}>
+                  Claim an existing page
+                </CardTitle>
+                <BodyText className={DARK_SURFACE_MUTED_TEXT}>
+                  If you already appear on Honestly, open your profile and use the claim flow.
+                </BodyText>
               </li>
               <li>
-                <MetaText className="mb-1 text-stone-400">3.</MetaText>
-                <CardTitle className="mb-1 text-[1.55rem] leading-tight text-white md:text-[1.75rem]">Help great vendors get discovered</CardTitle>
-                <BodyText className="text-stone-300">Once approved, the vendor can collect reviews, saves, and shortlist traffic from future clients.</BodyText>
+                <MetaText className={`mb-1 ${DARK_SURFACE_MUTED_TEXT}`}>3.</MetaText>
+                <CardTitle className={`mb-1 text-[1.55rem] leading-tight md:text-[1.75rem] ${DARK_SURFACE_HEADING_TEXT}`}>
+                  Help great vendors get discovered
+                </CardTitle>
+                <BodyText className={DARK_SURFACE_MUTED_TEXT}>
+                  Once approved, the vendor can collect reviews, saves, and shortlist traffic from future clients.
+                </BodyText>
               </li>
             </ol>
           </div>

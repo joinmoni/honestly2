@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Heart, Star } from "lucide-react";
+import { DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import { cn } from "@/lib/utils";
 import type { Vendor } from "@/lib/types/domain";
 
@@ -54,7 +55,7 @@ export function VendorImageCarousel({ vendor, saved = false, onSaveClick, classN
       <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
         <Star size={13} className="fill-white text-white" />
         <span>{vendor.ratingAvg.toFixed(1)}</span>
-        <span className="text-white/70">({vendor.reviewCount})</span>
+        <span className={DARK_SURFACE_MUTED_TEXT}>({vendor.reviewCount})</span>
       </div>
 
       <button

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Instagram, Twitter } from "lucide-react";
+import { DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import { cn } from "@/lib/utils";
 import type { FooterContent } from "@/lib/types/footer";
 
@@ -15,7 +16,7 @@ export function SiteFooter({ content, variant = "dark" }: SiteFooterProps) {
     <footer
       className={cn(
         "mt-14 px-4 py-12 md:mt-20 md:px-6 md:py-20",
-        isDark ? "bg-stone-900 text-stone-400" : "border-t border-stone-100 bg-white text-stone-500"
+        isDark ? cn("bg-stone-900", DARK_SURFACE_MUTED_TEXT) : "border-t border-stone-100 bg-white text-stone-500"
       )}
     >
       <div className="mx-auto max-w-7xl">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
+import { DARK_SURFACE_HEADING_TEXT, DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import type { SharedCollectionPageData } from "@/lib/types/shared-collection";
 
 type SharedCollectionScreenProps = {
@@ -94,10 +95,12 @@ export function SharedCollectionScreen({ data }: SharedCollectionScreenProps) {
           })}
         </div>
 
-        <section className="relative mt-24 overflow-hidden rounded-[2.5rem] bg-stone-900 p-8 text-center text-white md:mt-40 md:rounded-[3rem] md:p-24">
+        <section
+          className={`relative mt-24 overflow-hidden rounded-[2.5rem] bg-stone-900 p-8 text-center md:mt-40 md:rounded-[3rem] md:p-24 ${DARK_SURFACE_MUTED_TEXT}`}
+        >
           <div className="relative z-10">
-            <h2 className="serif-italic mb-6 text-4xl md:text-6xl">{data.copy.ctaTitle}</h2>
-            <p className="mx-auto mb-10 max-w-sm text-lg leading-relaxed text-stone-400">{data.copy.ctaDescription}</p>
+            <h2 className={`serif-italic mb-6 text-4xl md:text-6xl ${DARK_SURFACE_HEADING_TEXT}`}>{data.copy.ctaTitle}</h2>
+            <p className={`mx-auto mb-10 max-w-sm text-lg leading-relaxed ${DARK_SURFACE_MUTED_TEXT}`}>{data.copy.ctaDescription}</p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link href="/login?next=%2Flists%2Fnew" className="rounded-full bg-white px-10 py-4 font-bold text-stone-900 transition-colors hover:bg-stone-100">
                 {data.copy.ctaPrimaryButtonLabel}

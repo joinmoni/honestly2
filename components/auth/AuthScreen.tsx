@@ -7,7 +7,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect } from "react";
 import type { AuthPageCopy } from "@/lib/types/auth-page";
+import { DARK_SURFACE_HEADING_TEXT, DARK_SURFACE_MUTED_TEXT } from "@/lib/dark-surface";
 import { isSupabaseConfigured } from "@/lib/config/app-env";
+import { cn } from "@/lib/utils";
 import { setMockUserSession } from "@/lib/mock-auth-state.client";
 import { getBrowserSupabaseSession, signInWithEmailOtp, signInWithGoogle } from "@/lib/supabase/auth";
 
@@ -130,9 +132,9 @@ export function AuthScreen({ copy, nextPath = "/vendors" }: AuthScreenProps) {
           <Image src={copy.heroImageUrl} alt="Login visual" fill className="object-cover opacity-90" sizes="(max-width: 768px) 100vw, 50vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent" />
 
-          <div className="absolute bottom-6 left-6 right-6 text-white md:bottom-10 md:left-10 md:right-10">
-            <div className="mb-2 text-xl italic md:text-2xl">{copy.quoteText}</div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">{copy.quoteAuthor}</p>
+          <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10">
+            <div className={cn("mb-2 text-xl italic md:text-2xl", DARK_SURFACE_HEADING_TEXT)}>{copy.quoteText}</div>
+            <p className={cn("text-[10px] font-bold uppercase tracking-[0.2em]", DARK_SURFACE_MUTED_TEXT)}>{copy.quoteAuthor}</p>
           </div>
 
           <Link href="/" className="serif-italic absolute left-6 top-6 text-3xl text-white md:left-8 md:top-8 md:text-4xl">
