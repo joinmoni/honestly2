@@ -14,6 +14,7 @@ export async function getAdminVendorDirectoryData(): Promise<AdminVendorDirector
     createVendorLabel: "Create Vendor",
     navLinks: [
       { id: "dashboard", label: "Dashboard", href: "/admin" },
+      { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
       { id: "vendors", label: "Vendors", href: "/admin/vendors", active: true },
       { id: "reviews", label: "Reviews", href: "/admin/reviews" },
       { id: "claims", label: "Claims", href: "/admin/claims" },

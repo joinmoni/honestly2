@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = buildPageMetadata({
   title: "Revenue Radar | Honestly",
   description: "Public-sector opportunities identified and reviewed by Tender Radar.",
-  path: "/"
+  path: "/revenue-radar"
 });
 
-export default function HomePage() {
+export default function RevenueRadarRoutePage() {
   return <RevenueRadarPage />;
 }

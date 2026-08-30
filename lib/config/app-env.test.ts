@@ -5,8 +5,10 @@ import {
   getSearchProvider,
   getSupabasePublicEnv,
   getSupabaseServerEnv,
+  getTenderRadarEnv,
   isMeilisearchConfigured,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  isTenderRadarConfigured
 } from "@/lib/config/app-env";
 
 const ORIGINAL_ENV = process.env;
@@ -24,6 +26,8 @@ describe("app env", () => {
     delete process.env.MEILISEARCH_API_KEY;
     delete process.env.MEILISEARCH_ADMIN_API_KEY;
     delete process.env.HONESTLY_SEARCH_SYNC_TOKEN;
+    delete process.env.TENDER_RADAR_SUPABASE_URL;
+    delete process.env.TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY;
   });
 
   afterAll(() => {
@@ -98,6 +102,21 @@ describe("app env", () => {
       host: "http://localhost:7700",
       adminApiKey: "adminKey",
       syncToken: "syncToken"
+    });
+  });
+
+  it("reads Tender Radar env only when both server values exist", () => {
+    expect(isTenderRadarConfigured()).toBe(false);
+    expect(getTenderRadarEnv()).toBeNull();
+
+    process.env.TENDER_RADAR_SUPABASE_URL = "https://tender.supabase.co";
+    expect(getTenderRadarEnv()).toBeNull();
+
+    process.env.TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY = "tender_service_role";
+    expect(isTenderRadarConfigured()).toBe(true);
+    expect(getTenderRadarEnv()).toEqual({
+      url: "https://tender.supabase.co",
+      serviceRoleKey: "tender_service_role"
     });
   });
 });

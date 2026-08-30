@@ -87,6 +87,7 @@ export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
       createCategoryLabel: "New Primary Category",
       navLinks: [
         { id: "dashboard", label: "Dashboard", href: "/admin" },
+        { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
         { id: "vendors", label: "Vendors", href: "/admin/vendors" },
         { id: "reviews", label: "Reviews", href: "/admin/reviews" },
         { id: "claims", label: "Claims", href: "/admin/claims" },
@@ -121,6 +122,7 @@ export async function getAdminTaxonomyData(): Promise<AdminTaxonomyData> {
     createCategoryLabel: "New Primary Category",
     navLinks: [
       { id: "dashboard", label: "Dashboard", href: "/admin" },
+      { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews" },
       { id: "claims", label: "Claims", href: "/admin/claims" },

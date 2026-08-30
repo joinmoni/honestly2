@@ -102,3 +102,19 @@ export function isSupabaseConfigured(): boolean {
 export function isMeilisearchConfigured(): boolean {
   return getMeilisearchEnv() !== null;
 }
+
+export type TenderRadarEnv = {
+  url: string;
+  serviceRoleKey: string;
+};
+
+export function getTenderRadarEnv(): TenderRadarEnv | null {
+  const url = readEnv("TENDER_RADAR_SUPABASE_URL");
+  const serviceRoleKey = readEnv("TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceRoleKey) return null;
+  return { url, serviceRoleKey };
+}
+
+export function isTenderRadarConfigured(): boolean {
+  return getTenderRadarEnv() !== null;
+}

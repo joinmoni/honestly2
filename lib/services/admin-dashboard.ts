@@ -52,6 +52,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     statusState: "operational",
     navLinks: [
       { id: "dashboard", label: "Dashboard", href: "/admin", active: true },
+      { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews", count: pendingReviewsCount },
       { id: "claims", label: "Claims", href: "/admin/claims", count: pendingClaims.length },

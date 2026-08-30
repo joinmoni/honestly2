@@ -48,6 +48,7 @@ export async function getAdminClaimsModerationData(): Promise<AdminClaimsModerat
     description: "Verify business ownership requests.",
     navLinks: [
       { id: "dashboard", label: "Dashboard", href: "/admin" },
+      { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews" },
       { id: "claims", label: "Claims", href: "/admin/claims", active: true },

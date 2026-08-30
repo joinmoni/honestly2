@@ -22,7 +22,10 @@ export function ConsumerTopChrome({
   currentUserRole
 }: ConsumerTopChromeProps) {
   const reviewHref = currentUserName ? "/reviews/new" : "/login?next=%2Freviews%2Fnew";
-  const topNavLinks = [{ label: "Review", href: reviewHref }];
+  const topNavLinks = [
+    { label: "Revenue Radar", href: "/revenue-radar" },
+    { label: "Review", href: reviewHref }
+  ];
 
   return (
     <>

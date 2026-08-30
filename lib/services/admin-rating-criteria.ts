@@ -66,6 +66,7 @@ export async function getAdminRatingCriteriaData(): Promise<AdminRatingCriteriaD
     footerNote: "Changes here affect the public Review Modal in real-time.",
     navLinks: [
       { id: "dashboard", label: "Dashboard", href: "/admin" },
+      { id: "revenue-radar", label: "Revenue Radar", href: "/revenue-radar" },
       { id: "vendors", label: "Vendors", href: "/admin/vendors" },
       { id: "reviews", label: "Reviews", href: "/admin/reviews" },
       { id: "claims", label: "Claims", href: "/admin/claims" },
