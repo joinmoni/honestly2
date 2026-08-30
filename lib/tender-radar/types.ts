@@ -18,6 +18,18 @@ export type BidRoute = (typeof BID_ROUTES)[number];
 
 export type QueueFilter = "active" | "all";
 
+export const TENDER_ACCESS_TYPES = ["direct_documents", "external_portal", "notice_only"] as const;
+
+export type TenderAccessType = (typeof TENDER_ACCESS_TYPES)[number];
+
+export type TenderDocument = {
+  id: string | null;
+  url: string;
+  type: string | null;
+  format: string | null;
+  description: string | null;
+};
+
 export type RevenueOpportunity = {
   processKey: string;
   title: string | null;
@@ -52,6 +64,12 @@ export type RevenueOpportunity = {
   outcomeAt: string | null;
   outcomeValue: number | null;
   trackingUpdatedAt: string | null;
+  noticeUrl: string | null;
+  tenderAccessType: TenderAccessType | null;
+  tenderPortalUrl: string | null;
+  tenderDocuments: TenderDocument[];
+  submissionMethodDetails: string | null;
+  electronicSubmissionPolicy: string | null;
 };
 
 export const EMPTY_TRACKING: Pick<
@@ -77,6 +95,23 @@ export const EMPTY_TRACKING: Pick<
   outcomeAt: null,
   outcomeValue: null,
   trackingUpdatedAt: null
+};
+
+export const EMPTY_TENDER_ACCESS: Pick<
+  RevenueOpportunity,
+  | "noticeUrl"
+  | "tenderAccessType"
+  | "tenderPortalUrl"
+  | "tenderDocuments"
+  | "submissionMethodDetails"
+  | "electronicSubmissionPolicy"
+> = {
+  noticeUrl: null,
+  tenderAccessType: null,
+  tenderPortalUrl: null,
+  tenderDocuments: [],
+  submissionMethodDetails: null,
+  electronicSubmissionPolicy: null
 };
 
 export const CURRENT_AI_REVIEW_VERSION = "revenue-radar-v2.5-production";
@@ -130,6 +165,10 @@ export function isTrackingStatus(value: string | null | undefined): value is Tra
 
 export function isBidRoute(value: string | null | undefined): value is BidRoute {
   return BID_ROUTES.includes(value as BidRoute);
+}
+
+export function isTenderAccessType(value: string | null | undefined): value is TenderAccessType {
+  return TENDER_ACCESS_TYPES.includes(value as TenderAccessType);
 }
 
 export function getEffectiveTrackingStatus(

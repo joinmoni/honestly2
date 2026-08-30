@@ -31,8 +31,55 @@ describe("mapOpportunityRow", () => {
       valueAmount: 40000,
       needPartner: true,
       buyerNeed: null,
-      trackingStatus: null
+      trackingStatus: null,
+      noticeUrl: null,
+      tenderAccessType: null,
+      tenderDocuments: []
     });
+  });
+
+  it("maps a joined tender-access row onto the opportunity", () => {
+    const actual = mapOpportunityRow(
+      {
+        process_key: "ea-soil",
+        title: "Update of South East Soil Moisture model"
+      },
+      {
+        process_key: "ea-soil",
+        notice_url: "https://www.find-tender.service.gov.uk/Notice/082149-2026",
+        access_type: "direct_documents",
+        portal_url: null,
+        documents: [
+          {
+            id: "A-21101",
+            url: "https://www.find-tender.service.gov.uk/Notice/Attachment/A-21101",
+            type: "biddingDocuments",
+            format: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            description: null
+          }
+        ],
+        submission_method_details: "Submit via the portal.\nInclude pricing.",
+        electronic_submission_policy: "allowed"
+      }
+    );
+
+    expect(actual).toMatchObject({
+      processKey: "ea-soil",
+      noticeUrl: "https://www.find-tender.service.gov.uk/Notice/082149-2026",
+      tenderAccessType: "direct_documents",
+      tenderPortalUrl: null,
+      submissionMethodDetails: "Submit via the portal.\nInclude pricing.",
+      electronicSubmissionPolicy: "allowed"
+    });
+    expect(actual?.tenderDocuments).toEqual([
+      {
+        id: "A-21101",
+        url: "https://www.find-tender.service.gov.uk/Notice/Attachment/A-21101",
+        type: "biddingDocuments",
+        format: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        description: null
+      }
+    ]);
   });
 
   it("maps pipeline tracking and legacy fields without requiring v2.5 values", () => {

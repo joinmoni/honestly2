@@ -1,4 +1,6 @@
+import { mapTenderAccessFields, type TenderAccessRow } from "@/lib/tender-radar/tender-access";
 import {
+  EMPTY_TENDER_ACCESS,
   isBidRoute,
   isTrackingStatus,
   type BidRoute,
@@ -158,7 +160,10 @@ function toBidRoute(value: unknown): BidRoute | null {
   return isBidRoute(text) ? text : null;
 }
 
-export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunity | null {
+export function mapOpportunityRow(
+  row: RevenueOpportunityRow,
+  access?: TenderAccessRow | null
+): RevenueOpportunity | null {
   const processKey = toText(row.process_key);
   if (!processKey) return null;
   return {
@@ -194,12 +199,16 @@ export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunit
     notes: toText(row.notes),
     outcomeAt: toText(row.outcome_at),
     outcomeValue: toNumber(row.outcome_value),
-    trackingUpdatedAt: toText(row.tracking_updated_at)
+    trackingUpdatedAt: toText(row.tracking_updated_at),
+    ...(access ? mapTenderAccessFields(access) : { ...EMPTY_TENDER_ACCESS, tenderDocuments: [] })
   };
 }
 
-export function mapOpportunityRows(rows: RevenueOpportunityRow[]): RevenueOpportunity[] {
+export function mapOpportunityRows(
+  rows: RevenueOpportunityRow[],
+  accessByKey: ReadonlyMap<string, TenderAccessRow> = new Map()
+): RevenueOpportunity[] {
   return rows
-    .map((row) => mapOpportunityRow(row))
+    .map((row) => mapOpportunityRow(row, accessByKey.get(toText(row.process_key) ?? "") ?? null))
     .filter((row): row is RevenueOpportunity => row !== null);
 }

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
 import { RevenueRadarScreen } from "@/components/revenue-radar/RevenueRadarScreen";
-import { EMPTY_TRACKING, type RevenueOpportunity } from "@/lib/tender-radar/types";
+import { EMPTY_TENDER_ACCESS, EMPTY_TRACKING, type RevenueOpportunity } from "@/lib/tender-radar/types";
 
 const saveRevenueRadarTracking = vi.fn();
 
@@ -37,6 +37,7 @@ function opportunity(overrides: Partial<RevenueOpportunity> = {}): RevenueOpport
     analysedAt: overrides.analysedAt ?? null,
     updatedAt: overrides.updatedAt ?? null,
     ...EMPTY_TRACKING,
+    ...EMPTY_TENDER_ACCESS,
     ...overrides
   };
 }
@@ -62,6 +63,117 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Environmental modelling")).toBeInTheDocument();
     expect(screen.getByText("Our Activity")).toBeInTheDocument();
     expect(screen.getByTestId("opportunity-detail-panel")).toHaveClass("md:overflow-x-hidden");
+    expect(screen.getByText("Tender Access")).toBeInTheDocument();
+    expect(screen.getByText("Tender access information not yet available.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "View Notice ↗" })).not.toBeInTheDocument();
+  });
+
+  it("shows document count and safe document links for direct_documents access", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity({
+            title: "Update of South East Soil Moisture model",
+            tenderAccessType: "direct_documents",
+            noticeUrl: "https://www.find-tender.service.gov.uk/Notice/082149-2026",
+            tenderDocuments: [
+              {
+                id: "A-1",
+                url: "https://www.find-tender.service.gov.uk/Notice/Attachment/A-1",
+                type: "biddingDocuments",
+                format: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                description: null
+              },
+              {
+                id: "A-2",
+                url: "https://www.find-tender.service.gov.uk/Notice/Attachment/A-2",
+                type: "biddingDocuments",
+                format: "application/pdf",
+                description: "Soil moisture ITT"
+              }
+            ],
+            submissionMethodDetails: "Submit via the portal.\nInclude pricing.",
+            electronicSubmissionPolicy: "allowed"
+          })
+        ]}
+      />
+    );
+
+    expect(screen.getByText("2 docs")).toBeInTheDocument();
+    expect(screen.queryByText("3 docs")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /update of south east soil moisture model/i }));
+
+    const notice = screen.getByRole("link", { name: "View Notice ↗" });
+    expect(notice).toHaveAttribute("href", "https://www.find-tender.service.gov.uk/Notice/082149-2026");
+    expect(notice).toHaveAttribute("target", "_blank");
+    expect(notice).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByText("Tender Documents (2)")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Tender Document" })).toHaveAttribute(
+      "href",
+      "https://www.find-tender.service.gov.uk/Notice/Attachment/A-1"
+    );
+    expect(screen.getByRole("link", { name: "Soil moisture ITT" })).toHaveAttribute(
+      "href",
+      "https://www.find-tender.service.gov.uk/Notice/Attachment/A-2"
+    );
+    expect(screen.queryByRole("link", { name: "Unsafe" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Open Tender Portal ↗" })).not.toBeInTheDocument();
+    expect(screen.getByText("Submission Instructions")).toBeInTheDocument();
+    expect(screen.getByText(/Submit via the portal/)).toHaveClass("whitespace-pre-line");
+    expect(screen.getByText("Electronic submission allowed")).toBeInTheDocument();
+  });
+
+  it("shows a portal button for external_portal access", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity({
+            title: "DLSITT1105 - New Diamond Website",
+            tenderAccessType: "external_portal",
+            noticeUrl: "https://www.find-tender.service.gov.uk/Notice/diamond",
+            tenderPortalUrl: "https://tenders.diamond.ac.uk"
+          })
+        ]}
+      />
+    );
+
+    expect(screen.getByText("Portal")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /dlsitt1105/i }));
+
+    const portal = screen.getByRole("link", { name: "Open Tender Portal ↗" });
+    expect(portal).toHaveAttribute("href", "https://tenders.diamond.ac.uk");
+    expect(portal).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByRole("link", { name: "View Notice ↗" })).toBeInTheDocument();
+    expect(screen.queryByText(/Tender Documents/)).not.toBeInTheDocument();
+  });
+
+  it("shows the notice-only message without document controls", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity({
+            title: "Notice only tender",
+            tenderAccessType: "notice_only",
+            noticeUrl: "https://www.find-tender.service.gov.uk/Notice/notice-only"
+          })
+        ]}
+      />
+    );
+
+    expect(screen.getByText("Notice")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /notice only tender/i }));
+
+    expect(screen.getByRole("link", { name: "View Notice ↗" })).toBeInTheDocument();
+    expect(screen.getByText("Tender documents are not directly exposed in the current notice.")).toBeInTheDocument();
+    expect(screen.queryByText(/Tender Documents/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Open Tender Portal ↗" })).not.toBeInTheDocument();
   });
 
   it("shows the full analysis text when a row is expanded", async () => {

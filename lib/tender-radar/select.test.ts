@@ -6,7 +6,7 @@ import {
   selectCurrentOpportunities,
   sortOpportunities
 } from "@/lib/tender-radar/select";
-import { EMPTY_TRACKING, type RevenueOpportunity } from "@/lib/tender-radar/types";
+import { EMPTY_TENDER_ACCESS, EMPTY_TRACKING, type RevenueOpportunity } from "@/lib/tender-radar/types";
 
 function opportunity(overrides: Partial<RevenueOpportunity> = {}): RevenueOpportunity {
   return {
@@ -34,6 +34,7 @@ function opportunity(overrides: Partial<RevenueOpportunity> = {}): RevenueOpport
     analysedAt: overrides.analysedAt ?? null,
     updatedAt: overrides.updatedAt ?? null,
     ...EMPTY_TRACKING,
+    ...EMPTY_TENDER_ACCESS,
     ...overrides
   };
 }

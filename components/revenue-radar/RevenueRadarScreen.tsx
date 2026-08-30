@@ -40,6 +40,12 @@ import {
   selectCurrentOpportunities
 } from "@/lib/tender-radar/select";
 import {
+  formatElectronicSubmissionPolicy,
+  formatTenderAccessIndicator,
+  formatTenderDocumentLabel,
+  isSafeHttpUrl
+} from "@/lib/tender-radar/tender-access";
+import {
   PIPELINE_SUMMARY_STATUSES,
   ROUTE_LABELS,
   TRACKING_STATUS_LABELS,
@@ -476,6 +482,7 @@ function OpportunityItem({
   const urgency = formatDeadlineUrgency(opportunity.tenderDeadline);
   const reviewLabel = formatAiReviewLabel(opportunity.aiReviewVersion);
   const title = displayValue(opportunity.title);
+  const accessIndicator = formatTenderAccessIndicator(opportunity);
 
   return (
     <li className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:overflow-visible md:rounded-none md:border-0 md:border-b md:border-line md:shadow-none md:last:border-none">
@@ -501,6 +508,7 @@ function OpportunityItem({
           <p className={cn("mt-1 text-[11px]", isCurrentAiReview(opportunity.aiReviewVersion) ? "text-emerald-700" : "text-amber-700")}>
             {isCurrentAiReview(opportunity.aiReviewVersion) ? "v2.5 · Current" : "Needs re-review"}
           </p>
+          {accessIndicator ? <p className="mt-1 text-[11px] text-stone-400">{accessIndicator}</p> : null}
         </div>
         <p className="hidden truncate text-sm text-stone-600 md:block" title={displayValue(opportunity.buyerName)}>
           {displayValue(opportunity.buyerName)}
@@ -569,6 +577,7 @@ function OpportunityItem({
               <DetailBlock label="Recommended Partner Skill" value={opportunity.recommendedPartnerSkill} />
             </div>
           ) : null}
+          <TenderAccessSection opportunity={opportunity} />
           <div className="flex flex-wrap items-center gap-3 text-stone-400">
             <PillText className={isCurrentAiReview(opportunity.aiReviewVersion) ? "text-emerald-700" : "text-amber-700"}>
               {isCurrentAiReview(opportunity.aiReviewVersion) ? "v2.5" : "Older"} · {reviewLabel}
@@ -586,6 +595,72 @@ function OpportunityItem({
         </div>
       ) : null}
     </li>
+  );
+}
+
+function TenderAccessSection({ opportunity }: { opportunity: RevenueOpportunity }) {
+  const noticeUrl = isSafeHttpUrl(opportunity.noticeUrl) ? opportunity.noticeUrl : null;
+  const portalUrl = isSafeHttpUrl(opportunity.tenderPortalUrl) ? opportunity.tenderPortalUrl : null;
+  const documents = opportunity.tenderDocuments.filter((document) => isSafeHttpUrl(document.url));
+  const policyLabel = formatElectronicSubmissionPolicy(opportunity.electronicSubmissionPolicy);
+  return (
+    <div>
+      <MetaText className="mb-3">Tender Access</MetaText>
+      {opportunity.tenderAccessType == null ? (
+        <p className="text-sm text-stone-500">Tender access information not yet available.</p>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {noticeUrl ? <ExternalAccessLink href={noticeUrl} label="View Notice ↗" /> : null}
+            {opportunity.tenderAccessType === "external_portal" && portalUrl ? (
+              <ExternalAccessLink href={portalUrl} label="Open Tender Portal ↗" />
+            ) : null}
+          </div>
+          {opportunity.tenderAccessType === "direct_documents" ? (
+            <div>
+              <p className="text-sm font-medium text-stone-800">Tender Documents ({documents.length})</p>
+              {documents.length > 0 ? (
+                <ul className="mt-2 space-y-1.5">
+                  {documents.map((document, index) => (
+                    <li key={`${document.id ?? document.url}-${index}`}>
+                      <ExternalAccessLink
+                        href={document.url}
+                        label={formatTenderDocumentLabel(document, documents)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
+          {opportunity.tenderAccessType === "notice_only" ? (
+            <p className="text-sm text-stone-500">Tender documents are not directly exposed in the current notice.</p>
+          ) : null}
+        </div>
+      )}
+      {opportunity.submissionMethodDetails ? (
+        <div className="mt-4 max-w-2xl">
+          <p className="text-sm font-medium text-stone-800">Submission Instructions</p>
+          <p className="mt-1 whitespace-pre-line break-words text-sm leading-relaxed text-stone-700">
+            {opportunity.submissionMethodDetails}
+          </p>
+        </div>
+      ) : null}
+      {policyLabel ? <p className="mt-2 text-xs text-stone-500">{policyLabel}</p> : null}
+    </div>
+  );
+}
+
+function ExternalAccessLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-800"
+    >
+      {label}
+    </a>
   );
 }
 

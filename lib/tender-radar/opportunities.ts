@@ -9,6 +9,12 @@ import {
 } from "@/lib/tender-radar/map-opportunity";
 import { mergeRadarAndTracked, prepareMergedOpportunityList } from "@/lib/tender-radar/select";
 import { getTenderRadarClient } from "@/lib/tender-radar/server";
+import {
+  applyTenderAccess,
+  TENDER_ACCESS_COLUMNS,
+  tenderAccessByProcessKey,
+  type TenderAccessRow
+} from "@/lib/tender-radar/tender-access";
 import { ACTIONABLE_ROUTES, RETAINED_PIPELINE_STATUSES, type RevenueOpportunity } from "@/lib/tender-radar/types";
 
 export type RevenueRadarLoadResult =
@@ -38,6 +44,25 @@ async function selectPipelineRows(input: {
   return (core.data ?? []) as RevenueOpportunityRow[];
 }
 
+async function loadTenderAccessByKeys(processKeys: string[]): Promise<Map<string, TenderAccessRow>> {
+  const uniqueKeys = [...new Set(processKeys.filter(Boolean))];
+  if (uniqueKeys.length === 0) return new Map();
+  const client = getTenderRadarClient();
+  const { data, error } = await client
+    .from("procurement_tender_access")
+    .select(TENDER_ACCESS_COLUMNS)
+    .in("process_key", uniqueKeys);
+  if (error) return new Map();
+  return tenderAccessByProcessKey((data ?? []) as TenderAccessRow[]);
+}
+
+function withTenderAccess(
+  opportunities: RevenueOpportunity[],
+  accessByKey: Map<string, TenderAccessRow>
+): RevenueOpportunity[] {
+  return opportunities.map((opportunity) => applyTenderAccess(opportunity, accessByKey.get(opportunity.processKey)));
+}
+
 export async function loadRevenueOpportunities(): Promise<RevenueRadarLoadResult> {
   if (!isTenderRadarConfigured()) return { status: "not_configured" };
   try {
@@ -46,8 +71,11 @@ export async function loadRevenueOpportunities(): Promise<RevenueRadarLoadResult
       selectPipelineRows({ column: "tracking_status", values: [...RETAINED_PIPELINE_STATUSES] })
     ]);
     if (radarRows == null || trackedRows == null) return { status: "query_failed" };
-    const merged = mergeRadarAndTracked(mapOpportunityRows(radarRows), mapOpportunityRows(trackedRows));
-    return { status: "ok", opportunities: prepareMergedOpportunityList(merged) };
+    const merged = prepareMergedOpportunityList(
+      mergeRadarAndTracked(mapOpportunityRows(radarRows), mapOpportunityRows(trackedRows))
+    );
+    const accessByKey = await loadTenderAccessByKeys(merged.map((opportunity) => opportunity.processKey));
+    return { status: "ok", opportunities: withTenderAccess(merged, accessByKey) };
   } catch {
     return { status: "query_failed" };
   }
@@ -61,5 +89,8 @@ export async function loadRevenueOpportunityByKey(processKey: string): Promise<R
     : full;
   if (row.error || !row.data) return null;
   const mapped = mapOpportunityRows([row.data as RevenueOpportunityRow]);
-  return mapped[0] ?? null;
+  const opportunity = mapped[0];
+  if (!opportunity) return null;
+  const accessByKey = await loadTenderAccessByKeys([opportunity.processKey]);
+  return applyTenderAccess(opportunity, accessByKey.get(opportunity.processKey));
 }
