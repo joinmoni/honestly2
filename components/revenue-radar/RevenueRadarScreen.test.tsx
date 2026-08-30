@@ -76,7 +76,7 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Ward furniture")).toBeInTheDocument();
     expect(screen.queryByText("Tool for assessing pollutant risks from landspreading")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Bid Now" }));
+    await user.click(screen.getByRole("button", { name: "Filter route Bid Now" }));
     expect(screen.getByText("No opportunities match")).toBeInTheDocument();
 
     rerender(<RevenueRadarScreen status="not_configured" opportunities={[]} />);
@@ -112,5 +112,28 @@ describe("RevenueRadarScreen", () => {
     await user.click(screen.getByRole("button", { name: /older opportunity/i }));
     expect(screen.getByText("Why This Route")).toBeInTheDocument();
     expect(screen.getByText("Buyer Need")).toBeInTheDocument();
+  });
+
+  it("lets summary chips filter the list", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity(),
+          opportunity({
+            processKey: "watch-1",
+            title: "Watch this later",
+            recommendedRoute: "watch",
+            commercialStage: "early_engagement"
+          })
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show Watch opportunities" }));
+    expect(screen.getByText("Watch this later")).toBeInTheDocument();
+    expect(screen.queryByText("Tool for assessing pollutant risks from landspreading")).not.toBeInTheDocument();
+    expect(screen.getByText("1 opportunity")).toBeInTheDocument();
   });
 });

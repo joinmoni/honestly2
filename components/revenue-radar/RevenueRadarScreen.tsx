@@ -1,13 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronDown, Radar } from "lucide-react";
 
-import { EditorialTopNav } from "@/components/ui/EditorialTopNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { BodyText, MetaText, PageTitle, PillText } from "@/components/ui/Typography";
+import { BodyText, BrandWordmark, MetaText, PageTitle, PillText } from "@/components/ui/Typography";
 import {
   displayValue,
   formatAiReviewLabel,
@@ -71,33 +71,51 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
 
   return (
     <div className="min-h-screen bg-[#F9F8F6] text-stone-900">
-      <EditorialTopNav
-        brandLabel="honestly."
-        brandHref="/"
-        desktopNavSource="navLinks"
-        navLinks={[{ label: "Revenue Radar", href: "/revenue-radar", active: true }]}
-        innerClassName="max-w-6xl px-6 md:px-8"
-        rightSlot={<span className="ui-meta text-stone-400">Internal</span>}
-      />
+      <header className="sticky top-0 z-[120] border-b border-stone-100 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-8 md:py-5">
+          <Link href="/" className="min-w-0 shrink">
+            <BrandWordmark className="text-[1.75rem] md:text-4xl">
+              honestly
+              <span className="text-amber-600">.</span>
+            </BrandWordmark>
+          </Link>
+          <span className="ui-meta shrink-0 text-stone-400">Internal</span>
+        </div>
+      </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-10 md:px-8 md:py-12">
-        <header className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 md:px-8 md:py-12">
+        <header className="mb-6 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-stone-400">
+            <div className="mb-2 flex items-center gap-2 text-stone-400 md:mb-3">
               <Radar size={14} strokeWidth={2.25} />
               <MetaText>Internal</MetaText>
             </div>
-            <PageTitle className="mb-2">Revenue Radar</PageTitle>
-            <BodyText>Public-sector opportunities identified and reviewed by Tender Radar.</BodyText>
+            <PageTitle className="mb-2 text-[2rem] leading-[1.05] md:text-5xl">Revenue Radar</PageTitle>
+            <BodyText className="max-w-xl text-sm md:text-base">
+              Public-sector opportunities identified and reviewed by Tender Radar.
+            </BodyText>
           </div>
           {status === "ok" ? (
-            <div className="flex flex-wrap gap-2">
-              {SUMMARY_ROUTES.map((id) => (
-                <span key={id} className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-stone-600">
-                  <span className="font-medium text-stone-900">{ROUTE_LABELS[id]}</span>
-                  <span className="tabular-nums text-stone-400">{counts[id]}</span>
-                </span>
-              ))}
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {SUMMARY_ROUTES.map((id) => {
+                const active = route === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={active}
+                    aria-label={`Show ${ROUTE_LABELS[id]} opportunities`}
+                    className={cn(
+                      "inline-flex min-h-11 items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left text-xs sm:min-h-0 sm:justify-center sm:rounded-full sm:py-1.5",
+                      active ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600"
+                    )}
+                    onClick={() => setRoute((current) => (current === id ? "all" : id))}
+                  >
+                    <span className={cn("font-medium", active ? "text-white" : "text-stone-900")}>{ROUTE_LABELS[id]}</span>
+                    <span className={cn("tabular-nums", active ? "text-white/70" : "text-stone-400")}>{counts[id]}</span>
+                  </button>
+                );
+              })}
             </div>
           ) : null}
         </header>
@@ -120,16 +138,19 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
 
         {status === "ok" ? (
           <>
-            <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="sticky top-[3.35rem] z-40 -mx-4 mb-4 space-y-3 border-b border-stone-100 bg-[#F9F8F6]/95 px-4 py-3 backdrop-blur-md md:static md:z-auto md:mx-0 md:mb-6 md:space-y-3 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search title or buyer"
                 aria-label="Search title or buyer"
-                className="lg:max-w-sm"
+                className="h-12 text-base md:h-11 md:max-w-sm md:text-sm"
               />
               <FilterGroup label="Route" value={route} options={ROUTE_FILTERS} onChange={setRoute} />
               <FilterGroup label="Stage" value={stage} options={STAGE_FILTERS} onChange={setStage} />
+              <p className="text-xs text-stone-500 md:text-sm">
+                {visible.length} {visible.length === 1 ? "opportunity" : "opportunities"}
+              </p>
             </div>
 
             {visible.length === 0 ? (
@@ -139,17 +160,17 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
                 description="Try a different search, route, or stage. Early engagement records stay visible even without a deadline."
               />
             ) : (
-              <div className="surface overflow-hidden">
+              <div className="space-y-3 md:space-y-0 md:overflow-hidden md:rounded-xl2 md:border md:border-line md:bg-card md:shadow-soft">
                 <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_7.5rem_6rem_8rem_4.5rem_7.5rem] gap-3 border-b border-line px-4 py-3 md:grid">
                   {["Title", "Buyer", "Route", "Value", "Deadline", "Fit", "Stage"].map((label) => (
-                    <p key={label} className={cn("text-[10px] font-black uppercase tracking-[0.18em] text-stone-400")}>
+                    <p key={label} className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
                       {label}
                     </p>
                   ))}
                 </div>
-                <ul>
+                <ul className="space-y-3 md:space-y-0">
                   {visible.map((opportunity) => (
-                    <OpportunityRow
+                    <OpportunityItem
                       key={opportunity.processKey}
                       opportunity={opportunity}
                       expanded={expandedKey === opportunity.processKey}
@@ -177,20 +198,21 @@ type FilterGroupProps<T extends string> = {
 
 function FilterGroup<T extends string>({ label, value, options, onChange }: FilterGroupProps<T>) {
   return (
-    <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
+    <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
       <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
-      <div className="flex rounded-2xl border border-stone-200 bg-white p-1 shadow-sm">
+      <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         {options.map((option) => {
           const active = option.id === value;
           return (
             <button
               key={option.id}
               type="button"
-              className={
-                active
-                  ? "rounded-xl bg-stone-900 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white"
-                  : "px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400 transition-colors hover:text-stone-600"
-              }
+              aria-pressed={active}
+              aria-label={`Filter ${label.toLowerCase()} ${option.label}`}
+              className={cn(
+                "inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-xs font-bold uppercase tracking-widest sm:min-h-9",
+                active ? "bg-stone-900 text-white" : "border border-stone-200 bg-white text-stone-500"
+              )}
               onClick={() => onChange(option.id)}
             >
               {option.label}
@@ -202,44 +224,60 @@ function FilterGroup<T extends string>({ label, value, options, onChange }: Filt
   );
 }
 
-type OpportunityRowProps = {
+type OpportunityItemProps = {
   opportunity: RevenueOpportunity;
   expanded: boolean;
   onToggle: () => void;
 };
 
-function OpportunityRow({ opportunity, expanded, onToggle }: OpportunityRowProps) {
+function OpportunityItem({ opportunity, expanded, onToggle }: OpportunityItemProps) {
   const urgency = formatDeadlineUrgency(opportunity.tenderDeadline);
   const reviewLabel = formatAiReviewLabel(opportunity.aiReviewVersion);
+  const title = displayValue(opportunity.title);
 
   return (
-    <li className="border-b border-line last:border-none">
+    <li className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:rounded-none md:border-0 md:border-b md:border-line md:shadow-none md:last:border-none">
       <button
         type="button"
-        className="grid w-full grid-cols-1 gap-2 px-4 py-3 text-left transition-colors hover:bg-[#f6f3ec] md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_7.5rem_6rem_8rem_4.5rem_7.5rem] md:items-center md:gap-3"
+        className="w-full p-4 text-left transition-colors hover:bg-[#f6f3ec] md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_7.5rem_6rem_8rem_4.5rem_7.5rem] md:items-center md:gap-3 md:px-4 md:py-3"
         aria-expanded={expanded}
         onClick={onToggle}
       >
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-stone-900">{displayValue(opportunity.title)}</p>
-          <p className="mt-1 text-xs text-stone-400 md:hidden">{displayValue(opportunity.buyerName)}</p>
+          <div className="mb-2 flex items-start justify-between gap-3 md:hidden">
+            <Badge tone={routeTone(opportunity.recommendedRoute)}>{formatRouteLabel(opportunity.recommendedRoute)}</Badge>
+            <ChevronDown size={18} className={cn("mt-0.5 shrink-0 text-stone-400 transition-transform", expanded && "rotate-180")} />
+          </div>
+          <p className="text-base font-medium leading-snug text-stone-900 md:truncate md:text-sm">{title}</p>
+          <p className="mt-1 text-sm text-stone-500 md:hidden">{displayValue(opportunity.buyerName)}</p>
           <p className={cn("mt-1 text-[11px]", isCurrentAiReview(opportunity.aiReviewVersion) ? "text-emerald-700" : "text-amber-700")}>
             {isCurrentAiReview(opportunity.aiReviewVersion) ? "v2.5 · Current" : "Needs re-review"}
           </p>
         </div>
         <p className="hidden truncate text-sm text-stone-600 md:block">{displayValue(opportunity.buyerName)}</p>
-        <div>
+        <div className="hidden md:block">
           <Badge tone={routeTone(opportunity.recommendedRoute)}>{formatRouteLabel(opportunity.recommendedRoute)}</Badge>
         </div>
-        <p className="text-sm tabular-nums text-stone-700">{formatMoney(opportunity.valueAmount, opportunity.currency)}</p>
-        <div>
-          <p className="text-sm text-stone-700">{formatUkDate(opportunity.tenderDeadline)}</p>
-          {urgency ? <p className="mt-0.5 text-[11px] font-medium text-amber-700">{urgency}</p> : null}
-        </div>
-        <p className="text-sm tabular-nums text-stone-700">{formatScore(opportunity.relevanceScore)}</p>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-stone-600">{formatStageLabel(opportunity.commercialStage)}</p>
-          <ChevronDown size={16} className={cn("shrink-0 text-stone-400 transition-transform", expanded && "rotate-180")} />
+        <dl className="mt-3 grid grid-cols-3 gap-2 text-sm md:mt-0 md:contents">
+          <div className="md:contents">
+            <dt className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400 md:hidden">Value</dt>
+            <dd className="tabular-nums text-stone-800">{formatMoney(opportunity.valueAmount, opportunity.currency)}</dd>
+          </div>
+          <div className="md:contents">
+            <dt className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400 md:hidden">Deadline</dt>
+            <dd>
+              <p className="text-stone-800">{formatUkDate(opportunity.tenderDeadline)}</p>
+              {urgency ? <p className="mt-0.5 text-[11px] font-medium text-amber-700">{urgency}</p> : null}
+            </dd>
+          </div>
+          <div className="md:contents">
+            <dt className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400 md:hidden">Fit</dt>
+            <dd className="tabular-nums text-stone-800">{formatScore(opportunity.relevanceScore)}</dd>
+          </div>
+        </dl>
+        <div className="mt-3 flex items-center justify-between gap-2 text-sm text-stone-600 md:mt-0">
+          <p>{formatStageLabel(opportunity.commercialStage)}</p>
+          <ChevronDown size={16} className={cn("hidden shrink-0 text-stone-400 transition-transform md:block", expanded && "rotate-180")} />
         </div>
       </button>
 
@@ -251,10 +289,9 @@ function OpportunityRow({ opportunity, expanded, onToggle }: OpportunityRowProps
             <DetailBlock label="Why This Route" value={opportunity.reason} />
             <DetailBlock label="Recommended Next Action" value={opportunity.nextAction} />
           </div>
-
           <div>
             <MetaText className="mb-3">Scores</MetaText>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               <ScoreCell label="Relevance" value={opportunity.relevanceScore} />
               <ScoreCell label="Direct Fit" value={opportunity.directFitScore} />
               <ScoreCell label="Partner Fit" value={opportunity.partnerFitScore} />
@@ -262,7 +299,6 @@ function OpportunityRow({ opportunity, expanded, onToggle }: OpportunityRowProps
               <ScoreCell label="Confidence" value={opportunity.confidence} />
             </div>
           </div>
-
           {opportunity.recommendedRoute === "partner" ? (
             <div className="grid gap-4 md:grid-cols-2">
               <DetailBlock
@@ -272,7 +308,6 @@ function OpportunityRow({ opportunity, expanded, onToggle }: OpportunityRowProps
               <DetailBlock label="Recommended Partner Skill" value={opportunity.recommendedPartnerSkill} />
             </div>
           ) : null}
-
           <div className="flex flex-wrap items-center gap-3 text-stone-400">
             <PillText className={isCurrentAiReview(opportunity.aiReviewVersion) ? "text-emerald-700" : "text-amber-700"}>
               {isCurrentAiReview(opportunity.aiReviewVersion) ? "v2.5" : "Older"} · {reviewLabel}
