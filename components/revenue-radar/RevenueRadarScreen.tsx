@@ -200,7 +200,7 @@ function FilterGroup<T extends string>({ label, value, options, onChange }: Filt
   return (
     <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
       <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
-      <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+      <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const active = option.id === value;
           return (
