@@ -111,7 +111,7 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Ward furniture")).toBeInTheDocument();
     expect(screen.queryByText("Tool for assessing pollutant risks from landspreading")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Filter route Bid Now" }));
+    await user.selectOptions(screen.getByLabelText("Route"), "direct_bid");
     expect(screen.getByText("No opportunities match")).toBeInTheDocument();
 
     rerender(<RevenueRadarScreen status="not_configured" opportunities={[]} />);
@@ -204,18 +204,18 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Submitted bid")).toBeInTheDocument();
     expect(screen.queryByText("Won bid")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Filter my status Submitted" }));
+    await user.selectOptions(screen.getByLabelText("My Status"), "submitted");
     expect(screen.getByText("Submitted bid")).toBeInTheDocument();
     expect(screen.getAllByText("Submitted").length).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("button", { name: "Filter my status Won" }));
+    await user.selectOptions(screen.getByLabelText("My Status"), "won");
     expect(screen.getByText("Won bid")).toBeInTheDocument();
     expect(screen.queryByText("Submitted bid")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Filter my status Lost" }));
+    await user.selectOptions(screen.getByLabelText("My Status"), "lost");
     expect(screen.getByText("Lost bid")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Filter my status Passed" }));
+    await user.selectOptions(screen.getByLabelText("My Status"), "passed");
     expect(screen.getByText("Passed bid")).toBeInTheDocument();
   });
 

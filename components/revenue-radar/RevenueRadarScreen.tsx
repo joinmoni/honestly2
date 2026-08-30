@@ -16,6 +16,7 @@ import {
 } from "@/components/revenue-radar/opportunity-table-layout";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
 import { BodyText, BrandWordmark, MetaText, PageTitle, PillText } from "@/components/ui/Typography";
 import {
@@ -78,6 +79,11 @@ const STAGE_FILTERS: Array<{ id: StageFilter; label: string }> = [
 const STATUS_FILTERS: Array<{ id: TrackingStatusFilter; label: string }> = [
   { id: "all", label: "All" },
   ...TRACKING_STATUSES.map((id) => ({ id, label: TRACKING_STATUS_LABELS[id] }))
+];
+
+const QUEUE_FILTERS: Array<{ id: QueueFilter; label: string }> = [
+  { id: "active", label: "Active" },
+  { id: "all", label: "All" }
 ];
 
 const SUMMARY_ROUTES: ActionableRoute[] = ["direct_bid", "engage_now", "partner", "watch"];
@@ -273,7 +279,7 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
 
         {status === "ok" ? (
           <>
-            <div className="sticky top-[3.35rem] z-40 -mx-4 mb-4 space-y-3 border-b border-stone-100 bg-[#F9F8F6]/95 px-4 py-3 backdrop-blur-md md:static md:z-auto md:mx-0 md:mb-6 md:space-y-3 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <div className="mb-4 space-y-3 md:mb-6">
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -281,32 +287,40 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
                 aria-label="Search title or buyer"
                 className="h-12 text-base md:h-11 md:max-w-sm md:text-sm"
               />
-              <FilterGroup label="Route" value={route} options={ROUTE_FILTERS} onChange={setRoute} />
-              <FilterGroup label="Stage" value={stage} options={STAGE_FILTERS} onChange={setStage} />
-              <FilterGroup label="My Status" value={trackingStatus} options={STATUS_FILTERS} onChange={setTrackingStatus} />
+              <div className="grid grid-cols-4 gap-1.5 md:hidden">
+                <FilterSelect label="Route" value={route} options={ROUTE_FILTERS} onChange={setRoute} />
+                <FilterSelect label="Stage" value={stage} options={STAGE_FILTERS} onChange={setStage} />
+                <FilterSelect label="My Status" value={trackingStatus} options={STATUS_FILTERS} onChange={setTrackingStatus} />
+                <FilterSelect label="Queue" value={queue} options={QUEUE_FILTERS} onChange={setQueue} />
+              </div>
+              <div className="hidden space-y-3 md:block">
+                <FilterGroup label="Route" value={route} options={ROUTE_FILTERS} onChange={setRoute} />
+                <FilterGroup label="Stage" value={stage} options={STAGE_FILTERS} onChange={setStage} />
+                <FilterGroup label="My Status" value={trackingStatus} options={STATUS_FILTERS} onChange={setTrackingStatus} />
+              </div>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-stone-500 md:text-sm">
                   {paged.totalPages > 1
                     ? `${paged.start}–${paged.end} of ${visible.length} opportunities`
                     : `${visible.length} ${visible.length === 1 ? "opportunity" : "opportunities"}`}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-2 md:flex">
                   <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Queue</span>
-                  {(["active", "all"] as QueueFilter[]).map((id) => {
-                    const active = queue === id;
+                  {QUEUE_FILTERS.map((option) => {
+                    const active = queue === option.id;
                     return (
                       <button
-                        key={id}
+                        key={option.id}
                         type="button"
                         aria-pressed={active}
-                        aria-label={`Show ${id} queue`}
+                        aria-label={`Show ${option.id} queue`}
                         className={cn(
                           "inline-flex min-h-9 items-center rounded-full px-3 text-[11px] font-bold uppercase tracking-widest",
                           active ? "bg-stone-900 text-white" : "border border-stone-200 bg-white text-stone-500"
                         )}
-                        onClick={() => setQueue(id)}
+                        onClick={() => setQueue(option.id)}
                       >
-                        {id === "active" ? "Active" : "All"}
+                        {option.label}
                       </button>
                     );
                   })}
@@ -390,14 +404,29 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
   );
 }
 
-type FilterGroupProps<T extends string> = {
+type FilterControlProps<T extends string> = {
   label: string;
   value: T;
   options: Array<{ id: T; label: string }>;
   onChange: (value: T) => void;
 };
 
-function FilterGroup<T extends string>({ label, value, options, onChange }: FilterGroupProps<T>) {
+function FilterSelect<T extends string>({ label, value, options, onChange }: FilterControlProps<T>) {
+  return (
+    <label className="min-w-0">
+      <span className="mb-1 block truncate text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">{label}</span>
+      <Select aria-label={label} value={value} className="h-10 px-1.5 text-xs" onChange={(event) => onChange(event.target.value as T)}>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+    </label>
+  );
+}
+
+function FilterGroup<T extends string>({ label, value, options, onChange }: FilterControlProps<T>) {
   return (
     <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
       <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">{label}</span>
