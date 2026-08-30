@@ -112,6 +112,8 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
   const [columnWidths, setColumnWidths] = useState<OpportunityTableWidths>(getDefaultOpportunityTableWidths);
   const [isResizingColumn, setIsResizingColumn] = useState(false);
   const columnDrag = useRef<{ columnId: OpportunityTableColumnId; startX: number; startWidth: number } | null>(null);
+  const tableViewportRef = useRef<HTMLDivElement>(null);
+  const [detailPanelWidth, setDetailPanelWidth] = useState<number | null>(null);
   const tableGridStyle = getOpportunityTableGridStyle(columnWidths);
   const radarCounts = useMemo(() => countByRoute(selectCurrentOpportunities(items)), [items]);
   const pipelineCounts = useMemo(() => countByTrackingStatus(items), [items]);
@@ -152,6 +154,18 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
       window.removeEventListener("pointerup", handlePointerUp);
     };
   }, []);
+
+  useEffect(() => {
+    const node = tableViewportRef.current;
+    if (!node || typeof ResizeObserver === "undefined") return;
+    const updateWidth = () => {
+      if (node.clientWidth > 0) setDetailPanelWidth(node.clientWidth);
+    };
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visible.length, status]);
 
   useEffect(() => {
     if (!isResizingColumn) return;
@@ -309,6 +323,7 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
             ) : (
               <>
               <div
+                ref={tableViewportRef}
                 className={cn(
                   "space-y-3 md:space-y-0 md:overflow-x-auto md:rounded-xl2 md:border md:border-line md:bg-card md:shadow-soft",
                   isResizingColumn && "cursor-col-resize select-none"
@@ -347,6 +362,7 @@ export function RevenueRadarScreen({ status, opportunities, canEdit = false }: R
                         expanded={expandedKey === opportunity.processKey}
                         canEdit={canEdit}
                         tableGridStyle={tableGridStyle}
+                        detailPanelWidth={detailPanelWidth}
                         onSaved={replaceOpportunity}
                         onToggle={() =>
                           setExpandedKey((current) => (current === opportunity.processKey ? null : opportunity.processKey))
@@ -414,11 +430,20 @@ type OpportunityItemProps = {
   expanded: boolean;
   canEdit: boolean;
   tableGridStyle: { gridTemplateColumns: string; minWidth: number };
+  detailPanelWidth: number | null;
   onToggle: () => void;
   onSaved: (opportunity: RevenueOpportunity) => void;
 };
 
-function OpportunityItem({ opportunity, expanded, canEdit, tableGridStyle, onToggle, onSaved }: OpportunityItemProps) {
+function OpportunityItem({
+  opportunity,
+  expanded,
+  canEdit,
+  tableGridStyle,
+  detailPanelWidth,
+  onToggle,
+  onSaved
+}: OpportunityItemProps) {
   const urgency = formatDeadlineUrgency(opportunity.tenderDeadline);
   const reviewLabel = formatAiReviewLabel(opportunity.aiReviewVersion);
   const title = displayValue(opportunity.title);
@@ -481,8 +506,16 @@ function OpportunityItem({ opportunity, expanded, canEdit, tableGridStyle, onTog
       </button>
 
       {expanded ? (
-        <div className="space-y-5 border-t border-line bg-[#fcfaf6] px-4 py-5">
-          <div className="grid gap-4 md:grid-cols-2">
+        <div
+          data-testid="opportunity-detail-panel"
+          className="box-border space-y-5 border-t border-line bg-[#fcfaf6] px-4 py-5 md:sticky md:left-0 md:overflow-x-hidden"
+          style={
+            detailPanelWidth
+              ? { width: detailPanelWidth, maxWidth: detailPanelWidth }
+              : undefined
+          }
+        >
+          <div className="grid min-w-0 gap-4 md:grid-cols-2">
             <DetailBlock label="Buyer Need" value={opportunity.buyerNeed} />
             <DetailBlock label="Supplier Deliverable" value={opportunity.supplierDeliverable} />
             <DetailBlock label="Why This Route" value={opportunity.reason} />
@@ -529,9 +562,9 @@ function OpportunityItem({ opportunity, expanded, canEdit, tableGridStyle, onTog
 
 function DetailBlock({ label, value }: { label: string; value: string | null }) {
   return (
-    <div>
+    <div className="min-w-0">
       <MetaText className="mb-1">{label}</MetaText>
-      <p className="text-sm leading-relaxed text-stone-700">{displayValue(value)}</p>
+      <p className="break-words whitespace-normal text-sm leading-relaxed text-stone-700">{displayValue(value)}</p>
     </div>
   );
 }

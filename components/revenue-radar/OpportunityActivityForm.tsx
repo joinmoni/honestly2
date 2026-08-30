@@ -113,7 +113,7 @@ export function OpportunityActivityForm({ opportunity, canEdit, onSaved }: Oppor
         </div>
       ) : null}
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid max-w-2xl gap-3 md:grid-cols-2">
         <label className="block">
           <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">Status</span>
           <Select

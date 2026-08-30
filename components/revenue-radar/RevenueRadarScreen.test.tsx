@@ -61,6 +61,30 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Recommended Partner Skill")).toBeInTheDocument();
     expect(screen.getByText("Environmental modelling")).toBeInTheDocument();
     expect(screen.getByText("Our Activity")).toBeInTheDocument();
+    expect(screen.getByTestId("opportunity-detail-panel")).toHaveClass("md:overflow-x-hidden");
+  });
+
+  it("shows the full analysis text when a row is expanded", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity({
+            buyerNeed:
+              "An online system to manage the council's traded services to schools: to administer, track and invoice traded services provided to maintained schools and academies."
+          })
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /tool for assessing pollutant risks/i }));
+    expect(
+      screen.getByText(
+        "An online system to manage the council's traded services to schools: to administer, track and invoice traded services provided to maintained schools and academies."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Status").closest("div.grid")).toHaveClass("max-w-2xl");
   });
 
   it("filters by search and shows empty and error states", async () => {
