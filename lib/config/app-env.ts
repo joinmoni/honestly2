@@ -105,14 +105,17 @@ export function isMeilisearchConfigured(): boolean {
 
 export type TenderRadarEnv = {
   url: string;
-  serviceRoleKey: string;
+  apiKey: string;
 };
 
 export function getTenderRadarEnv(): TenderRadarEnv | null {
   const url = readEnv("TENDER_RADAR_SUPABASE_URL");
-  const serviceRoleKey = readEnv("TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !serviceRoleKey) return null;
-  return { url, serviceRoleKey };
+  const apiKey =
+    readEnv("TENDER_RADAR_SUPABASE_SECRET_KEY") ??
+    readEnv("TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY") ??
+    readEnv("TENDER_RADAR_SUPABASE_PUBLISHABLE_KEY");
+  if (!url || !apiKey) return null;
+  return { url, apiKey };
 }
 
 export function isTenderRadarConfigured(): boolean {

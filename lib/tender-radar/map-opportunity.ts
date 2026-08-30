@@ -10,9 +10,11 @@ export type RevenueOpportunityRow = {
   direct_fit_score?: unknown;
   partner_fit_score?: unknown;
   commercial_attractiveness?: unknown;
+  ai_confidence?: unknown;
   confidence?: unknown;
   buyer_need?: unknown;
   supplier_deliverable?: unknown;
+  ai_reason?: unknown;
   reason?: unknown;
   next_action?: unknown;
   need_partner?: unknown;
@@ -59,10 +61,10 @@ export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunit
     directFitScore: toNumber(row.direct_fit_score),
     partnerFitScore: toNumber(row.partner_fit_score),
     commercialAttractiveness: toNumber(row.commercial_attractiveness),
-    confidence: toNumber(row.confidence),
+    confidence: toNumber(row.ai_confidence ?? row.confidence),
     buyerNeed: toText(row.buyer_need),
     supplierDeliverable: toText(row.supplier_deliverable),
-    reason: toText(row.reason),
+    reason: toText(row.ai_reason ?? row.reason),
     nextAction: toText(row.next_action),
     needPartner: toBoolean(row.need_partner),
     recommendedPartnerSkill: toText(row.recommended_partner_skill),

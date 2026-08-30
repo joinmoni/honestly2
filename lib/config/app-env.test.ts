@@ -27,7 +27,9 @@ describe("app env", () => {
     delete process.env.MEILISEARCH_ADMIN_API_KEY;
     delete process.env.HONESTLY_SEARCH_SYNC_TOKEN;
     delete process.env.TENDER_RADAR_SUPABASE_URL;
+    delete process.env.TENDER_RADAR_SUPABASE_SECRET_KEY;
     delete process.env.TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.TENDER_RADAR_SUPABASE_PUBLISHABLE_KEY;
   });
 
   afterAll(() => {
@@ -112,11 +114,23 @@ describe("app env", () => {
     process.env.TENDER_RADAR_SUPABASE_URL = "https://tender.supabase.co";
     expect(getTenderRadarEnv()).toBeNull();
 
-    process.env.TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY = "tender_service_role";
+    process.env.TENDER_RADAR_SUPABASE_SECRET_KEY = "sb_secret_test";
     expect(isTenderRadarConfigured()).toBe(true);
     expect(getTenderRadarEnv()).toEqual({
       url: "https://tender.supabase.co",
-      serviceRoleKey: "tender_service_role"
+      apiKey: "sb_secret_test"
     });
+  });
+
+  it("falls back to Tender Radar publishable or legacy service role keys", () => {
+    process.env.TENDER_RADAR_SUPABASE_URL = "https://tender.supabase.co";
+    process.env.TENDER_RADAR_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+    expect(getTenderRadarEnv()).toEqual({
+      url: "https://tender.supabase.co",
+      apiKey: "sb_publishable_test"
+    });
+
+    process.env.TENDER_RADAR_SUPABASE_SERVICE_ROLE_KEY = "legacy_service_role";
+    expect(getTenderRadarEnv()?.apiKey).toBe("legacy_service_role");
   });
 });

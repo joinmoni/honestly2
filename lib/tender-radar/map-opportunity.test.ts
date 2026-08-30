@@ -9,6 +9,8 @@ describe("mapOpportunityRow", () => {
       commercial_stage: "live_bid",
       recommended_route: "partner",
       relevance_score: "70",
+      ai_confidence: 85,
+      ai_reason: "Strong partner fit.",
       partner_fit_score: 85,
       value_amount: 40000,
       currency: "GBP",
@@ -24,6 +26,8 @@ describe("mapOpportunityRow", () => {
       recommendedRoute: "partner",
       relevanceScore: 70,
       partnerFitScore: 85,
+      confidence: 85,
+      reason: "Strong partner fit.",
       valueAmount: 40000,
       needPartner: true,
       buyerNeed: null
