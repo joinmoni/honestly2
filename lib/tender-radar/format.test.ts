@@ -1,11 +1,14 @@
 import {
   formatAiReviewLabel,
+  formatBidRouteLabel,
   formatCompactAmount,
   formatDeadlineUrgency,
+  formatExactMoney,
   formatMoney,
   formatRouteLabel,
   formatScore,
   formatStageLabel,
+  formatTrackingStatusLabel,
   formatUkDate
 } from "@/lib/tender-radar/format";
 
@@ -46,5 +49,15 @@ describe("tender radar format", () => {
     expect(formatAiReviewLabel("revenue-radar-v2.5-production")).toBe("Current");
     expect(formatAiReviewLabel("revenue-radar-v2.4-production")).toBe("Needs re-review");
     expect(formatAiReviewLabel(null)).toBe("Needs re-review");
+  });
+
+  it("formats tracking labels and exact bid amounts", () => {
+    expect(formatTrackingStatusLabel(null)).toBe("New");
+    expect(formatTrackingStatusLabel({ trackingStatus: null })).toBe("New");
+    expect(formatTrackingStatusLabel("submitted")).toBe("Submitted");
+    expect(formatBidRouteLabel("direct")).toBe("Direct");
+    expect(formatBidRouteLabel(null)).toBe("—");
+    expect(formatExactMoney(79500, "GBP")).toBe("£79,500");
+    expect(formatExactMoney(null, "GBP")).toBe("—");
   });
 });

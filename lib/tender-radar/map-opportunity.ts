@@ -1,4 +1,10 @@
-import type { RevenueOpportunity } from "@/lib/tender-radar/types";
+import {
+  isBidRoute,
+  isTrackingStatus,
+  type BidRoute,
+  type RevenueOpportunity,
+  type TrackingStatus
+} from "@/lib/tender-radar/types";
 
 export type RevenueOpportunityRow = {
   process_key?: unknown;
@@ -6,16 +12,22 @@ export type RevenueOpportunityRow = {
   buyer_name?: unknown;
   commercial_stage?: unknown;
   recommended_route?: unknown;
+  commercial_route?: unknown;
   relevance_score?: unknown;
+  ai_score?: unknown;
   direct_fit_score?: unknown;
   partner_fit_score?: unknown;
   commercial_attractiveness?: unknown;
   ai_confidence?: unknown;
   confidence?: unknown;
   buyer_need?: unknown;
+  actual_service_required?: unknown;
+  summary?: unknown;
   supplier_deliverable?: unknown;
   ai_reason?: unknown;
   reason?: unknown;
+  why_we_can_deliver?: unknown;
+  recommendation?: unknown;
   next_action?: unknown;
   need_partner?: unknown;
   recommended_partner_skill?: unknown;
@@ -26,7 +38,95 @@ export type RevenueOpportunityRow = {
   ai_reviewed_at?: unknown;
   analysed_at?: unknown;
   updated_at?: unknown;
+  tracking_status?: unknown;
+  submitted_at?: unknown;
+  bid_value?: unknown;
+  bid_currency?: unknown;
+  bid_route?: unknown;
+  partner_name?: unknown;
+  notes?: unknown;
+  outcome_at?: unknown;
+  outcome_value?: unknown;
+  tracking_updated_at?: unknown;
 };
+
+export const CORE_PIPELINE_VIEW_COLUMNS = [
+  "process_key",
+  "title",
+  "buyer_name",
+  "commercial_stage",
+  "recommended_route",
+  "relevance_score",
+  "direct_fit_score",
+  "partner_fit_score",
+  "commercial_attractiveness",
+  "ai_confidence",
+  "buyer_need",
+  "supplier_deliverable",
+  "ai_reason",
+  "next_action",
+  "need_partner",
+  "recommended_partner_skill",
+  "value_amount",
+  "currency",
+  "tender_deadline",
+  "ai_review_version",
+  "ai_reviewed_at",
+  "analysed_at",
+  "updated_at",
+  "tracking_status",
+  "submitted_at",
+  "bid_value",
+  "bid_currency",
+  "bid_route",
+  "partner_name",
+  "notes",
+  "outcome_at",
+  "outcome_value",
+  "tracking_updated_at"
+].join(", ");
+
+export const PIPELINE_VIEW_COLUMNS = [
+  "process_key",
+  "title",
+  "buyer_name",
+  "commercial_stage",
+  "recommended_route",
+  "commercial_route",
+  "relevance_score",
+  "ai_score",
+  "direct_fit_score",
+  "partner_fit_score",
+  "commercial_attractiveness",
+  "ai_confidence",
+  "buyer_need",
+  "actual_service_required",
+  "summary",
+  "supplier_deliverable",
+  "ai_reason",
+  "why_we_can_deliver",
+  "recommendation",
+  "next_action",
+  "need_partner",
+  "recommended_partner_skill",
+  "value_amount",
+  "currency",
+  "tender_deadline",
+  "ai_review_version",
+  "ai_reviewed_at",
+  "analysed_at",
+  "updated_at",
+  "tracking_status",
+  "submitted_at",
+  "bid_value",
+  "bid_currency",
+  "bid_route",
+  "partner_name",
+  "notes",
+  "outcome_at",
+  "outcome_value",
+  "tracking_updated_at"
+].join(", ");
 
 function toText(value: unknown): string | null {
   if (value == null) return null;
@@ -48,6 +148,16 @@ function toBoolean(value: unknown): boolean | null {
   return null;
 }
 
+function toTrackingStatus(value: unknown): TrackingStatus | null {
+  const text = toText(value);
+  return isTrackingStatus(text) ? text : null;
+}
+
+function toBidRoute(value: unknown): BidRoute | null {
+  const text = toText(value);
+  return isBidRoute(text) ? text : null;
+}
+
 export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunity | null {
   const processKey = toText(row.process_key);
   if (!processKey) return null;
@@ -56,15 +166,15 @@ export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunit
     title: toText(row.title),
     buyerName: toText(row.buyer_name),
     commercialStage: toText(row.commercial_stage),
-    recommendedRoute: toText(row.recommended_route),
-    relevanceScore: toNumber(row.relevance_score),
+    recommendedRoute: toText(row.recommended_route) ?? toText(row.commercial_route),
+    relevanceScore: toNumber(row.relevance_score) ?? toNumber(row.ai_score),
     directFitScore: toNumber(row.direct_fit_score),
     partnerFitScore: toNumber(row.partner_fit_score),
     commercialAttractiveness: toNumber(row.commercial_attractiveness),
     confidence: toNumber(row.ai_confidence ?? row.confidence),
-    buyerNeed: toText(row.buyer_need),
+    buyerNeed: toText(row.buyer_need) ?? toText(row.actual_service_required) ?? toText(row.summary),
     supplierDeliverable: toText(row.supplier_deliverable),
-    reason: toText(row.ai_reason ?? row.reason),
+    reason: toText(row.ai_reason ?? row.reason) ?? toText(row.why_we_can_deliver) ?? toText(row.recommendation),
     nextAction: toText(row.next_action),
     needPartner: toBoolean(row.need_partner),
     recommendedPartnerSkill: toText(row.recommended_partner_skill),
@@ -74,6 +184,22 @@ export function mapOpportunityRow(row: RevenueOpportunityRow): RevenueOpportunit
     aiReviewVersion: toText(row.ai_review_version),
     aiReviewedAt: toText(row.ai_reviewed_at),
     analysedAt: toText(row.analysed_at),
-    updatedAt: toText(row.updated_at)
+    updatedAt: toText(row.updated_at),
+    trackingStatus: toTrackingStatus(row.tracking_status),
+    submittedAt: toText(row.submitted_at),
+    bidValue: toNumber(row.bid_value),
+    bidCurrency: toText(row.bid_currency),
+    bidRoute: toBidRoute(row.bid_route),
+    partnerName: toText(row.partner_name),
+    notes: toText(row.notes),
+    outcomeAt: toText(row.outcome_at),
+    outcomeValue: toNumber(row.outcome_value),
+    trackingUpdatedAt: toText(row.tracking_updated_at)
   };
+}
+
+export function mapOpportunityRows(rows: RevenueOpportunityRow[]): RevenueOpportunity[] {
+  return rows
+    .map((row) => mapOpportunityRow(row))
+    .filter((row): row is RevenueOpportunity => row !== null);
 }

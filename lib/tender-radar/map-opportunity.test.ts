@@ -30,7 +30,41 @@ describe("mapOpportunityRow", () => {
       reason: "Strong partner fit.",
       valueAmount: 40000,
       needPartner: true,
-      buyerNeed: null
+      buyerNeed: null,
+      trackingStatus: null
+    });
+  });
+
+  it("maps pipeline tracking and legacy fields without requiring v2.5 values", () => {
+    const actual = mapOpportunityRow({
+      process_key: "legacy-1",
+      title: "Historic bid",
+      commercial_stage: null,
+      recommended_route: null,
+      commercial_route: "direct",
+      ai_review_version: null,
+      summary: "Buyer needs a reporting tool.",
+      why_we_can_deliver: "We already deliver this.",
+      ai_score: 62,
+      tracking_status: "submitted",
+      submitted_at: "2026-08-30T00:00:00.000Z",
+      bid_value: "79500",
+      bid_currency: "GBP",
+      bid_route: "direct",
+      notes: null,
+      outcome_value: null
+    });
+
+    expect(actual).toMatchObject({
+      processKey: "legacy-1",
+      recommendedRoute: "direct",
+      buyerNeed: "Buyer needs a reporting tool.",
+      reason: "We already deliver this.",
+      relevanceScore: 62,
+      trackingStatus: "submitted",
+      submittedAt: "2026-08-30T00:00:00.000Z",
+      bidValue: 79500,
+      bidRoute: "direct"
     });
   });
 

@@ -1,8 +1,13 @@
 import {
+  BID_ROUTE_LABELS,
   CURRENT_AI_REVIEW_VERSION,
   ROUTE_LABELS,
+  TRACKING_STATUS_LABELS,
+  getEffectiveTrackingStatus,
+  isBidRoute,
   type ActionableRoute,
-  type RevenueOpportunity
+  type RevenueOpportunity,
+  type TrackingStatus
 } from "@/lib/tender-radar/types";
 
 const MISSING = "—";
@@ -97,4 +102,41 @@ export function isCurrentAiReview(version: string | null | undefined): boolean {
 
 export function formatAiReviewLabel(version: string | null | undefined): "Current" | "Needs re-review" {
   return isCurrentAiReview(version) ? "Current" : "Needs re-review";
+}
+
+export function formatTrackingStatusLabel(
+  opportunity: Pick<RevenueOpportunity, "trackingStatus"> | TrackingStatus | null | undefined
+): string {
+  if (typeof opportunity === "string" || opportunity == null) {
+    return TRACKING_STATUS_LABELS[opportunity ?? "new"];
+  }
+  return TRACKING_STATUS_LABELS[getEffectiveTrackingStatus(opportunity)];
+}
+
+export function formatBidRouteLabel(route: string | null | undefined): string {
+  if (isBidRoute(route)) return BID_ROUTE_LABELS[route];
+  return displayValue(route);
+}
+
+export function trackingStatusTone(
+  status: TrackingStatus
+): "success" | "warning" | "neutral" {
+  if (status === "won") return "success";
+  if (status === "submitted" || status === "pursuing" || status === "reviewing") return "warning";
+  return "neutral";
+}
+
+export function formatExactMoney(amount: number | null | undefined, currency: string | null | undefined): string {
+  if (amount == null || !Number.isFinite(amount)) return MISSING;
+  const code = (currency ?? "GBP").trim().toUpperCase();
+  const normalized = code === "£" ? "GBP" : code === "€" ? "EUR" : code === "$" ? "USD" : code;
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: normalized,
+      maximumFractionDigits: 0
+    }).format(amount);
+  } catch {
+    return `${normalized} ${amount}`;
+  }
 }

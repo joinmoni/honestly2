@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Radar } from "lucide-react";
 
+import { OpportunityActivityForm } from "@/components/revenue-radar/OpportunityActivityForm";
+import { Pagination } from "@/components/ui/Pagination";
+import {
+  OPPORTUNITY_TABLE_COLUMNS,
+  getDefaultOpportunityTableWidths,
+  getOpportunityTableGridStyle,
+  resizeOpportunityTableColumn,
+  type OpportunityTableColumnId,
+  type OpportunityTableWidths
+} from "@/components/revenue-radar/opportunity-table-layout";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -16,16 +26,30 @@ import {
   formatRouteLabel,
   formatScore,
   formatStageLabel,
+  formatTrackingStatusLabel,
   formatUkDate,
-  isCurrentAiReview
+  isCurrentAiReview,
+  trackingStatusTone
 } from "@/lib/tender-radar/format";
-import { countByRoute, filterOpportunities } from "@/lib/tender-radar/select";
 import {
+  countByRoute,
+  countByTrackingStatus,
+  filterOpportunities,
+  paginateItems,
+  selectCurrentOpportunities
+} from "@/lib/tender-radar/select";
+import {
+  PIPELINE_SUMMARY_STATUSES,
   ROUTE_LABELS,
+  TRACKING_STATUS_LABELS,
+  TRACKING_STATUSES,
+  getEffectiveTrackingStatus,
   type ActionableRoute,
+  type QueueFilter,
   type RevenueOpportunity,
   type RouteFilter,
-  type StageFilter
+  type StageFilter,
+  type TrackingStatusFilter
 } from "@/lib/tender-radar/types";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +58,7 @@ export type RevenueRadarScreenStatus = "ok" | "not_configured" | "query_failed";
 type RevenueRadarScreenProps = {
   status: RevenueRadarScreenStatus;
   opportunities: RevenueOpportunity[];
+  canEdit?: boolean;
 };
 
 const ROUTE_FILTERS: Array<{ id: RouteFilter; label: string }> = [
@@ -50,6 +75,11 @@ const STAGE_FILTERS: Array<{ id: StageFilter; label: string }> = [
   { id: "early_engagement", label: "Early Engagement" }
 ];
 
+const STATUS_FILTERS: Array<{ id: TrackingStatusFilter; label: string }> = [
+  { id: "all", label: "All" },
+  ...TRACKING_STATUSES.map((id) => ({ id, label: TRACKING_STATUS_LABELS[id] }))
+];
+
 const SUMMARY_ROUTES: ActionableRoute[] = ["direct_bid", "engage_now", "partner", "watch"];
 
 function routeTone(route: string | null): "success" | "warning" | "neutral" {
@@ -58,16 +88,87 @@ function routeTone(route: string | null): "success" | "warning" | "neutral" {
   return "neutral";
 }
 
-export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreenProps) {
+function TrackingStatusBadge({ opportunity }: { opportunity: RevenueOpportunity }) {
+  const status = getEffectiveTrackingStatus(opportunity);
+  return (
+    <Badge
+      tone={trackingStatusTone(status)}
+      className={status === "submitted" ? "font-black uppercase tracking-[0.14em]" : undefined}
+    >
+      {formatTrackingStatusLabel(status)}
+    </Badge>
+  );
+}
+
+export function RevenueRadarScreen({ status, opportunities, canEdit = false }: RevenueRadarScreenProps) {
+  const [items, setItems] = useState(opportunities);
   const [query, setQuery] = useState("");
   const [route, setRoute] = useState<RouteFilter>("all");
   const [stage, setStage] = useState<StageFilter>("all");
+  const [trackingStatus, setTrackingStatus] = useState<TrackingStatusFilter>("all");
+  const [queue, setQueue] = useState<QueueFilter>("active");
+  const [paging, setPaging] = useState({ filterKey: "", page: 1 });
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const counts = useMemo(() => countByRoute(opportunities), [opportunities]);
+  const [columnWidths, setColumnWidths] = useState<OpportunityTableWidths>(getDefaultOpportunityTableWidths);
+  const [isResizingColumn, setIsResizingColumn] = useState(false);
+  const columnDrag = useRef<{ columnId: OpportunityTableColumnId; startX: number; startWidth: number } | null>(null);
+  const tableGridStyle = getOpportunityTableGridStyle(columnWidths);
+  const radarCounts = useMemo(() => countByRoute(selectCurrentOpportunities(items)), [items]);
+  const pipelineCounts = useMemo(() => countByTrackingStatus(items), [items]);
   const visible = useMemo(
-    () => filterOpportunities(opportunities, { query, route, stage }),
-    [opportunities, query, route, stage]
+    () => filterOpportunities(items, { query, route, stage, status: trackingStatus, queue }),
+    [items, query, route, stage, trackingStatus, queue]
   );
+  const filterKey = `${query}|${route}|${stage}|${trackingStatus}|${queue}`;
+  const page = paging.filterKey === filterKey ? paging.page : 1;
+  const paged = useMemo(() => paginateItems(visible, page), [visible, page]);
+
+  function changePage(nextPage: number) {
+    setPaging({ filterKey, page: nextPage });
+    setExpandedKey(null);
+  }
+
+  function replaceOpportunity(updated: RevenueOpportunity) {
+    setItems((current) => current.map((item) => (item.processKey === updated.processKey ? updated : item)));
+  }
+
+  useEffect(() => {
+    function handlePointerMove(event: PointerEvent) {
+      const drag = columnDrag.current;
+      if (!drag) return;
+      event.preventDefault();
+      setColumnWidths((current) =>
+        resizeOpportunityTableColumn(current, drag.columnId, drag.startWidth + event.clientX - drag.startX)
+      );
+    }
+    function handlePointerUp() {
+      columnDrag.current = null;
+      setIsResizingColumn(false);
+    }
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isResizingColumn) return;
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [isResizingColumn]);
+
+  function startColumnResize(columnId: OpportunityTableColumnId, clientX: number) {
+    columnDrag.current = { columnId, startX: clientX, startWidth: columnWidths[columnId] };
+    setIsResizingColumn(true);
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F8F6] text-stone-900">
@@ -96,26 +197,46 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
             </BodyText>
           </div>
           {status === "ok" ? (
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {SUMMARY_ROUTES.map((id) => {
-                const active = route === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={active}
-                    aria-label={`Show ${ROUTE_LABELS[id]} opportunities`}
-                    className={cn(
-                      "inline-flex min-h-11 items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left text-xs sm:min-h-0 sm:justify-center sm:rounded-full sm:py-1.5",
-                      active ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600"
-                    )}
-                    onClick={() => setRoute((current) => (current === id ? "all" : id))}
-                  >
-                    <span className={cn("font-medium", active ? "text-white" : "text-stone-900")}>{ROUTE_LABELS[id]}</span>
-                    <span className={cn("tabular-nums", active ? "text-white/70" : "text-stone-400")}>{counts[id]}</span>
-                  </button>
-                );
-              })}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                {SUMMARY_ROUTES.map((id) => {
+                  const active = route === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      aria-label={`Show ${ROUTE_LABELS[id]} opportunities`}
+                      className={cn(
+                        "inline-flex min-h-11 items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left text-xs sm:min-h-0 sm:justify-center sm:rounded-full sm:py-1.5",
+                        active ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600"
+                      )}
+                      onClick={() => setRoute((current) => (current === id ? "all" : id))}
+                    >
+                      <span className={cn("font-medium", active ? "text-white" : "text-stone-900")}>{ROUTE_LABELS[id]}</span>
+                      <span className={cn("tabular-nums", active ? "text-white/70" : "text-stone-400")}>{radarCounts[id]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-500">
+                {PIPELINE_SUMMARY_STATUSES.map((id) => {
+                  const active = trackingStatus === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      aria-label={`Show ${TRACKING_STATUS_LABELS[id]} opportunities`}
+                      className={cn("inline-flex items-center gap-1.5", active ? "text-stone-900" : "text-stone-500")}
+                      onClick={() => setTrackingStatus((current) => (current === id ? "all" : id))}
+                    >
+                      <span>{TRACKING_STATUS_LABELS[id]}</span>
+                      <span className="tabular-nums text-stone-400">{pipelineCounts[id]}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ) : null}
         </header>
@@ -148,9 +269,35 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
               />
               <FilterGroup label="Route" value={route} options={ROUTE_FILTERS} onChange={setRoute} />
               <FilterGroup label="Stage" value={stage} options={STAGE_FILTERS} onChange={setStage} />
-              <p className="text-xs text-stone-500 md:text-sm">
-                {visible.length} {visible.length === 1 ? "opportunity" : "opportunities"}
-              </p>
+              <FilterGroup label="My Status" value={trackingStatus} options={STATUS_FILTERS} onChange={setTrackingStatus} />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs text-stone-500 md:text-sm">
+                  {paged.totalPages > 1
+                    ? `${paged.start}–${paged.end} of ${visible.length} opportunities`
+                    : `${visible.length} ${visible.length === 1 ? "opportunity" : "opportunities"}`}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">Queue</span>
+                  {(["active", "all"] as QueueFilter[]).map((id) => {
+                    const active = queue === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        aria-pressed={active}
+                        aria-label={`Show ${id} queue`}
+                        className={cn(
+                          "inline-flex min-h-9 items-center rounded-full px-3 text-[11px] font-bold uppercase tracking-widest",
+                          active ? "bg-stone-900 text-white" : "border border-stone-200 bg-white text-stone-500"
+                        )}
+                        onClick={() => setQueue(id)}
+                      >
+                        {id === "active" ? "Active" : "All"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {visible.length === 0 ? (
@@ -160,27 +307,65 @@ export function RevenueRadarScreen({ status, opportunities }: RevenueRadarScreen
                 description="Try a different search, route, or stage. Early engagement records stay visible even without a deadline."
               />
             ) : (
-              <div className="space-y-3 md:space-y-0 md:overflow-hidden md:rounded-xl2 md:border md:border-line md:bg-card md:shadow-soft">
-                <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_7.5rem_6rem_8rem_4.5rem_7.5rem] gap-3 border-b border-line px-4 py-3 md:grid">
-                  {["Title", "Buyer", "Route", "Value", "Deadline", "Fit", "Stage"].map((label) => (
-                    <p key={label} className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
-                      {label}
-                    </p>
-                  ))}
+              <>
+              <div
+                className={cn(
+                  "space-y-3 md:space-y-0 md:overflow-x-auto md:rounded-xl2 md:border md:border-line md:bg-card md:shadow-soft",
+                  isResizingColumn && "cursor-col-resize select-none"
+                )}
+              >
+                <div className="md:min-w-max">
+                  <div
+                    className="hidden gap-3 border-b border-line px-4 py-3 md:grid"
+                    style={tableGridStyle}
+                    data-testid="opportunity-table-header"
+                  >
+                    {OPPORTUNITY_TABLE_COLUMNS.map((column) => (
+                      <div key={column.id} className="relative min-w-0 pr-2">
+                        <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
+                          {column.label}
+                        </p>
+                        <span
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label={`Resize ${column.label} column`}
+                          className="absolute -right-1.5 top-0 z-10 h-full w-3 cursor-col-resize after:absolute after:right-[5px] after:top-0 after:h-full after:w-px after:bg-transparent hover:after:bg-stone-300"
+                          onPointerDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            startColumnResize(column.id, event.clientX);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <ul className="space-y-3 md:space-y-0">
+                    {paged.items.map((opportunity) => (
+                      <OpportunityItem
+                        key={opportunity.processKey}
+                        opportunity={opportunity}
+                        expanded={expandedKey === opportunity.processKey}
+                        canEdit={canEdit}
+                        tableGridStyle={tableGridStyle}
+                        onSaved={replaceOpportunity}
+                        onToggle={() =>
+                          setExpandedKey((current) => (current === opportunity.processKey ? null : opportunity.processKey))
+                        }
+                      />
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-3 md:space-y-0">
-                  {visible.map((opportunity) => (
-                    <OpportunityItem
-                      key={opportunity.processKey}
-                      opportunity={opportunity}
-                      expanded={expandedKey === opportunity.processKey}
-                      onToggle={() =>
-                        setExpandedKey((current) => (current === opportunity.processKey ? null : opportunity.processKey))
-                      }
-                    />
-                  ))}
-                </ul>
               </div>
+              {paged.totalPages > 1 ? (
+                <div className="mt-4">
+                  <Pagination
+                    page={paged.page}
+                    totalPages={paged.totalPages}
+                    onPageChange={changePage}
+                  />
+                </div>
+              ) : null}
+              </>
             )}
           </>
         ) : null}
@@ -227,36 +412,50 @@ function FilterGroup<T extends string>({ label, value, options, onChange }: Filt
 type OpportunityItemProps = {
   opportunity: RevenueOpportunity;
   expanded: boolean;
+  canEdit: boolean;
+  tableGridStyle: { gridTemplateColumns: string; minWidth: number };
   onToggle: () => void;
+  onSaved: (opportunity: RevenueOpportunity) => void;
 };
 
-function OpportunityItem({ opportunity, expanded, onToggle }: OpportunityItemProps) {
+function OpportunityItem({ opportunity, expanded, canEdit, tableGridStyle, onToggle, onSaved }: OpportunityItemProps) {
   const urgency = formatDeadlineUrgency(opportunity.tenderDeadline);
   const reviewLabel = formatAiReviewLabel(opportunity.aiReviewVersion);
   const title = displayValue(opportunity.title);
 
   return (
-    <li className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:rounded-none md:border-0 md:border-b md:border-line md:shadow-none md:last:border-none">
+    <li className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:overflow-visible md:rounded-none md:border-0 md:border-b md:border-line md:shadow-none md:last:border-none">
       <button
         type="button"
-        className="w-full p-4 text-left transition-colors hover:bg-[#f6f3ec] md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_7.5rem_6rem_8rem_4.5rem_7.5rem] md:items-center md:gap-3 md:px-4 md:py-3"
+        className="w-full p-4 text-left transition-colors hover:bg-[#f6f3ec] md:grid md:items-center md:gap-3 md:px-4 md:py-3"
+        style={tableGridStyle}
         aria-expanded={expanded}
         onClick={onToggle}
       >
         <div className="min-w-0">
           <div className="mb-2 flex items-start justify-between gap-3 md:hidden">
-            <Badge tone={routeTone(opportunity.recommendedRoute)}>{formatRouteLabel(opportunity.recommendedRoute)}</Badge>
+            <div className="flex flex-wrap gap-2">
+              <Badge tone={routeTone(opportunity.recommendedRoute)}>{formatRouteLabel(opportunity.recommendedRoute)}</Badge>
+              <TrackingStatusBadge opportunity={opportunity} />
+            </div>
             <ChevronDown size={18} className={cn("mt-0.5 shrink-0 text-stone-400 transition-transform", expanded && "rotate-180")} />
           </div>
-          <p className="text-base font-medium leading-snug text-stone-900 md:truncate md:text-sm">{title}</p>
+          <p className="text-base font-medium leading-snug text-stone-900 md:truncate md:text-sm" title={title}>
+            {title}
+          </p>
           <p className="mt-1 text-sm text-stone-500 md:hidden">{displayValue(opportunity.buyerName)}</p>
           <p className={cn("mt-1 text-[11px]", isCurrentAiReview(opportunity.aiReviewVersion) ? "text-emerald-700" : "text-amber-700")}>
             {isCurrentAiReview(opportunity.aiReviewVersion) ? "v2.5 · Current" : "Needs re-review"}
           </p>
         </div>
-        <p className="hidden truncate text-sm text-stone-600 md:block">{displayValue(opportunity.buyerName)}</p>
+        <p className="hidden truncate text-sm text-stone-600 md:block" title={displayValue(opportunity.buyerName)}>
+          {displayValue(opportunity.buyerName)}
+        </p>
         <div className="hidden md:block">
           <Badge tone={routeTone(opportunity.recommendedRoute)}>{formatRouteLabel(opportunity.recommendedRoute)}</Badge>
+        </div>
+        <div className="hidden md:block">
+          <TrackingStatusBadge opportunity={opportunity} />
         </div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-sm md:mt-0 md:contents">
           <div className="md:contents">
@@ -316,6 +515,12 @@ function OpportunityItem({ opportunity, expanded, onToggle }: OpportunityItemPro
               {displayValue(opportunity.aiReviewVersion)} · Last reviewed {formatUkDate(opportunity.aiReviewedAt)}
             </span>
           </div>
+          <OpportunityActivityForm
+            key={opportunity.processKey}
+            opportunity={opportunity}
+            canEdit={canEdit}
+            onSaved={onSaved}
+          />
         </div>
       ) : null}
     </li>

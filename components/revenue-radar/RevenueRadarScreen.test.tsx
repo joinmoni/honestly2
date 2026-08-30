@@ -1,8 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
 import { RevenueRadarScreen } from "@/components/revenue-radar/RevenueRadarScreen";
-import type { RevenueOpportunity } from "@/lib/tender-radar/types";
+import { EMPTY_TRACKING, type RevenueOpportunity } from "@/lib/tender-radar/types";
+
+const saveRevenueRadarTracking = vi.fn();
+
+vi.mock("@/lib/revenue-radar-tracking.client", () => ({
+  saveRevenueRadarTracking: (...args: unknown[]) => saveRevenueRadarTracking(...args)
+}));
 
 function opportunity(overrides: Partial<RevenueOpportunity> = {}): RevenueOpportunity {
   return {
@@ -28,7 +35,9 @@ function opportunity(overrides: Partial<RevenueOpportunity> = {}): RevenueOpport
     aiReviewVersion: overrides.aiReviewVersion ?? "revenue-radar-v2.5-production",
     aiReviewedAt: overrides.aiReviewedAt ?? "2026-08-28T00:00:00.000Z",
     analysedAt: overrides.analysedAt ?? null,
-    updatedAt: overrides.updatedAt ?? null
+    updatedAt: overrides.updatedAt ?? null,
+    ...EMPTY_TRACKING,
+    ...overrides
   };
 }
 
@@ -43,6 +52,7 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("£40k")).toBeInTheDocument();
     expect(screen.getAllByText("Partner").length).toBeGreaterThan(0);
     expect(screen.getByText(/Current/)).toBeInTheDocument();
+    expect(screen.getAllByText("New").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /tool for assessing pollutant risks/i }));
 
@@ -50,6 +60,7 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Assess pollutant risk from landspreading.")).toBeInTheDocument();
     expect(screen.getByText("Recommended Partner Skill")).toBeInTheDocument();
     expect(screen.getByText("Environmental modelling")).toBeInTheDocument();
+    expect(screen.getByText("Our Activity")).toBeInTheDocument();
   });
 
   it("filters by search and shows empty and error states", async () => {
@@ -101,17 +112,23 @@ describe("RevenueRadarScreen", () => {
             relevanceScore: null,
             aiReviewVersion: "revenue-radar-v2.4-production",
             recommendedRoute: "watch",
-            commercialStage: "early_engagement"
+            commercialStage: "early_engagement",
+            trackingStatus: null,
+            bidValue: null,
+            bidRoute: null,
+            notes: null
           })
         ]}
       />
     );
 
     expect(screen.getByText("Needs re-review")).toBeInTheDocument();
+    expect(screen.getAllByText("New").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /older opportunity/i }));
     expect(screen.getByText("Why This Route")).toBeInTheDocument();
     expect(screen.getByText("Buyer Need")).toBeInTheDocument();
+    expect(screen.getByText("Our Activity")).toBeInTheDocument();
   });
 
   it("lets summary chips filter the list", async () => {
@@ -135,5 +152,136 @@ describe("RevenueRadarScreen", () => {
     expect(screen.getByText("Watch this later")).toBeInTheDocument();
     expect(screen.queryByText("Tool for assessing pollutant risks from landspreading")).not.toBeInTheDocument();
     expect(screen.getByText("1 opportunity")).toBeInTheDocument();
+  });
+
+  it("filters by my status and keeps submitted, won, lost and passed available", async () => {
+    const user = userEvent.setup();
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity(),
+          opportunity({
+            processKey: "submitted-1",
+            title: "Submitted bid",
+            trackingStatus: "submitted",
+            submittedAt: "2026-08-30T00:00:00.000Z",
+            bidValue: 79500,
+            bidCurrency: "GBP",
+            bidRoute: "direct"
+          }),
+          opportunity({ processKey: "won-1", title: "Won bid", trackingStatus: "won", recommendedRoute: "watch" }),
+          opportunity({ processKey: "lost-1", title: "Lost bid", trackingStatus: "lost", recommendedRoute: "watch" }),
+          opportunity({ processKey: "passed-1", title: "Passed bid", trackingStatus: "passed", recommendedRoute: "watch" })
+        ]}
+      />
+    );
+
+    expect(screen.getByText("Submitted bid")).toBeInTheDocument();
+    expect(screen.queryByText("Won bid")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Filter my status Submitted" }));
+    expect(screen.getByText("Submitted bid")).toBeInTheDocument();
+    expect(screen.getAllByText("Submitted").length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: "Filter my status Won" }));
+    expect(screen.getByText("Won bid")).toBeInTheDocument();
+    expect(screen.queryByText("Submitted bid")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Filter my status Lost" }));
+    expect(screen.getByText("Lost bid")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Filter my status Passed" }));
+    expect(screen.getByText("Passed bid")).toBeInTheDocument();
+  });
+
+  it("keeps an expired submitted opportunity in the default queue", () => {
+    render(
+      <RevenueRadarScreen
+        status="ok"
+        opportunities={[
+          opportunity({
+            processKey: "expired-submitted",
+            title: "Expired submitted bid",
+            recommendedRoute: "direct_bid",
+            commercialStage: "live_bid",
+            tenderDeadline: "2020-01-01T00:00:00.000Z",
+            trackingStatus: "submitted",
+            submittedAt: "2019-12-01T00:00:00.000Z",
+            bidValue: 79500,
+            bidCurrency: "GBP",
+            bidRoute: "direct"
+          })
+        ]}
+      />
+    );
+
+    expect(screen.getByText("Expired submitted bid")).toBeInTheDocument();
+    expect(screen.getAllByText("Submitted").length).toBeGreaterThan(0);
+  });
+
+  it("saves activity without a page reload and shows the new status", async () => {
+    const user = userEvent.setup();
+    saveRevenueRadarTracking.mockResolvedValue(
+      opportunity({
+        trackingStatus: "reviewing",
+        trackingUpdatedAt: "2026-08-30T12:00:00.000Z"
+      })
+    );
+
+    render(<RevenueRadarScreen status="ok" opportunities={[opportunity()]} canEdit />);
+
+    await user.click(screen.getByRole("button", { name: /tool for assessing pollutant risks/i }));
+    await user.selectOptions(screen.getByLabelText("Status"), "reviewing");
+    await user.click(screen.getByRole("button", { name: "Save activity" }));
+
+    expect(saveRevenueRadarTracking).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processKey: "ea-1",
+        status: "reviewing"
+      })
+    );
+    expect(await screen.findByText("Saved")).toBeInTheDocument();
+    expect(screen.getAllByText("Reviewing").length).toBeGreaterThan(0);
+  });
+
+  it("lets the user drag a table header to widen a column", () => {
+    render(<RevenueRadarScreen status="ok" opportunities={[opportunity()]} />);
+
+    const header = screen.getByTestId("opportunity-table-header");
+    expect(header.style.gridTemplateColumns.startsWith("280px")).toBe(true);
+
+    fireEvent.pointerDown(screen.getByRole("separator", { name: "Resize Title column", hidden: true }), { clientX: 300 });
+    fireEvent.pointerMove(window, { clientX: 420 });
+    fireEvent.pointerUp(window);
+
+    expect(header.style.gridTemplateColumns.startsWith("400px")).toBe(true);
+  });
+
+  it("pages the opportunity list and resets to the first page when filters change", async () => {
+    const user = userEvent.setup();
+    const opportunities = Array.from({ length: 21 }, (_, index) =>
+      opportunity({
+        processKey: `page-${index}`,
+        title: `Opportunity ${index + 1}`,
+        recommendedRoute: "watch",
+        commercialStage: "early_engagement"
+      })
+    );
+
+    render(<RevenueRadarScreen status="ok" opportunities={opportunities} />);
+
+    expect(screen.getByText("Opportunity 1")).toBeInTheDocument();
+    expect(screen.queryByText("Opportunity 21")).not.toBeInTheDocument();
+    expect(screen.getByText("1–20 of 21 opportunities")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Opportunity 21")).toBeInTheDocument();
+    expect(screen.queryByText("Opportunity 1")).not.toBeInTheDocument();
+    expect(screen.getByText("21–21 of 21 opportunities")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Show Watch opportunities" }));
+    expect(screen.getByText("Opportunity 1")).toBeInTheDocument();
+    expect(screen.queryByText("Opportunity 21")).not.toBeInTheDocument();
   });
 });
